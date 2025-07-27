@@ -1,4 +1,4 @@
-![1714709371529](D:\main\LuoPulse\LuoPulse_from_git\ReadmeAssets\1714709371529.jpg)
+![1714709371529](https://github.com/include-xb/LuoPulse_from_git/blob/main/ReadmeAssets/1714709371529.jpg)
 
 ---
 
