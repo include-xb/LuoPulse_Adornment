@@ -10,7 +10,7 @@
 >
 > 艺术家与 ta 们的爱万岁！			  —— 雨狸《塔与少女的无题诗》
 
-**洛之动脉（Luo Pulse）**是一款中文虚拟歌手同人、非商业音乐游戏。
+洛之动脉（Luo Pulse）是一款中文虚拟歌手同人、非商业音乐游戏。
 
 > 通知：该项目已暂停维护，2026年6月10日后将会重新启动项目。
 
@@ -48,7 +48,7 @@ title.lpz	# .zip
 
 谱面文件格式如下：
 
-```json
+```javascript
 {
     "General": {
         "Title": "title",		// title 与曲包文件同名
@@ -71,7 +71,7 @@ title.lpz	# .zip
             "column": 2
         },
         {
-            "type": "release",	// release (红键)
+            "type": "release", 	// release (红键)
             "time": 1.000,
             "column": 3
         },
@@ -79,7 +79,7 @@ title.lpz	# .zip
             "type": "hold",		// hold (长条)
             "time": 1.000,
             "column": 4,
-            "duration": 1.500	// 秒, 长条持续时间, 精度: 3 位小数
+            "duration": 1.500 	// 秒, 长条持续时间, 精度: 3 位小数
         }
     ]
 }
