@@ -51,7 +51,7 @@ title.lpz	# .zip
 
 The chart file format is structured as follows:
 
-```json
+```javascript
 {
     "General": {
         "Title": "title",		// must match song package filename
