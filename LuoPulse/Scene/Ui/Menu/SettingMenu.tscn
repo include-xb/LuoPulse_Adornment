@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://mcu71j4uqmai"]
+
+[node name="Setting" type="Control"]
+layout_mode = 3
+anchors_preset = 0

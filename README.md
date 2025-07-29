@@ -62,24 +62,24 @@ title.lpz	# .zip
     "HitObjects": [
         {
             "type": "tap",		// tap (蓝键)
-            "time": 1.000,		// 秒, 音符到达判定线的时间, 精度: 3 位小数
+            "time": 1000,		// 毫秒, 音符到达判定线的时间
             "column": 1			// 轨道编号 1 ~ 4
         },
         {
             "type": "drag",		// drag (黄键)
-            "time": 1.000,
+            "time": 1000,
             "column": 2
         },
         {
             "type": "release", 	// release (红键)
-            "time": 1.000,
+            "time": 1000,
             "column": 3
         },
         {
             "type": "hold",		// hold (长条)
-            "time": 1.000,
+            "time": 1000,
             "column": 4,
-            "duration": 1.500 	// 秒, 长条持续时间, 精度: 3 位小数
+            "duration": 1500 	// 毫秒, 长条持续时间
         }
     ]
 }

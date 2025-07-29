@@ -65,24 +65,24 @@ The chart file format is structured as follows:
     "HitObjects": [
         {
             "type": "tap",		// tap (blue key)
-            "time": 1.000,		// (sec) arrives line, precision: 3 decimals
+            "time": 1000,		// (msec) arrives line
             "column": 1			// column 1 ~ 4
         },
         {
             "type": "drag",		// drag (yellow key)
-            "time": 1.000,
+            "time": 1000,
             "column": 2
         },
         {
             "type": "release",	// release (red key)
-            "time": 1.000,
+            "time": 1000,
             "column": 3
         },
         {
             "type": "hold",		// hold (long press)
-            "time": 1.000,
+            "time": 1000,
             "column": 4,
-            "duration": 1.500	// (sec) precision: 3 decimals
+            "duration": 1500	// (msec)
         }
     ]
 }

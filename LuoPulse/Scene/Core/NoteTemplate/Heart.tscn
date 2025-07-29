@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://ciobpeh52btrk"]
+
+[node name="Heart" type="Sprite2D"]

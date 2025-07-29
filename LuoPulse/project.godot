@@ -11,5 +11,15 @@ config_version=5
 [application]
 
 config/name="LuoPulse_from_git"
+config/tags=PackedStringArray("初始化后的lp仓库")
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Global="*res://Scene/GameManager/Global.tscn"
+SceneManager="*res://Scene/GameManager/SceneManager.tscn"
+
+[gui]
+
+theme/custom_font="uid://vs467it8p0n6"
