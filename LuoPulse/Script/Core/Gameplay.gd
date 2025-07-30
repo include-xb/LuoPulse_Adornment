@@ -1,20 +1,35 @@
+## Gameplay 游戏界面
+##
+## 可以切换到这里的场景:
+## 		- Sympathy 共鸣主线
+## 		- Album 专辑主线
+## 		- FinshMenu 结算界面
+## 		- CardMenu 资料卡界面
+## 从这里可以前往: 
+## 		- Sympathy 共鸣主线
+## 		- Album 专辑主线
+## 		- FinshMenu 结算界面
+## 		- CardMenu 资料卡界面
+
+
+
 extends Node2D
 
 @onready var audio_system: AudioStreamPlayer = $"AudioSystem"
 
-@onready var note_loader: Node = $"NoteLoader"
+@onready var note_loader: NoteLoader = $"NoteLoader"
 
-@onready var time_manager: Node = $"TimeManager"
-
-@onready var progress_bar: ProgressBar = $"ProgressBar"
+@onready var progress_bar: ProgressBar = $"UI/ProgressBar"
 
 
 
 # 解析完成的谱面数据
-var chart: Dictionary = {}
+var chart: Dictionary = { }
 
 # 当前时间
-var current_time: float = 0.0
+var current_time: int = 0
+
+var start_time: int = 0
 
 # 总音符数
 var total_notes: int = 0
@@ -49,12 +64,13 @@ func _ready() -> void:
 	# 将谱面数据写入到各数组中
 	write_in_list()
 	# 启动计时器
-	time_manager.start()
+	start_time = Time.get_ticks_msec()
 	pass
 
 
+@warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
-	current_time = time_manager.get_current_time()
+	current_time = Time.get_ticks_msec() - start_time
 	if is_loading_note:
 		
 		if current_note_index >= total_notes:
@@ -113,5 +129,5 @@ func write_in_list() -> void:
 
 # 游戏结束
 func game_finished() -> void:
-	# 结算
+	# 转到结算场景
 	pass

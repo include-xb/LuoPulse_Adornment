@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cit22tbr0bvx8"]
+
+[ext_resource type="Script" uid="uid://bpujobp6ug4v5" path="res://Script/Core/InputProcesser.gd" id="1_ogl7y"]
+
+[node name="Column" type="Node2D"]
+script = ExtResource("1_ogl7y")
+
+[node name="NotePool" type="Node2D" parent="."]

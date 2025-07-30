@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3 uid="uid://bq51gdk13v4ok"]
+
+[ext_resource type="Script" uid="uid://bq7lp6os3csgp" path="res://Script/Core/Gameplay.gd" id="1_i27d6"]
+[ext_resource type="Script" uid="uid://4d8t7kcp1p3i" path="res://Script/Core/NoteLoader.gd" id="2_ovtvy"]
+[ext_resource type="PackedScene" uid="uid://cit22tbr0bvx8" path="res://Scene/Core/Column.tscn" id="3_21dkn"]
+
+[node name="Gameplay" type="Node2D" groups=["JudgeArea"]]
+script = ExtResource("1_i27d6")
+
+[node name="NoteLoader" type="Node" parent="."]
+script = ExtResource("2_ovtvy")
+
+[node name="AudioSystem" type="AudioStreamPlayer" parent="."]
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="ProgressBar" type="ProgressBar" parent="UI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 24.0
+grow_horizontal = 2
+
+[node name="Track" type="Node2D" parent="."]
+
+[node name="Column1" parent="Track" instance=ExtResource("3_21dkn")]
+
+[node name="Column2" parent="Track" instance=ExtResource("3_21dkn")]
+KEY = "F"
+
+[node name="Column3" parent="Track" instance=ExtResource("3_21dkn")]
+KEY = "J"
+
+[node name="Column4" parent="Track" instance=ExtResource("3_21dkn")]
+KEY = "K"

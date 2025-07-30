@@ -1,6 +1,9 @@
 extends Node
 
 
+class_name TimeManager
+
+
 # 计时器开始的时间 (毫秒)
 var start_time: int = 0
 

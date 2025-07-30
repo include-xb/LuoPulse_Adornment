@@ -1,3 +1,6 @@
-[gd_scene format=3 uid="uid://cwgd5663wpeft"]
+[gd_scene load_steps=2 format=3 uid="uid://cwgd5663wpeft"]
+
+[ext_resource type="Script" uid="uid://bj84hr26lx2bj" path="res://Script/GameManager/SceneManager.gd" id="1_pibfg"]
 
 [node name="SceneManager" type="CanvasLayer"]
+script = ExtResource("1_pibfg")

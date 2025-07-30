@@ -1,3 +1,6 @@
-[gd_scene format=3 uid="uid://tdafsjxt54ak"]
+[gd_scene load_steps=2 format=3 uid="uid://tdafsjxt54ak"]
+
+[ext_resource type="Script" uid="uid://univje4h31e0" path="res://Script/Core/NoteTemplate/Hold.gd" id="1_1lfxb"]
 
 [node name="Hold" type="Sprite2D"]
+script = ExtResource("1_1lfxb")

@@ -6,84 +6,82 @@
 
 - 可参考已创建的文件结构.
 
-    ```bash
-    LuoPulse/
-    	├─ Asset/
-    	|	├─ Audio/
-    	|	|	└─ *.mp3
-    	|	├─ Font/
-    	|	|	└─ *.ttf
-    	|	├─ Icon/
-    	|	|	└─ *.svg
-    	|	└─ Image/
-    	|		└─ *.jpg
-    	├─ Scene/
-    	|	├─ Core/
-    	|	|	├─ EffectTemplate/
-    	|	|	|	└─ *.tscn
-    	|	|	├─ NoteTemplate/
-    	|	|	|	├─ Tap.tscn
-    	|	|	|	├─ Drag.tscn
-    	|	|	|	├─ Release.tscn
-    	|	|	|	├─ Hold.tscn
-    	|	|	|	└─ Heart.tscn
-    	|	|	├─ GameProgress.tscn
-    	|	|	├─ InputProgress.tscn
-    	|	|	├─ NoteLoader.tscn
-    	|	|	└─ *.tscn
-    	|	├─ GameManager/
-    	|	|	├─ Global.tscn
-    	|	|	├─ SceneManager.tscn
-    	|	|	├─ TimeManager.tscn
-    	|	|	└─ *.tscn
-    	|	└─ Ui/
-    	|		├─ Menu/
-    	|		|	├─ AboutMenu.tscn
-    	|		|	├─ MainMenu.tscn
-    	|		|	├─ SettingMenu.tscn
-    	|		|	└─ *.tscn
-    	|		├─ SongSelect/
-    	|		|	├─ Album.tscn
-    	|		|	└─ Sympathy.tscn
-    	|		├─ Launch.tscn
-    	|		└─ *.tscn
-    	├─ Script/
-    	|	├─ Core/
-    	|	|	├─ EffectTemplate/
-    	|	|	|	└─ *.gd
-    	|	|	├─ NoteTemplate/
-    	|	|	|	├─ Tap.gd
-    	|	|	|	├─ Drag.gd
-    	|	|	|	├─ Release.gd
-    	|	|	|	├─ Hold.gd
-    	|	|	|	└─ Heart.gd
-    	|	|	├─ GameProgress.gd
-    	|	|	├─ InputProgress.gd
-    	|	|	├─ NoteLoader.gd
-    	|	|	└─ *.gd
-    	|	├─ GameManager/
-    	|	|	├─ Global.gd
-    	|	|	├─ SceneManager.gd
-    	|	|	├─ TimeManager.gd
-    	|	|	└─ *.gd
-    	|	└─ Ui/
-    	|		├─ Menu/
-    	|		|	├─ AboutMenu.gd
-    	|		|	├─ MainMenu.gd
-    	|		|	├─ SettingMenu.gd
-    	|		|	└─ *.gd
-    	|		├─ SongSelect/
-    	|		|	├─ Album.gd
-    	|		|	└─ Sympathy.gd
-    	|		├─ Launch.gd
-    	|		└─ *.gd
-    	├─ Shader/
-    	|	└─ *.shader
-    	└─ Theme/
-    		└─ *.tres
-    ```
-    
-    
+```bash
+LuoPulse/
+	├── Asset/		# 静态资源
+	│	├── Audio/	# 音频资源（.mp3格式）
+	│	├── Font/	# 字体文件（.ttf格式）
+	│	├── Icon/	# SVG图标资源
+	│	└── Image/	# 图片素材（.jpg格式）
+	│
+	├── Scene/		# 游戏场景
+	│   ├── Core/		# 核心游戏组件
+	│   │   ├── EffectTemplate/	# 特效模板场景
+	│   │   ├── NoteTemplate/	# 音符类型模板
+	│   │   │   ├── Tap.tscn	# 点击音符
+	│   │   │   ├── Drag.tscn	# 拖拽音符
+	│   │   │   ├── Release.tscn 	# 释放音符
+	│   │   │   ├── Hold.tscn		# 长按音符
+	│   │   │   └── Heart.tscn		# 特殊心跳音符
+	│   │   │
+	│   │   ├── GameProgress.tscn	# 游戏进程控制
+	│   │   ├── InputProgress.tscn	# 输入处理
+	│   │   └── NoteLoader.tscn		# 音符加载器
+	│   │
+	│   ├── GameManager/	# 游戏管理系统
+	│   │   ├── Global.tscn			# 全局管理器
+	│   │   └── SceneManager.tscn	# 场景切换
+	│   │
+	│   └── UI/		# 用户界面
+	│       ├── Menu/
+	│       │   ├── MainMenu.tscn		# 游戏主页面
+	│       │   ├── SettingMenu.tscn	# 设置菜单
+	│       │   └── AboutMenu.tscn		# 关于页面
+	│       │
+	│       ├── SongSelect/     # 选曲界面
+	│       │   ├── Album.tscn  # 专辑主线
+	│       │   └── Sympathy.tscn # 共鸣主线
+	│       │
+	│       └── Launch.tscn     # 启动加载界面
+	│	
+	├── Script/		# 游戏脚本
+	│   ├── Core/	# 核心游戏逻辑
+	│   │   ├── NoteTemplate/  # 音符行为脚本
+	│   │   │   ├── Tap.gd     # 点击逻辑
+	│   │   │   ├── Drag.gd    # 拖拽逻辑
+	│   │   │   ├── Release.gd # 释放逻辑
+	│   │   │   ├── Hold.gd    # 长按逻辑
+	│   │   │   └── Heart.gd   # 心跳逻辑
+	│   │   │
+	│   │   ├── GameProgress.gd  # 游戏进程控制
+	│   │   ├── InputProgress.gd  # 输入处理
+	│   │   └── NoteLoader.gd    # 音符加载
+	│   │
+	│   ├── GameManager/	# 管理类脚本
+	│   │   ├── Global.gd	# 全局状态管理
+	│   │   └── SceneManager.gd # 场景加载
+	│   │
+	│   └── UI/	# 界面逻辑
+	│       ├── Menu/          
+	│       │   ├── MainMenu.gd    # 游戏主页面
+	│       │   ├── SettingMenu.gd # 设置
+	│       │   └── AboutMenu.gd   # 关于页面
+	│       │
+	│       ├── SongSelect/     
+	│       │   ├── Album.gd	# 专辑主线
+	│       │   └── Sympathy.gd # 共鸣主线
+	│       │
+	│       └── Launch.gd		# 启动界面控制
+	│
+	├── Shader/		# 着色器文件
+	│   └── （*.shader）	# 自定义着色器
+	│
+	└── Theme/		# 界面主题
+		└── （*.tres）		# 主题资源文件
+```
+
+
+​    
 
 ## 文件
 

@@ -1,5 +1,8 @@
-[gd_scene format=3 uid="uid://dk6axgnha1fv5"]
+[gd_scene load_steps=2 format=3 uid="uid://dk6axgnha1fv5"]
+
+[ext_resource type="Script" uid="uid://esbj00n5wyml" path="res://Script/Ui/launch.gd" id="1_sc0u0"]
 
 [node name="Launch" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+script = ExtResource("1_sc0u0")

@@ -1,9 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://dlod24c0w1wsi"]
+[gd_scene load_steps=2 format=3 uid="uid://dlod24c0w1wsi"]
 
 [ext_resource type="Script" uid="uid://bdc2ytkbescnv" path="res://Script/Core/NoteTemplate/Tap.gd" id="1_yt8n7"]
-[ext_resource type="PackedScene" uid="uid://cnmebfsbgqj8b" path="res://Scene/GameManager/TimeManager.tscn" id="2_r723p"]
 
 [node name="Tap" type="Sprite2D"]
 script = ExtResource("1_yt8n7")
-
-[node name="TimeManager" parent="." instance=ExtResource("2_r723p")]

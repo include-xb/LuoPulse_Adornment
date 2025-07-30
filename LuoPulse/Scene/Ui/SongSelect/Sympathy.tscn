@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://cyby1mdapaw3i"]
+[gd_scene load_steps=2 format=3 uid="uid://cyby1mdapaw3i"]
+
+[ext_resource type="Script" uid="uid://bupmai1v77wxb" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
 
 [node name="Sympathy" type="Control"]
 layout_mode = 3
@@ -7,3 +9,4 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_sd8b3")
