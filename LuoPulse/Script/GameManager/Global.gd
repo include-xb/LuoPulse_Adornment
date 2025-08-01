@@ -1,10 +1,18 @@
-extends Node
+extends Control
 
+
+@onready var NOTICE_BOX: VBoxContainer = $NoticeBox
 
 ## 常量
 
 # 版本号
 const VERSION: String = "0.0.1"
+
+# 通知消息展示时间
+const NOTICE_LIFETIME: int = 3
+
+# 通知消息组件
+const NOTICE_PACKED_SCENE: PackedScene = preload("res://Scene/Ui/Widget/Notice.tscn")
 
 # 轨道数
 const COLUMN_NUM: int = 4
@@ -89,3 +97,10 @@ var combo: int = 0
 
 # 准度
 var accuracy: float = 0.0
+
+
+func display_notice(info: String) -> void:
+	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
+	notice.text = "  " + info
+	NOTICE_BOX.add_child(notice)
+	pass

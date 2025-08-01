@@ -1,0 +1,33 @@
+[gd_resource type="Theme" load_steps=5 format=3 uid="uid://kb7wugiy2jme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d2g8x"]
+bg_color = Color(0.952941, 0.933333, 0.866667, 1)
+
+[sub_resource type="Gradient" id="Gradient_d2g8x"]
+offsets = PackedFloat32Array(0, 0.269406, 0.525114, 1)
+colors = PackedColorArray(0.137255, 0.137255, 0.137255, 0.784314, 0.0705882, 0.0705882, 0.0705882, 0.368627, 0.0352941, 0.0352941, 0.0352941, 0.176471, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_uegkn"]
+gradient = SubResource("Gradient_d2g8x")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_l7374"]
+texture = SubResource("GradientTexture1D_uegkn")
+
+[resource]
+Label/colors/font_color = Color(0, 0, 0, 1)
+Label/colors/font_outline_color = Color(0, 0, 0, 1)
+Label/colors/font_shadow_color = Color(0, 0, 0, 0)
+Label/constants/outline_size = 1
+Label/constants/shadow_offset_x = 1
+Label/constants/shadow_offset_y = 1
+Label/constants/shadow_outline_size = 1
+Label/font_sizes/font_size = 30
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_d2g8x")
+RichTextLabel/colors/font_outline_color = Color(0, 0, 0, 1)
+RichTextLabel/colors/font_shadow_color = Color(0, 0, 0, 0.392157)
+RichTextLabel/constants/outline_size = 2
+RichTextLabel/constants/shadow_offset_x = 1
+RichTextLabel/constants/shadow_offset_y = 1
+RichTextLabel/constants/shadow_outline_size = 1
+RichTextLabel/font_sizes/normal_font_size = 30
+RichTextLabel/styles/normal = SubResource("StyleBoxTexture_l7374")

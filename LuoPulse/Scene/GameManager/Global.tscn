@@ -1,6 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://b3gjxgt8p4y6r"]
+[gd_scene load_steps=3 format=3 uid="uid://b3gjxgt8p4y6r"]
 
 [ext_resource type="Script" uid="uid://mk6wr6n82tmu" path="res://Script/GameManager/Global.gd" id="1_i4ohj"]
+[ext_resource type="PackedScene" uid="uid://db7s130jodufv" path="res://Scene/Ui/Widget/Notice.tscn" id="2_yjbyn"]
 
-[node name="Global" type="Node"]
+[node name="Global" type="Control"]
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_i4ohj")
+
+[node name="NoticeBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+offset_right = 100.0
+offset_bottom = 174.0
+
+[node name="Notice" parent="NoticeBox" instance=ExtResource("2_yjbyn")]
+z_index = 1
+layout_mode = 2
+text = "  Notice: ..."

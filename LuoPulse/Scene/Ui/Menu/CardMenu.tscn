@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://blfr5lunj0qsy"]
+[gd_scene load_steps=3 format=3 uid="uid://blfr5lunj0qsy"]
 
 [ext_resource type="Script" uid="uid://uuh1hwjkfka2" path="res://Script/Ui/Menu/CardMenu.gd" id="1_pwdtp"]
+[ext_resource type="PackedScene" uid="uid://bb7rvd87ejo8s" path="res://Scene/Ui/Widget/CardPage.tscn" id="2_gkif5"]
 
 [node name="CardMenu" type="Control"]
 layout_mode = 3
@@ -10,3 +11,135 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_pwdtp")
+
+[node name="Background" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_group_ = true
+
+[node name="HLine" type="Node2D" parent="Background"]
+position = Vector2(0, 23)
+metadata/_edit_group_ = true
+
+[node name="Line1" type="Line2D" parent="Background/HLine"]
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line2" type="Line2D" parent="Background/HLine"]
+position = Vector2(0, 100)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line3" type="Line2D" parent="Background/HLine"]
+position = Vector2(0, 200)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line4" type="Line2D" parent="Background/HLine"]
+position = Vector2(0, 300)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line5" type="Line2D" parent="Background/HLine"]
+position = Vector2(0, 400)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line6" type="Line2D" parent="Background/HLine"]
+position = Vector2(0, 500)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line7" type="Line2D" parent="Background/HLine"]
+position = Vector2(0, 600)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="VLine" type="Node2D" parent="Background"]
+position = Vector2(23, 0)
+metadata/_edit_group_ = true
+
+[node name="Line1" type="Line2D" parent="Background/VLine"]
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line2" type="Line2D" parent="Background/VLine"]
+position = Vector2(100, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line3" type="Line2D" parent="Background/VLine"]
+position = Vector2(200, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line4" type="Line2D" parent="Background/VLine"]
+position = Vector2(300, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line5" type="Line2D" parent="Background/VLine"]
+position = Vector2(400, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line6" type="Line2D" parent="Background/VLine"]
+position = Vector2(500, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line7" type="Line2D" parent="Background/VLine"]
+position = Vector2(600, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line8" type="Line2D" parent="Background/VLine"]
+position = Vector2(700, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line9" type="Line2D" parent="Background/VLine"]
+position = Vector2(800, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line10" type="Line2D" parent="Background/VLine"]
+position = Vector2(900, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line11" type="Line2D" parent="Background/VLine"]
+position = Vector2(1000, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line12" type="Line2D" parent="Background/VLine"]
+position = Vector2(1100, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="CardPage" parent="." instance=ExtResource("2_gkif5")]
+layout_mode = 1

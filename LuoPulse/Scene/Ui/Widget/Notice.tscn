@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://db7s130jodufv"]
+
+[ext_resource type="Script" uid="uid://b8tvticei3ymk" path="res://Script/Ui/Widget/Notice.gd" id="1_o6fh4"]
+
+[node name="Notice" type="RichTextLabel"]
+custom_minimum_size = Vector2(350, 40)
+offset_right = 100.0
+offset_bottom = 40.0
+text = "Notice: ..."
+scroll_active = false
+script = ExtResource("1_o6fh4")

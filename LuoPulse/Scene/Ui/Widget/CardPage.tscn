@@ -1,0 +1,246 @@
+[gd_scene load_steps=18 format=3 uid="uid://bb7rvd87ejo8s"]
+
+[ext_resource type="Script" uid="uid://dbap0gqox0ty1" path="res://Asset/Plug/markdownlabel/markdownlabel.gd" id="1_xp1ei"]
+[ext_resource type="Script" uid="uid://dcx7crs23nf4" path="res://Asset/Plug/markdownlabel/header_formats/h1_format.gd" id="2_pyugn"]
+[ext_resource type="Script" uid="uid://d0sin64i4v3op" path="res://Asset/Plug/markdownlabel/header_formats/h2_format.gd" id="3_8s3h4"]
+[ext_resource type="Script" uid="uid://dlok0dv1tq2bf" path="res://Asset/Plug/markdownlabel/header_formats/h3_format.gd" id="4_mqrfm"]
+[ext_resource type="Script" uid="uid://bayuh2vafablg" path="res://Asset/Plug/markdownlabel/header_formats/h4_format.gd" id="5_cmdnn"]
+[ext_resource type="Script" uid="uid://dfr1w7u3jgni3" path="res://Asset/Plug/markdownlabel/header_formats/h5_format.gd" id="6_c7ouf"]
+[ext_resource type="Script" uid="uid://bsi6dexoofpe6" path="res://Asset/Plug/markdownlabel/header_formats/h6_format.gd" id="7_60207"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pwdtp"]
+bg_color = Color(0.976471, 0.968627, 0.929412, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.815686, 0.811765, 0.690196, 1)
+shadow_color = Color(0, 0, 0, 0.196078)
+shadow_size = 10
+shadow_offset = Vector2(4, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gkif5"]
+bg_color = Color(0.941176, 0.909804, 0.815686, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xp1ei"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="Theme" id="Theme_pyugn"]
+RichTextLabel/colors/default_color = Color(0, 0, 0, 1)
+RichTextLabel/colors/font_outline_color = Color(1, 1, 1, 0)
+RichTextLabel/colors/font_shadow_color = Color(1, 1, 1, 0)
+RichTextLabel/constants/outline_size = 1
+RichTextLabel/constants/shadow_offset_x = 1
+RichTextLabel/constants/shadow_offset_y = 1
+RichTextLabel/constants/shadow_outline_size = 1
+RichTextLabel/styles/normal = SubResource("StyleBoxFlat_xp1ei")
+
+[sub_resource type="Resource" id="Resource_cyepg"]
+resource_local_to_scene = true
+script = ExtResource("2_pyugn")
+font_size = 2.285
+is_bold = false
+is_italic = false
+is_underlined = false
+override_font_color = false
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_7lsu0"]
+resource_local_to_scene = true
+script = ExtResource("3_8s3h4")
+font_size = 1.714
+is_bold = false
+is_italic = false
+is_underlined = false
+override_font_color = false
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_173kc"]
+resource_local_to_scene = true
+script = ExtResource("4_mqrfm")
+font_size = 1.428
+is_bold = false
+is_italic = false
+is_underlined = false
+override_font_color = false
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_dmdma"]
+resource_local_to_scene = true
+script = ExtResource("5_cmdnn")
+font_size = 1.142
+is_bold = false
+is_italic = false
+is_underlined = false
+override_font_color = false
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_yvbax"]
+resource_local_to_scene = true
+script = ExtResource("6_c7ouf")
+font_size = 1.0
+is_bold = false
+is_italic = false
+is_underlined = false
+override_font_color = false
+font_color = Color(1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_nrrlu"]
+resource_local_to_scene = true
+script = ExtResource("7_60207")
+font_size = 0.857
+is_bold = false
+is_italic = false
+is_underlined = false
+override_font_color = false
+font_color = Color(1, 1, 1, 1)
+
+[node name="CardPage" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -219.0
+offset_top = -268.0
+offset_right = 221.0
+offset_bottom = 268.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Paper" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pwdtp")
+
+[node name="Spine" type="PanelContainer" parent="Paper"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_gkif5")
+
+[node name="Width" type="MarginContainer" parent="Paper/Spine"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+
+[node name="HLine" type="Node2D" parent="Paper"]
+position = Vector2(0, 12)
+metadata/_edit_group_ = true
+
+[node name="Line1" type="Line2D" parent="Paper/HLine"]
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line2" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 40)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line3" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 80)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line4" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 120)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line5" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 160)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line6" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 200)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line7" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 240)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line8" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 280)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line9" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 320)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line10" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 360)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line11" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 400)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line12" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 440)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line13" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 480)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Line14" type="Line2D" parent="Paper/HLine"]
+position = Vector2(0, 520)
+points = PackedVector2Array(2, 2, 438, 2)
+width = 1.0
+default_color = Color(0.945098, 0.937255, 0.878431, 1)
+
+[node name="Margin" type="MarginContainer" parent="Paper"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 70
+theme_override_constants/margin_bottom = 30
+
+[node name="Context" type="RichTextLabel" parent="Paper/Margin"]
+layout_mode = 2
+theme = SubResource("Theme_pyugn")
+bbcode_enabled = true
+text = "[font_size=51]洛之动脉[/font_size]
+[font_size=42]这是一个资料卡[/font_size]
+[ul][url=https://space.bilibili.com/1640232445]源来是小白[/url]
+[url=https://space.bilibili.com/1913343200]星海流歌[/url]
+[/ul]
+"
+script = ExtResource("1_xp1ei")
+markdown_text = "## 洛之动脉
+### 这是一个资料卡
+- [源来是小白](https://space.bilibili.com/1640232445)
+- [星海流歌](https://space.bilibili.com/1913343200)
+"
+h1 = SubResource("Resource_cyepg")
+h2 = SubResource("Resource_7lsu0")
+h3 = SubResource("Resource_173kc")
+h4 = SubResource("Resource_dmdma")
+h5 = SubResource("Resource_yvbax")
+h6 = SubResource("Resource_nrrlu")
+metadata/_custom_type_script = "uid://dbap0gqox0ty1"
