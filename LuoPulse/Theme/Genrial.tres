@@ -1,4 +1,16 @@
-[gd_resource type="Theme" load_steps=5 format=3 uid="uid://kb7wugiy2jme"]
+[gd_resource type="Theme" load_steps=9 format=3 uid="uid://kb7wugiy2jme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uegkn"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l7374"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qqgdb"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t6ycm"]
+bg_color = Color(1, 1, 1, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d2g8x"]
 bg_color = Color(0.952941, 0.933333, 0.866667, 1)
@@ -14,6 +26,16 @@ gradient = SubResource("Gradient_d2g8x")
 texture = SubResource("GradientTexture1D_uegkn")
 
 [resource]
+Button/colors/font_color = Color(0, 0, 0, 0.784314)
+Button/colors/font_focus_color = Color(0, 0, 0, 0.784314)
+Button/colors/font_hover_color = Color(0, 0, 0, 0.784314)
+Button/colors/font_hover_pressed_color = Color(0, 0, 0, 0.784314)
+Button/colors/font_pressed_color = Color(0, 0, 0, 0.784314)
+Button/font_sizes/font_size = 45
+Button/styles/focus = SubResource("StyleBoxFlat_uegkn")
+Button/styles/hover = SubResource("StyleBoxFlat_l7374")
+Button/styles/normal = SubResource("StyleBoxFlat_qqgdb")
+Button/styles/pressed = SubResource("StyleBoxFlat_t6ycm")
 Label/colors/font_color = Color(0, 0, 0, 1)
 Label/colors/font_outline_color = Color(0, 0, 0, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 0)

@@ -17,3 +17,8 @@ extends Control
 
 func _ready() -> void:
 	pass
+
+
+func _on_sympathy_pressed() -> void:
+	SceneManager.change_scene("res://Scene/Ui/SongSelect/Sympathy.tscn")
+	pass

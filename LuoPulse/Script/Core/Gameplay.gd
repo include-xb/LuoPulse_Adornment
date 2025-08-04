@@ -29,6 +29,7 @@ var chart: Dictionary = { }
 # 当前时间
 var current_time: int = 0
 
+# 开始计时的时间, 与 Time.get_ticks_msec() 相减得到 current_time
 var start_time: int = 0
 
 # 总音符数

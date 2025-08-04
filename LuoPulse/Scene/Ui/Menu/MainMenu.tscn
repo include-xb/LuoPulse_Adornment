@@ -1,8 +1,79 @@
-[gd_scene load_steps=2 format=3 uid="uid://ctaqumekhngd7"]
+[gd_scene load_steps=5 format=3 uid="uid://ctaqumekhngd7"]
 
+[ext_resource type="Shader" uid="uid://bbgw8np0wnik0" path="res://Shader/paper.gdshader" id="1_a34cl"]
 [ext_resource type="Script" uid="uid://xvtsk50ta20u" path="res://Script/Ui/Menu/MainMenu.gd" id="1_wxf6g"]
+[ext_resource type="Texture2D" uid="uid://cd8el0otv4sf3" path="res://Asset/Image/paper(1).jpg" id="2_tekst"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_558w5"]
+shader = ExtResource("1_a34cl")
+shader_parameter/paper_texture = ExtResource("2_tekst")
 
 [node name="MainMenu" type="Control"]
+clip_contents = true
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_wxf6g")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_tekst")
+expand_mode = 5
+stretch_mode = 6
+
+[node name="Wrinkle" type="ColorRect" parent="."]
+editor_description = "这个节点下的子节点, 设置 材质->使用父级材质 为 true, 这可渲染褶皱效果"
+material = SubResource("ShaderMaterial_558w5")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Sympathy" type="Button" parent="Wrinkle"]
+use_parent_material = true
+layout_mode = 0
+offset_left = 198.0
+offset_top = 230.0
+offset_right = 313.0
+offset_bottom = 286.0
+text = "> 共鸣"
+
+[node name="Album" type="Button" parent="Wrinkle"]
+use_parent_material = true
+layout_mode = 0
+offset_left = 197.0
+offset_top = 313.0
+offset_right = 313.0
+offset_bottom = 369.0
+text = "# 专辑"
+
+[node name="Setting" type="Button" parent="Wrinkle"]
+use_parent_material = true
+layout_mode = 0
+offset_left = 195.0
+offset_top = 400.0
+offset_right = 313.0
+offset_bottom = 456.0
+text = "* 设置"
+
+[node name="About" type="Button" parent="Wrinkle"]
+use_parent_material = true
+layout_mode = 0
+offset_left = 195.0
+offset_top = 471.0
+offset_right = 313.0
+offset_bottom = 527.0
+text = "& 关于"
+
+[connection signal="pressed" from="Wrinkle/Sympathy" to="." method="_on_sympathy_pressed"]
