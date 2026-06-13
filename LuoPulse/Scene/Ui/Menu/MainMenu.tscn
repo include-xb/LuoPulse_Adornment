@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://ctaqumekhngd7"]
+[gd_scene format=3 uid="uid://ctaqumekhngd7"]
 
 [ext_resource type="Shader" uid="uid://bbgw8np0wnik0" path="res://Shader/paper.gdshader" id="1_a34cl"]
 [ext_resource type="Script" uid="uid://xvtsk50ta20u" path="res://Script/Ui/Menu/MainMenu.gd" id="1_wxf6g"]
@@ -8,7 +8,7 @@
 shader = ExtResource("1_a34cl")
 shader_parameter/paper_texture = ExtResource("2_tekst")
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=325735639]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 15
@@ -18,7 +18,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wxf6g")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=188162680]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,7 +29,7 @@ texture = ExtResource("2_tekst")
 expand_mode = 5
 stretch_mode = 6
 
-[node name="Wrinkle" type="ColorRect" parent="."]
+[node name="Wrinkle" type="ColorRect" parent="." unique_id=1490739650]
 editor_description = "这个节点下的子节点, 设置 材质->使用父级材质 为 true, 这可渲染褶皱效果"
 material = SubResource("ShaderMaterial_558w5")
 layout_mode = 1
@@ -40,40 +40,40 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
 
-[node name="Sympathy" type="Button" parent="Wrinkle"]
+[node name="Sympathy" type="Button" parent="Wrinkle" unique_id=1389277567]
 use_parent_material = true
 layout_mode = 0
-offset_left = 198.0
-offset_top = 230.0
-offset_right = 313.0
-offset_bottom = 286.0
+offset_left = 978.0
+offset_top = 189.0
+offset_right = 1093.0
+offset_bottom = 245.0
 text = "> 共鸣"
 
-[node name="Album" type="Button" parent="Wrinkle"]
+[node name="Album" type="Button" parent="Wrinkle" unique_id=777698392]
 use_parent_material = true
 layout_mode = 0
-offset_left = 197.0
-offset_top = 313.0
-offset_right = 313.0
-offset_bottom = 369.0
+offset_left = 977.0
+offset_top = 272.0
+offset_right = 1093.0
+offset_bottom = 328.0
 text = "# 专辑"
 
-[node name="Setting" type="Button" parent="Wrinkle"]
+[node name="Setting" type="Button" parent="Wrinkle" unique_id=1006324580]
 use_parent_material = true
 layout_mode = 0
-offset_left = 195.0
-offset_top = 400.0
-offset_right = 313.0
-offset_bottom = 456.0
+offset_left = 975.0
+offset_top = 359.0
+offset_right = 1093.0
+offset_bottom = 415.0
 text = "* 设置"
 
-[node name="About" type="Button" parent="Wrinkle"]
+[node name="About" type="Button" parent="Wrinkle" unique_id=1460301077]
 use_parent_material = true
 layout_mode = 0
-offset_left = 195.0
-offset_top = 471.0
-offset_right = 313.0
-offset_bottom = 527.0
+offset_left = 975.0
+offset_top = 430.0
+offset_right = 1093.0
+offset_bottom = 486.0
 text = "& 关于"
 
 [connection signal="pressed" from="Wrinkle/Sympathy" to="." method="_on_sympathy_pressed"]

@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://yn8fim1wnjpj"]
+[gd_scene format=3 uid="uid://yn8fim1wnjpj"]
 
 [ext_resource type="Script" uid="uid://r0r484hde2wc" path="res://Script/Creator/Editor.gd" id="1_h7540"]
 
-[node name="Editor" type="Control"]
+[node name="Editor" type="Control" unique_id=1548191713]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
