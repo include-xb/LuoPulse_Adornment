@@ -23,10 +23,15 @@ config/icon="res://icon.svg"
 
 Global="*res://Scene/GameManager/Global.tscn"
 SceneManager="*res://Scene/GameManager/SceneManager.tscn"
+MCPRuntime="*uid://732g0yf236a7"
 
 [display]
 
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
 
 [global_group]
 

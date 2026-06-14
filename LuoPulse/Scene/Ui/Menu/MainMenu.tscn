@@ -76,4 +76,13 @@ offset_right = 1093.0
 offset_bottom = 486.0
 text = "& 关于"
 
+[node name="GameTitle" type="Label" parent="." unique_id=447084575]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 400.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 45
+text = "洛之动脉"
+
 [connection signal="pressed" from="Wrinkle/Sympathy" to="." method="_on_sympathy_pressed"]
