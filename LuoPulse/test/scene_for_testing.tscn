@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://cpeph0q1lwpxx"]
+
+[ext_resource type="Shader" uid="uid://t77p2xi38jyx" path="res://test/scene_for_testing.gdshader" id="1_xn56q"]
+[ext_resource type="Texture2D" uid="uid://d1a2x7neg2alb" path="res://test/cover.jpg" id="2_aalbo"]
+[ext_resource type="Texture2D" uid="uid://byx8eiiarl7hb" path="res://icon.svg" id="3_aalbo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g2b6c"]
+shader = ExtResource("1_xn56q")
+shader_parameter/paper_color = Color(0.95, 0.88, 0.78, 1)
+shader_parameter/fade_start = 0.3
+shader_parameter/fade_end = 0.89999997615814
+shader_parameter/saturation = 1.0
+shader_parameter/brightness = 0.9
+shader_parameter/line_strength = 0.3
+shader_parameter/edge_threshold = 0.05
+shader_parameter/texture_strength = 0.06
+shader_parameter/texture_scale = 180.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h363u"]
+shader = ExtResource("1_xn56q")
+shader_parameter/paper_color = Color(0.95, 0.88, 0.78, 1)
+shader_parameter/fade_start = 0.10000000475
+shader_parameter/fade_end = 1.0
+shader_parameter/saturation = 0.70000003325
+shader_parameter/brightness = 1.00000002375
+shader_parameter/line_strength = 0.3
+shader_parameter/edge_threshold = 0.05
+shader_parameter/texture_strength = 0.06
+shader_parameter/texture_scale = 180.0
+
+[node name="SceneForTesting" type="Control" unique_id=1162820125]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=647136149]
+material = SubResource("ShaderMaterial_g2b6c")
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("2_aalbo")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="TextureRect2" type="TextureRect" parent="." unique_id=1284354409]
+material = SubResource("ShaderMaterial_h363u")
+layout_mode = 0
+offset_left = 96.0
+offset_top = 240.0
+offset_right = 224.0
+offset_bottom = 368.0
+texture = ExtResource("3_aalbo")
