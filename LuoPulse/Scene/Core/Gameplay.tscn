@@ -1,39 +1,40 @@
-[gd_scene load_steps=4 format=3 uid="uid://bq51gdk13v4ok"]
+[gd_scene format=3 uid="uid://bq51gdk13v4ok"]
 
 [ext_resource type="Script" uid="uid://bq7lp6os3csgp" path="res://Script/Core/Gameplay.gd" id="1_i27d6"]
 [ext_resource type="Script" uid="uid://4d8t7kcp1p3i" path="res://Script/Core/NoteLoader.gd" id="2_ovtvy"]
 [ext_resource type="PackedScene" uid="uid://cit22tbr0bvx8" path="res://Scene/Core/Column.tscn" id="3_21dkn"]
 
-[node name="Gameplay" type="Node2D" groups=["JudgeArea"]]
+[node name="Gameplay" type="Node2D" unique_id=2106804085 groups=["JudgeArea"]]
 script = ExtResource("1_i27d6")
 
-[node name="NoteLoader" type="Node" parent="."]
+[node name="NoteLoader" type="Node" parent="." unique_id=380954061]
 script = ExtResource("2_ovtvy")
 
-[node name="AudioSystem" type="AudioStreamPlayer" parent="."]
+[node name="AudioSystem" type="AudioStreamPlayer" parent="." unique_id=1667507616]
 
-[node name="UI" type="Control" parent="."]
+[node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
 
-[node name="ProgressBar" type="ProgressBar" parent="UI"]
+[node name="ProgressBar" type="ProgressBar" parent="UI" unique_id=1275532284]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
+offset_right = 133.0
 offset_bottom = 24.0
 grow_horizontal = 2
 
-[node name="Track" type="Node2D" parent="."]
+[node name="Track" type="Node2D" parent="." unique_id=922708025]
 
-[node name="Column1" parent="Track" instance=ExtResource("3_21dkn")]
+[node name="Column1" parent="Track" unique_id=1829621600 instance=ExtResource("3_21dkn")]
 
-[node name="Column2" parent="Track" instance=ExtResource("3_21dkn")]
+[node name="Column2" parent="Track" unique_id=792229827 instance=ExtResource("3_21dkn")]
 KEY = "F"
 
-[node name="Column3" parent="Track" instance=ExtResource("3_21dkn")]
+[node name="Column3" parent="Track" unique_id=1047817573 instance=ExtResource("3_21dkn")]
 KEY = "J"
 
-[node name="Column4" parent="Track" instance=ExtResource("3_21dkn")]
+[node name="Column4" parent="Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
 KEY = "K"

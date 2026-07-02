@@ -99,7 +99,7 @@ func _process(delta: float) -> void:
 				pass
 			
 			# 更新当前音符索引
-			current_note_index += 1	
+			current_note_index += 1
 			pass
 		return
 		# 当正在加载音符时, 代码不会向下执行

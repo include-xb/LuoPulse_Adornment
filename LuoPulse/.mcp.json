@@ -2,7 +2,10 @@
   "mcpServers": {
     "godot-mcp": {
       "command": "npx",
-      "args": ["-y", "godot-mcp-server"]
+      "args": ["-y", "godot-mcp-server"],
+      "env": {
+        "GODOT_PATH": "c:\\Program Files\\Godot\\Godot_v4.7-stable_win64\\Godot_v4.7-stable_win64.exe"
+      }
     }
   }
 }

@@ -1,8 +1,23 @@
-[gd_scene load_steps=2 format=3 uid="uid://cyby1mdapaw3i"]
+[gd_scene format=3 uid="uid://cyby1mdapaw3i"]
 
-[ext_resource type="Script" uid="uid://bupmai1v77wxb" path="res://Script/Ui/SongSelect/Sympathy.gd" id="1_sd8b3"]
+[ext_resource type="Script" uid="uid://bupmai1v77wxb" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
+[ext_resource type="Texture2D" uid="uid://ckkflwkuu1poh" path="res://Asset/Image/最初日.png" id="2_8by2n"]
+[ext_resource type="Shader" uid="uid://d1dnw1f0qxiy" path="res://Shader/dark_manager.gdshader" id="2_qx1yg"]
 
-[node name="Sympathy" type="Control"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
+shader = ExtResource("2_qx1yg")
+shader_parameter/paper_color = Color(0.95, 0.88, 0.78, 1)
+shader_parameter/fade_start = 0.0
+shader_parameter/fade_end = 1.0
+shader_parameter/saturation = 1.0
+shader_parameter/brightness = 1.00000002375
+shader_parameter/gray_scale = 1.0
+shader_parameter/line_strength = 0.0
+shader_parameter/edge_threshold = 0.0
+shader_parameter/texture_strength = 0.0
+shader_parameter/texture_scale = 180.0
+
+[node name="Sympathy" type="Control" unique_id=1456702183]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,10 +26,12 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sd8b3")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1136130409]
+material = SubResource("ShaderMaterial_s4y3q")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("2_8by2n")
