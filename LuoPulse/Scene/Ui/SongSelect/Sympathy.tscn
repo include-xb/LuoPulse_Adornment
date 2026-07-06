@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cyby1mdapaw3i"]
 
-[ext_resource type="Script" uid="uid://ok1j4u3yms2" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
+[ext_resource type="Script" uid="uid://dhs52o7d8c1qx" path="res://Script/Ui/SongSelect/Sympathy.gd" id="1_sd8b3"]
 [ext_resource type="Texture2D" uid="uid://ckkflwkuu1poh" path="res://Asset/Image/最初日.png" id="2_8by2n"]
 [ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_qx1yg"]
 
@@ -11,6 +11,91 @@ shader_parameter/gray_scale = 0.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qx1yg"]
 shader = ExtResource("2_qx1yg")
 shader_parameter/gray_scale = 0.0
+
+[sub_resource type="Animation" id="Animation_qx1yg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VBoxContainer:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(488, 192)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Cover:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(490, 190)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("VBoxContainer:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_lqs8k"]
+resource_name = "unfold"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VBoxContainer:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(488, 192), Vector2(646, 192)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Cover:position")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(490, 190), Vector2(330, 192)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("VBoxContainer:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.0009999999, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ohs4k"]
+_data = {
+&"RESET": SubResource("Animation_qx1yg"),
+&"unfold": SubResource("Animation_lqs8k")
+}
 
 [node name="Sympathy" type="Control" unique_id=1456702183]
 layout_mode = 3
@@ -31,24 +116,18 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_8by2n")
 
-[node name="Cover" type="TextureRect" parent="." unique_id=327564411]
-material = SubResource("ShaderMaterial_qx1yg")
-custom_minimum_size = Vector2(300, 300)
+[node name="Chapter" type="Label" parent="." unique_id=422246838]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -170.0
-offset_right = 150.0
-offset_bottom = 130.0
+offset_left = -147.5
+offset_top = 88.0
+offset_right = 147.5
+offset_bottom = 150.0
 grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_8by2n")
-expand_mode = 5
-stretch_mode = 6
+theme_override_font_sizes/font_size = 50
+text = "ChapterⅠ 序章 "
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1790863430]
 layout_mode = 1
@@ -90,4 +169,121 @@ theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
 theme_override_font_sizes/font_size = 38
 text = "114514"
 
+[node name="Select" type="HBoxContainer" parent="." unique_id=787473497]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -192.0
+offset_top = -208.0
+offset_right = 192.0
+offset_bottom = -109.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Left" type="Button" parent="Select" unique_id=1979864805]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 80
+text = "<"
+
+[node name="Start" type="Button" parent="Select" unique_id=2104645452]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 75
+text = "@"
+
+[node name="Right" type="Button" parent="Select" unique_id=1609907361]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 80
+text = ">"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=527410655]
+layout_mode = 0
+offset_left = 488.0
+offset_top = 192.0
+offset_right = 792.00024
+offset_bottom = 488.0
+
+[node name="Title" type="Label" parent="VBoxContainer" unique_id=1091785862]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "最初日"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=502763094]
+layout_mode = 2
+theme_override_constants/margin_top = 19
+
+[node name="Producer" type="Label" parent="VBoxContainer" unique_id=386705241]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+text = "作词/作曲/编曲："
+
+[node name="Creator" type="Label" parent="VBoxContainer" unique_id=1615023692]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+text = "制谱："
+
+[node name="Vocalist" type="Label" parent="VBoxContainer" unique_id=166633472]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 20
+text = "演唱："
+
+[node name="Card" type="Button" parent="VBoxContainer" unique_id=1643585828]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 10
+theme_override_font_sizes/font_size = 20
+text = "【资料卡】"
+alignment = 0
+
+[node name="Cover" type="TextureRect" parent="." unique_id=327564411]
+material = SubResource("ShaderMaterial_qx1yg")
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -170.0
+offset_right = 150.00134
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_8by2n")
+expand_mode = 5
+stretch_mode = 6
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=637257565]
+libraries/ = SubResource("AnimationLibrary_ohs4k")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=781416472]
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1321983800]
+custom_minimum_size = Vector2(15, 0)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+step = 0.1
+show_percentage = false
+
 [connection signal="pressed" from="HBoxContainer/MarginContainer/Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="Select/Left" to="." method="_on_left_pressed"]
+[connection signal="pressed" from="Select/Right" to="." method="_on_right_pressed"]

@@ -86,6 +86,9 @@ var current_song: String = ""
 # 当前歌曲的索引
 var current_song_index: int = 0
 
+# 最后一次解锁的歌曲索引
+var current_unlocked_song_index: int = 0
+
 # 四类判定等级
 var harmonious: int = 0
 var sympathetic: int = 0
@@ -101,7 +104,7 @@ var accuracy: float = 0.0
 
 # 计算当前主线进度 -> 得到当前灰度
 func get_current_gray_scale() -> float:
-	var progress: float = float(current_song_index) / float(sympath_song_num)
+	var progress: float = float(current_unlocked_song_index) / float(sympath_song_num)
 	var gray_scale: float = 1.0 - progress
 	return gray_scale
 

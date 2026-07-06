@@ -6,6 +6,13 @@
 ## 		- MainMenu 游戏主页面
 
 
+############################################
+##				DANGER					  ##
+##		  AI 产出的 shit，勿动！			  ##
+############################################
+
+
+
 extends Control
 
 
@@ -107,6 +114,8 @@ func _copy_lpz_to_customized_playlist() -> void:
 	for file_name in lpz_names:
 		var source_path := source_dir.path_join(file_name)
 		var target_path := target_dir.path_join(file_name)
+		if FileAccess.file_exists(target_path):
+			continue
 		_copy_binary_file(source_path, target_path)
 
 

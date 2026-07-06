@@ -1,5 +1,7 @@
 [gd_resource type="Theme" format=3 uid="uid://kb7wugiy2jme"]
 
+[ext_resource type="Texture2D" uid="uid://cl8jpaflsacx8" path="res://Asset/Image/fill-black.png" id="1_uegkn"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uegkn"]
 bg_color = Color(1, 1, 1, 0)
 
@@ -14,6 +16,14 @@ bg_color = Color(1, 1, 1, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d2g8x"]
 bg_color = Color(0.952941, 0.933333, 0.866667, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lqs8k"]
+texture = ExtResource("1_uegkn")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
 
 [sub_resource type="Gradient" id="Gradient_d2g8x"]
 offsets = PackedFloat32Array(0, 0.269406, 0.525114, 1)
@@ -45,6 +55,8 @@ Label/constants/shadow_offset_y = 1
 Label/constants/shadow_outline_size = 1
 Label/font_sizes/font_size = 30
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_d2g8x")
+ProgressBar/styles/background = SubResource("StyleBoxFlat_qx1yg")
+ProgressBar/styles/fill = SubResource("StyleBoxTexture_lqs8k")
 RichTextLabel/colors/font_outline_color = Color(0, 0, 0, 1)
 RichTextLabel/colors/font_shadow_color = Color(0, 0, 0, 0.392157)
 RichTextLabel/constants/outline_size = 2
