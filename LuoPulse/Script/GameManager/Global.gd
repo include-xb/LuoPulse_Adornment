@@ -72,7 +72,7 @@ var is_autoplay: bool = false
 var sympath_song_path_list: Array[String] = [ ]
 
 # 共鸣主线歌曲数
-var sympath_song_num: int = 0
+var sympath_song_num: int = 17
 
 # 专辑主线歌曲路径列表
 var album_song_path_list: Array[String] = [ ]
@@ -87,9 +87,9 @@ var current_song: String = ""
 var current_song_index: int = 0
 
 # 四类判定等级
-var sympathized: int = 0
-var synced: int = 0
-var connected: int = 0
+var harmonious: int = 0
+var sympathetic: int = 0
+var aware: int = 0
 var lost: int = 0
 
 # 连击数
@@ -97,6 +97,13 @@ var combo: int = 0
 
 # 准度
 var accuracy: float = 0.0
+
+
+# 计算当前主线进度 -> 得到当前灰度
+func get_current_gray_scale() -> float:
+	var progress: float = float(current_song_index) / float(sympath_song_num)
+	var gray_scale: float = 1.0 - progress
+	return gray_scale
 
 
 func display_notice(info: String) -> void:

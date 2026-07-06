@@ -1,8 +1,89 @@
-[gd_scene load_steps=2 format=3 uid="uid://dk6axgnha1fv5"]
+[gd_scene format=3 uid="uid://dk6axgnha1fv5"]
 
-[ext_resource type="Script" uid="uid://esbj00n5wyml" path="res://Script/Ui/Launch.gd" id="1_sc0u0"]
+[ext_resource type="Script" uid="uid://esbj00n5wyml" path="res://Script/Ui/Widget/Launch.gd" id="1_sc0u0"]
 
-[node name="Launch" type="Control"]
+[node name="Launch" type="Control" unique_id=1952455162]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_sc0u0")
+
+[node name="Background" type="ColorRect" parent="." unique_id=964636709]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Text1" type="VBoxContainer" parent="." unique_id=471906944]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -60.0
+offset_right = 400.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="SpanishLabel" type="Label" parent="Text1" unique_id=1022063291]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 42
+text = "viva los artistas y su amor."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ChineseLabel" type="Label" parent="Text1" unique_id=484850362]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "艺术家与 ta 们的爱万岁"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Text2" type="VBoxContainer" parent="." unique_id=1094387824]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -60.0
+offset_right = 400.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Text2" unique_id=1873932510]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 52
+text = "洛之动脉"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="Text2" unique_id=494067955]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+text = "Luo Pulse"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1280571672]

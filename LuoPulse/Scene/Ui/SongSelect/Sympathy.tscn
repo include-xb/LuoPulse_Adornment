@@ -1,21 +1,16 @@
 [gd_scene format=3 uid="uid://cyby1mdapaw3i"]
 
-[ext_resource type="Script" uid="uid://bupmai1v77wxb" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
+[ext_resource type="Script" uid="uid://ok1j4u3yms2" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
 [ext_resource type="Texture2D" uid="uid://ckkflwkuu1poh" path="res://Asset/Image/最初日.png" id="2_8by2n"]
-[ext_resource type="Shader" uid="uid://d1dnw1f0qxiy" path="res://Shader/dark_manager.gdshader" id="2_qx1yg"]
+[ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_qx1yg"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_558w5"]
 shader = ExtResource("2_qx1yg")
-shader_parameter/paper_color = Color(0.95, 0.88, 0.78, 1)
-shader_parameter/fade_start = 0.0
-shader_parameter/fade_end = 1.0
-shader_parameter/saturation = 1.0
-shader_parameter/brightness = 1.00000002375
-shader_parameter/gray_scale = 1.0
-shader_parameter/line_strength = 0.0
-shader_parameter/edge_threshold = 0.0
-shader_parameter/texture_strength = 0.0
-shader_parameter/texture_scale = 180.0
+shader_parameter/gray_scale = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qx1yg"]
+shader = ExtResource("2_qx1yg")
+shader_parameter/gray_scale = 0.0
 
 [node name="Sympathy" type="Control" unique_id=1456702183]
 layout_mode = 3
@@ -26,8 +21,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sd8b3")
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1136130409]
-material = SubResource("ShaderMaterial_s4y3q")
+[node name="Background" type="TextureRect" parent="." unique_id=1136130409]
+material = SubResource("ShaderMaterial_558w5")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -35,3 +30,64 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_8by2n")
+
+[node name="Cover" type="TextureRect" parent="." unique_id=327564411]
+material = SubResource("ShaderMaterial_qx1yg")
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -170.0
+offset_right = 150.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_8by2n")
+expand_mode = 5
+stretch_mode = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1790863430]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 56.0
+grow_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer" unique_id=671048748]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+
+[node name="Button" type="Button" parent="HBoxContainer/MarginContainer" unique_id=666879444]
+layout_mode = 2
+text = "< 返回"
+
+[node name="Currency" type="MarginContainer" parent="HBoxContainer" unique_id=729937514]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 190
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/Currency" unique_id=1545854422]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="Diamond" type="Label" parent="HBoxContainer/Currency/HBoxContainer" unique_id=357431331]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
+theme_override_font_sizes/font_size = 40
+text = "◇"
+
+[node name="Amount" type="Label" parent="HBoxContainer/Currency/HBoxContainer" unique_id=1634015711]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
+theme_override_font_sizes/font_size = 38
+text = "114514"
+
+[connection signal="pressed" from="HBoxContainer/MarginContainer/Button" to="." method="_on_button_pressed"]

@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://bifeqp1xtt7v3"]
+
+[ext_resource type="Script" uid="uid://dhaieafuju8ky" path="res://Script/Ui/Widget/UnderlineButton.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_trans"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k3ctm"]
+bg_color = Color(0, 0, 0, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+
+[node name="UnderlineButton" type="VBoxContainer" unique_id=1010812019]
+theme_override_constants/separation = -20
+script = ExtResource("1_script")
+
+[node name="Button" type="Button" parent="." unique_id=45460652]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0, 0, 0, 0.784)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 0.784)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 0.784)
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_trans")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_trans")
+theme_override_styles/hover = SubResource("StyleBoxFlat_trans")
+theme_override_styles/focus = SubResource("StyleBoxFlat_trans")
+text = ">>>"
+
+[node name="Separator" type="HSeparator" parent="." unique_id=483453183]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxFlat_k3ctm")

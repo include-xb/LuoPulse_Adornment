@@ -1,15 +1,22 @@
 [gd_scene format=3 uid="uid://ctaqumekhngd7"]
 
-[ext_resource type="Shader" uid="uid://bbgw8np0wnik0" path="res://Shader/paper.gdshader" id="1_a34cl"]
 [ext_resource type="Script" uid="uid://xvtsk50ta20u" path="res://Script/Ui/Menu/MainMenu.gd" id="1_wxf6g"]
 [ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="2_558w5"]
-[ext_resource type="Texture2D" uid="uid://cd8el0otv4sf3" path="res://Asset/Image/paper(1).jpg" id="2_tekst"]
+[ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_cwtva"]
+[ext_resource type="PackedScene" uid="uid://bifeqp1xtt7v3" path="res://Scene/Ui/Widget/UnderlineButton.tscn" id="3_ubtn"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_558w5"]
-shader = ExtResource("1_a34cl")
-shader_parameter/paper_texture = ExtResource("2_tekst")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cwtva"]
+shader = ExtResource("2_cwtva")
+shader_parameter/gray_scale = 0.0
 
-[node name="MainMenu" type="Control" unique_id=325735639]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a34cl"]
+bg_color = Color(0.952941, 0.933333, 0.866667, 1)
+corner_radius_top_left = 54
+corner_radius_top_right = 54
+corner_radius_bottom_right = 54
+corner_radius_bottom_left = 54
+
+[node name="MainMenu" type="Control" unique_id=399667804]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 15
@@ -19,7 +26,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wxf6g")
 
-[node name="Background" type="TextureRect" parent="." unique_id=188162680]
+[node name="Background" type="TextureRect" parent="." unique_id=1168184271]
+material = SubResource("ShaderMaterial_cwtva")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,51 +38,123 @@ texture = ExtResource("2_558w5")
 expand_mode = 5
 stretch_mode = 6
 
-[node name="Wrinkle" type="ColorRect" parent="." unique_id=1490739650]
-editor_description = "这个节点下的子节点, 设置 材质->使用父级材质 为 true, 这可渲染褶皱效果"
-material = SubResource("ShaderMaterial_558w5")
+[node name="MenuButtons" type="VBoxContainer" parent="." unique_id=2073143880]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(1, 1, 1, 0)
+offset_left = 961.0
+offset_top = 199.0
+offset_right = 1209.0
+offset_bottom = 535.0
+theme_override_constants/separation = 20
 
-[node name="Sympathy" type="Button" parent="Wrinkle" unique_id=1389277567]
-use_parent_material = true
-layout_mode = 0
-offset_left = 978.0
-offset_top = 189.0
-offset_right = 1093.0
-offset_bottom = 245.0
+[node name="Sympathy" parent="MenuButtons" unique_id=1423665452 instance=ExtResource("3_ubtn")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" parent="MenuButtons/Sympathy" index="0" unique_id=45460652]
 text = "> 共鸣"
 
-[node name="Album" type="Button" parent="Wrinkle" unique_id=777698392]
-use_parent_material = true
-layout_mode = 0
-offset_left = 977.0
-offset_top = 272.0
-offset_right = 1093.0
-offset_bottom = 328.0
+[node name="Album" parent="MenuButtons" unique_id=24736938 instance=ExtResource("3_ubtn")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" parent="MenuButtons/Album" index="0" unique_id=45460652]
 text = "# 断章"
 
-[node name="Setting" type="Button" parent="Wrinkle" unique_id=1006324580]
-use_parent_material = true
-layout_mode = 0
-offset_left = 975.0
-offset_top = 359.0
-offset_right = 1093.0
-offset_bottom = 415.0
+[node name="Setting" parent="MenuButtons" unique_id=2007988620 instance=ExtResource("3_ubtn")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" parent="MenuButtons/Setting" index="0" unique_id=45460652]
 text = "= 笔记"
 
-[node name="About" type="Button" parent="Wrinkle" unique_id=1460301077]
-use_parent_material = true
-layout_mode = 0
-offset_left = 975.0
-offset_top = 430.0
-offset_right = 1093.0
-offset_bottom = 486.0
+[node name="About" parent="MenuButtons" unique_id=476490099 instance=ExtResource("3_ubtn")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" parent="MenuButtons/About" index="0" unique_id=45460652]
 text = "* 设置"
 
-[connection signal="pressed" from="Wrinkle/Sympathy" to="." method="_on_sympathy_pressed"]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2040597354]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -78.0
+offset_right = 175.0
+grow_vertical = 0
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_bottom = 40
+
+[node name="Version" type="Label" parent="MarginContainer" unique_id=163397353]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.35, 0.35, 0.35, 0.5)
+theme_override_font_sizes/font_size = 30
+text = "V0.1 alpha"
+
+[node name="Currency" type="MarginContainer" parent="." unique_id=256023867]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -107.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 190
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Currency" unique_id=697312055]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="Diamond" type="Label" parent="Currency/HBoxContainer" unique_id=813408224]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
+theme_override_font_sizes/font_size = 40
+text = "◇"
+
+[node name="Amount" type="Label" parent="Currency/HBoxContainer" unique_id=1332006374]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
+theme_override_font_sizes/font_size = 38
+text = "114514"
+
+[node name="Profile" type="VBoxContainer" parent="." unique_id=2014772999]
+layout_mode = 1
+offset_left = 63.0
+offset_top = 66.0
+offset_right = 200.0
+offset_bottom = 203.0
+theme_override_constants/separation = 4
+
+[node name="AvatarPanel" type="PanelContainer" parent="Profile" unique_id=1566971643]
+custom_minimum_size = Vector2(108, 108)
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_a34cl")
+
+[node name="Username" type="Label" parent="Profile" unique_id=584728887]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "小小白"
+vertical_alignment = 1
+
+[node name="Level" type="Label" parent="Profile" unique_id=7557958]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.35, 0.35, 0.8)
+theme_override_font_sizes/font_size = 16
+text = "共鸣 #114"
+
+[connection signal="pressed" from="MenuButtons/Sympathy" to="." method="_on_sympathy_pressed"]
+[connection signal="pressed" from="MenuButtons/Album" to="." method="_on_album_pressed"]
+[connection signal="pressed" from="MenuButtons/Setting" to="." method="_on_setting_pressed"]
+[connection signal="pressed" from="MenuButtons/About" to="." method="_on_about_pressed"]
+
+[editable path="MenuButtons/Sympathy"]
+[editable path="MenuButtons/Album"]
+[editable path="MenuButtons/Setting"]
+[editable path="MenuButtons/About"]

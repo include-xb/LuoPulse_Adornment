@@ -14,11 +14,26 @@
 
 extends Control
 
+@onready var background: TextureRect = $Background
+
+
 
 func _ready() -> void:
+	background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	pass
 
 
 func _on_sympathy_pressed() -> void:
 	SceneManager.change_scene("res://Scene/Ui/SongSelect/Sympathy.tscn")
-	pass
+
+
+func _on_album_pressed() -> void:
+	SceneManager.change_scene("res://Scene/Ui/Menu/CardMenu.tscn")
+
+
+func _on_setting_pressed() -> void:
+	SceneManager.change_scene("res://Scene/Ui/Menu/Notebook.tscn")
+
+
+func _on_about_pressed() -> void:
+	SceneManager.change_scene("res://Scene/Ui/Menu/SettingMenu.tscn")
