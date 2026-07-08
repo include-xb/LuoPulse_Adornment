@@ -24,16 +24,20 @@ func _ready() -> void:
 
 
 func _on_sympathy_pressed() -> void:
+	Global.play_ui_click_audio()
 	SceneManager.change_scene("res://Scene/Ui/SongSelect/Sympathy.tscn")
 
 
 func _on_album_pressed() -> void:
-	SceneManager.change_scene("res://Scene/Ui/Menu/CardMenu.tscn")
+	Global.play_ui_click_audio()
+	SceneManager.change_scene("res://Script/Ui/SongSelect/Album.gd")
 
 
-func _on_setting_pressed() -> void:
+func _on_note_pressed() -> void:
+	Global.play_ui_click_audio()
 	SceneManager.change_scene("res://Scene/Ui/Menu/Notebook.tscn")
 
 
-func _on_about_pressed() -> void:
+func _on_setting_pressed() -> void:
+	Global.play_ui_click_audio()
 	SceneManager.change_scene("res://Scene/Ui/Menu/SettingMenu.tscn")

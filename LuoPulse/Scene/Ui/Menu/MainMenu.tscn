@@ -58,20 +58,21 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuButtons/Album" index="0" unique_id=45460652]
+disabled = true
 text = "# 断章"
 
-[node name="Setting" parent="MenuButtons" unique_id=2007988620 instance=ExtResource("3_ubtn")]
+[node name="Note" parent="MenuButtons" unique_id=2007988620 instance=ExtResource("3_ubtn")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" parent="MenuButtons/Note" index="0" unique_id=45460652]
+text = "= 笔记"
+
+[node name="Setting" parent="MenuButtons" unique_id=476490099 instance=ExtResource("3_ubtn")]
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuButtons/Setting" index="0" unique_id=45460652]
-text = "= 笔记"
-
-[node name="About" parent="MenuButtons" unique_id=476490099 instance=ExtResource("3_ubtn")]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="Button" parent="MenuButtons/About" index="0" unique_id=45460652]
 text = "* 设置"
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=2040597354]
@@ -151,10 +152,10 @@ text = "共鸣 #114"
 
 [connection signal="pressed" from="MenuButtons/Sympathy" to="." method="_on_sympathy_pressed"]
 [connection signal="pressed" from="MenuButtons/Album" to="." method="_on_album_pressed"]
+[connection signal="pressed" from="MenuButtons/Note" to="." method="_on_note_pressed"]
 [connection signal="pressed" from="MenuButtons/Setting" to="." method="_on_setting_pressed"]
-[connection signal="pressed" from="MenuButtons/About" to="." method="_on_about_pressed"]
 
 [editable path="MenuButtons/Sympathy"]
 [editable path="MenuButtons/Album"]
+[editable path="MenuButtons/Note"]
 [editable path="MenuButtons/Setting"]
-[editable path="MenuButtons/About"]

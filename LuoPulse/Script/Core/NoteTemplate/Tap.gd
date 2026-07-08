@@ -1,6 +1,6 @@
-extends Sprite2D
+extends MeshInstance3D
 
-@onready var time_manager: Node = $"TimeManager"
+# @onready var time_manager: Node = $"TimeManager"
 
 
 # 音符类型
@@ -15,9 +15,10 @@ var duration: int = 0
 # 音符所在列数
 var column: int = 0
 
-# 当前时间
+# 当前流逝的时间
 var current_time: int = 0
 
+# 开始计时的时间, 用于做差得到当前流逝的时间
 var start_time: int = 0
 
 # 音符是否已经被添加到判定区间
@@ -29,27 +30,30 @@ var is_removed: bool = false
 
 func _ready():
 	# 设置音符开始时间
-	time_manager.start()
 	start_time = Time.get_ticks_msec()
 	pass
 
 
 func _physics_process(delta: float) -> void:
 	# 音符下落
-	self.position.y += Global.speed * delta
+	position.z += Global.note_speed * delta
+	
 	# 获取当前时间
-	current_time = Time.get_ticks_msec() - time
+	current_time = Time.get_ticks_msec() - start_time - Global.start_duration
 
 	if (not is_added) and current_time >= Global.START_JUDGE_TIME:
 		is_added = true
 		# 添加音符到判定区间
 		pass
-
-	if (not is_removed) and current_time >= duration + Global.START_JUDGE_TIME:
+	
+	# print("current_time: " + str(current_time))
+	if (not is_removed) and current_time >= duration + Global.END_JUDGE_TIME:
 		is_removed = true
 		# 移除音符出判定区间
 		# lost + 1
 		# 释放内存
+		#print("移除")
+		queue_free()
 		pass
 	
 	if Global.is_autoplay:

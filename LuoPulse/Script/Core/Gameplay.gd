@@ -22,9 +22,13 @@ extends Node2D
 @onready var progress_bar: ProgressBar = $"UI/ProgressBar"
 
 
+@onready var background: TextureRect = $UI/Background
+@onready var video_stream_player: VideoStreamPlayer = $UI/VideoStreamPlayer
+
+
 
 # 解析完成的谱面数据
-var chart: Dictionary = { }
+var chart: Array = [ ]
 
 # 当前时间
 var current_time: int = 0
@@ -38,7 +42,7 @@ var total_notes: int = 0
 # 当前音符
 var current_note: Sprite2D = null
 
-# 当前音符索引
+# 当前加载的音符索引
 var current_note_index: int = 0
 
 # 音符时间列表
@@ -56,6 +60,8 @@ var column_list: Array = []
 # 是否正在加载
 var is_loading_note: bool = true
 
+var is_audio_start: bool = false
+
 
 func _ready() -> void:
 	# 连接音频播放器的 finished 信号: 播放完毕即游戏结束
@@ -66,14 +72,20 @@ func _ready() -> void:
 	write_in_list()
 	# 启动计时器
 	start_time = Time.get_ticks_msec()
+	#audio_system.play()
 	pass
 
 
 @warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
 	current_time = Time.get_ticks_msec() - start_time
+	
+	if is_audio_start == false && current_time >= 3000:
+		audio_system.play()
+		is_audio_start = true
+		pass
+	
 	if is_loading_note:
-		
 		if current_note_index >= total_notes:
 			# 加载完毕
 			is_loading_note = false
@@ -82,6 +94,7 @@ func _process(delta: float) -> void:
 		if current_time >= time_list[current_note_index]:
 			# 加载音符
 			load_note(current_note_index)
+			print("正在加载第 %d 个音符" % current_note_index)
 			# 检查接下来是否有相同时间的音符
 			for i in range(Global.COLUMN_NUM - 1):
 				# 获取下一个音符的索引
@@ -93,6 +106,7 @@ func _process(delta: float) -> void:
 				# 如果下一个音符的时间与当前音符相同，则加载下一个音符
 				if time_list[current_note_index] == time_list[next_note_index]:
 					load_note(next_note_index)
+					print("正在加载第 %d 个音符" % current_note_index)
 					# 更新当前音符索引
 					current_note_index += 1
 					pass
@@ -113,19 +127,43 @@ func load_note(note_index: int) -> void:
 		type_list[note_index],
 		time_list[note_index],
 		duration_list[note_index],
-		column_list[note_index]
+		column_list[note_index],
+		$SubViewport/Node3D/Track,
 	)
 	pass
 
 
 # 从当前选择的曲包中加载谱面数据
 func load_list() -> void:
+	var path: String = Global.sympath_song_path_list[Global.current_song_index]
+	var img: ImageTexture = Global._read_cover_from_lpz(path)
+	var audio_stream: AudioStream = Global._read_audio_from_lpz(path)
+	var chart_raw: Dictionary = Global._read_chart_from_lpz(path)
+	
+	background.texture = img
+	audio_system.stream = audio_stream
+	chart = chart_raw.get("HitObjects")
+	# print(chart)
 	pass
 
 
 # 将谱面数据写入到各数组中
 func write_in_list() -> void:
 	# INFO: 没有 duration 元素则默认为 0
+	
+	total_notes = len(chart)
+	for i: Dictionary in chart:
+		var time: int = i.get("time")
+		var type: String = i.get("type")
+		var column: int = i.get("column")
+		var duration: int = i.get("duration", 0.0)
+		
+		time_list.append(time)
+		type_list.append(type)
+		column_list.append(column)
+		duration_list.append(duration)
+		pass
+	
 	pass
 
 # 游戏结束

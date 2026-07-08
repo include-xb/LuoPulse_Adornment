@@ -140,7 +140,7 @@ grow_horizontal = 2
 layout_mode = 2
 theme_override_constants/margin_left = 50
 
-[node name="Button" type="Button" parent="HBoxContainer/MarginContainer" unique_id=666879444]
+[node name="Back" type="Button" parent="HBoxContainer/MarginContainer" unique_id=666879444]
 layout_mode = 2
 text = "< 返回"
 
@@ -284,6 +284,7 @@ grow_vertical = 0
 step = 0.1
 show_percentage = false
 
-[connection signal="pressed" from="HBoxContainer/MarginContainer/Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/MarginContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Select/Left" to="." method="_on_left_pressed"]
+[connection signal="pressed" from="Select/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="Select/Right" to="." method="_on_right_pressed"]

@@ -2,3 +2,5 @@
 .godot/
 /android/
 .vscode/
+.claude/
+LuoPulse/addons/godot_mcp/cache/

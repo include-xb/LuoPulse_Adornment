@@ -2,6 +2,8 @@ extends Control
 
 
 @onready var NOTICE_BOX: VBoxContainer = $NoticeBox
+@onready var ui_click: AudioStreamPlayer = $UiClick
+
 
 ## 常量
 
@@ -33,10 +35,10 @@ const KEY_4: String = "K"
 const KEY_LIST: Array[String] = [ KEY_1, KEY_2, KEY_3, KEY_4 ]
 
 # 开始判定时间 (单位: 毫秒)
-const START_JUDGE_TIME: int = -180
+const START_JUDGE_TIME: int = -240
 
 # 结束判定时间 (单位: 毫秒)
-const END_JUDGE_TIME: int = 180
+const END_JUDGE_TIME: int = 240
 
 # 共鸣判定区间: [-60, 60]
 const SYMPATHY_TIME: int = 60
@@ -51,8 +53,8 @@ const CONNECTED_TIME: int = 180
 
 ## 变量
 
-# 音符速度
-var note_speed: float = 200.0
+# 音符速度, 这个速度是下落的实际速度准值
+var note_speed: float = 10.0
 
 # 用户名
 var user_name: String = ""
@@ -101,12 +103,155 @@ var combo: int = 0
 # 准度
 var accuracy: float = 0.0
 
+# 开始前的延时，这个时间也反应着同一时间内场景中音符最大数量。
+# 相当于当前时间，到当前时间+start_duration这段时间内的音符会被加载到场景中
+var start_duration: int = 3000
+
+
+# ---- 用户数据 (user.json) ----
+
+# 已解锁的共鸣曲目数
+var main_line_unlocked: int = 1
+
+# 水晶数
+var crystal: int = 0
+
+# 已获得的彩蛋碎片 ID
+var story_fragments_unlocked: Array = []
+
+
+# ---- 游戏配置 (config.json) ----
+
+# 游戏配置版本号
+var config_version: String = "0.0.0.1"
+
+# 歌曲播放音量
+var volume_song: int = 90
+
+# 音符打击音量
+var volume_note: int = 70
+
+# UI 音量
+var volume_ui: int = 60
+
+# 谱面偏移
+var chart_offset: int = 0
+
+# 音符流速，这个速度是将音符实际速度映射到 1-20 的区间， 方便玩家调节
+var note_flow_speed: int = 10
+
+
 
 # 计算当前主线进度 -> 得到当前灰度
 func get_current_gray_scale() -> float:
 	var progress: float = float(current_unlocked_song_index) / float(sympath_song_num)
 	var gray_scale: float = 1.0 - progress
 	return gray_scale
+
+
+func play_ui_click_audio() -> void:
+	ui_click.play()
+	pass
+
+
+## ============================================================
+## LPZ 文件读取
+## ============================================================
+
+## 从 .lpz 文件中读取封面图片，返回 ImageTexture
+func _read_cover_from_lpz(lpz_path: String) -> ImageTexture:
+	var zip := ZIPReader.new()
+	var err := zip.open(lpz_path)
+	if err != OK:
+		push_error("无法打开 .lpz 文件: %s" % lpz_path)
+		return null
+
+	var cover_path := ""
+	for f in zip.get_files():
+		if f.get_file() == "cover.png":
+			cover_path = f
+			break
+
+	if cover_path == "":
+		zip.close()
+		push_error("在 .lpz 中找不到 cover.png: %s" % lpz_path)
+		return null
+
+	var img_bytes := zip.read_file(cover_path)
+	zip.close()
+
+	var img := Image.new()
+	var load_err := img.load_png_from_buffer(img_bytes)
+	if load_err != OK:
+		push_error("无法解码封面图片: %s" % cover_path)
+		return null
+
+	return ImageTexture.create_from_image(img)
+
+
+## 从 .lpz 文件中读取音频，返回 AudioStream
+func _read_audio_from_lpz(lpz_path: String) -> AudioStream:
+	var zip := ZIPReader.new()
+	var err := zip.open(lpz_path)
+	if err != OK:
+		push_error("无法打开 .lpz 文件: %s" % lpz_path)
+		return null
+
+	var audio_path := ""
+	for f in zip.get_files():
+		if f.get_file() == "audio.ogg":
+			audio_path = f
+			break
+
+	if audio_path == "":
+		zip.close()
+		push_error("在 .lpz 中找不到 audio.ogg: %s" % lpz_path)
+		return null
+
+	var audio_bytes := zip.read_file(audio_path)
+	zip.close()
+
+	var audio_stream := AudioStreamOggVorbis.load_from_buffer(audio_bytes)
+	if audio_stream == null:
+		push_error("无法解码音频文件: %s" % audio_path)
+		return null
+	return audio_stream
+
+
+## 从 .lpz 文件中读取 chart.lp
+func _read_chart_from_lpz(lpz_path: String) -> Dictionary:
+	var zip := ZIPReader.new()
+	var err := zip.open(lpz_path)
+	if err != OK:
+		return {}
+
+	var chart_path := ""
+	for f in zip.get_files():
+		if f.get_file() == "chart.lp":
+			chart_path = f
+			break
+
+	if chart_path == "":
+		zip.close()
+		return {}
+
+	var json_bytes := zip.read_file(chart_path)
+	zip.close()
+
+	var json_str := json_bytes.get_string_from_utf8()
+
+	var json := JSON.new()
+	var parse_err := json.parse(json_str)
+	if parse_err != OK:
+		push_error("无法解析 chart.lp: %s" % lpz_path)
+		return {}
+
+	var data = json.get_data()
+	#if data is Dictionary and data.has("General"):
+		#return data["General"]
+	#return {}
+	return data
+
 
 
 func display_notice(info: String) -> void:

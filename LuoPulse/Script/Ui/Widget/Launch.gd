@@ -20,6 +20,7 @@ extends Control
 
 
 func _ready() -> void:
+	load_config()
 	_setup_animations()
 	load_sympathy_song()
 	_play_intro_sequence()
@@ -92,9 +93,88 @@ func _play_intro_sequence() -> void:
 
 
 func load_config() -> void:
-	# 加载用户数据文件夹的 config.json
-	
-	pass
+	_load_user_data()
+	_load_game_config()
+
+
+## 加载用户数据: user.json
+## 保存在 OS.get_user_data_dir()，若不存在则创建默认数据
+func _load_user_data() -> void:
+	var user_path := OS.get_user_data_dir().path_join("user.json")
+
+	var default_data := {
+		"username": "小白",
+		"main_line_unlocked": 1,
+		"crystal": 0,
+		"story_fragments_unlocked": []
+	}
+
+	var data: Dictionary = default_data.duplicate()
+
+	if FileAccess.file_exists(user_path):
+		var file := FileAccess.open(user_path, FileAccess.READ)
+		if file:
+			var json_string := file.get_as_text()
+			file.close()
+			var parsed: Variant = JSON.parse_string(json_string)
+			if parsed != null and parsed is Dictionary:
+				for key in default_data:
+					if key in parsed:
+						data[key] = parsed[key]
+
+	_write_json_file(user_path, data)
+
+	# 赋值到 Global
+	Global.user_name = data["username"]
+	Global.main_line_unlocked = data["main_line_unlocked"]
+	Global.crystal = data["crystal"]
+	Global.story_fragments_unlocked = data["story_fragments_unlocked"]
+
+
+## 加载游戏配置: config.json
+## 保存在 OS.get_user_data_dir()，若不存在则创建默认数据
+func _load_game_config() -> void:
+	var config_path := OS.get_user_data_dir().path_join("config.json")
+
+	var default_data := {
+		"version": "0.0.0.1",
+		"volume_song": 90,
+		"volume_note": 70,
+		"volume_ui": 60,
+		"offset": 0,
+		"speed": 10
+	}
+
+	var data: Dictionary = default_data.duplicate()
+
+	if FileAccess.file_exists(config_path):
+		var file := FileAccess.open(config_path, FileAccess.READ)
+		if file:
+			var json_string := file.get_as_text()
+			file.close()
+			var parsed: Variant = JSON.parse_string(json_string)
+			if parsed != null and parsed is Dictionary:
+				for key in default_data:
+					if key in parsed:
+						data[key] = parsed[key]
+
+	_write_json_file(config_path, data)
+
+	# 赋值到 Global
+	Global.config_version = data["version"]
+	Global.volume_song = data["volume_song"]
+	Global.volume_note = data["volume_note"]
+	Global.volume_ui = data["volume_ui"]
+	Global.chart_offset = data["offset"]
+	Global.note_flow_speed = data["speed"]
+
+
+## 将字典写入 JSON 文件
+func _write_json_file(path: String, data: Dictionary) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
 
 
 func load_sympathy_song() -> void:

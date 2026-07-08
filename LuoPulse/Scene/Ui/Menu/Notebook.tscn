@@ -1,9 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://ch76n4qivx0hl"]
 
-[ext_resource type="Script" path="res://Script/Ui/Menu/Notebook.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://bb7rvd87ejo8s" path="res://Scene/Ui/Widget/CardPage.tscn" id="2_card_page"]
+[ext_resource type="Script" uid="uid://bjb6bgdktts7l" path="res://Script/Ui/Menu/Notebook.gd" id="1_script"]
 
-[node name="Notebook" type="Control"]
+[node name="Notebook" type="Control" unique_id=1068100127]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="PanelContainer" parent="."]
+[node name="Background" type="PanelContainer" parent="." unique_id=768386285]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +19,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="." unique_id=1309308806]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,70 +31,70 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="TopBar" type="HBoxContainer" parent="Margin"]
+[node name="TopBar" type="HBoxContainer" parent="Margin" unique_id=878577292]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="BackBtn" type="Button" parent="Margin/TopBar"]
+[node name="BackBtn" type="Button" parent="Margin/TopBar" unique_id=1226277300]
 layout_mode = 2
 text = "< 返回"
 flat = true
 
-[node name="TitleLabel" type="Label" parent="Margin/TopBar"]
+[node name="TitleLabel" type="Label" parent="Margin/TopBar" unique_id=1496824942]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "笔记"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="Margin/TopBar"]
+[node name="Spacer" type="Control" parent="Margin/TopBar" unique_id=1474255690]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="TabBar" type="HBoxContainer" parent="Margin"]
-layout_mode = 2
-
-[node name="CardsTab" type="Button" parent="Margin/TabBar"]
+[node name="CardsTab" type="Button" parent="Margin/TopBar" unique_id=1831274427]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "资料卡"
 toggle_mode = true
 button_pressed = true
+text = "资料卡"
 
-[node name="FragmentsTab" type="Button" parent="Margin/TabBar"]
+[node name="TabBar" type="HBoxContainer" parent="Margin" unique_id=36860098]
+layout_mode = 2
+
+[node name="FragmentsTab" type="Button" parent="Margin/TabBar" unique_id=1954149703]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "故事碎片"
 toggle_mode = true
+text = "故事碎片"
 
-[node name="HSplit" type="HSplitContainer" parent="Margin"]
+[node name="HSplit" type="HSplitContainer" parent="Margin" unique_id=994662658]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Sidebar" type="PanelContainer" parent="Margin/HSplit"]
-layout_mode = 2
+[node name="Sidebar" type="PanelContainer" parent="Margin/HSplit" unique_id=1805707745]
 custom_minimum_size = Vector2(140, 0)
-
-[node name="Scroll" type="ScrollContainer" parent="Margin/HSplit/Sidebar"]
 layout_mode = 2
 
-[node name="SidebarList" type="VBoxContainer" parent="Margin/HSplit/Sidebar/Scroll"]
+[node name="Scroll" type="ScrollContainer" parent="Margin/HSplit/Sidebar" unique_id=856965913]
 layout_mode = 2
 
-[node name="MainContent" type="PanelContainer" parent="Margin/HSplit"]
+[node name="SidebarList" type="VBoxContainer" parent="Margin/HSplit/Sidebar/Scroll" unique_id=1181585585]
+layout_mode = 2
+
+[node name="MainContent" type="PanelContainer" parent="Margin/HSplit" unique_id=1381666779]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Scroll" type="ScrollContainer" parent="Margin/HSplit/MainContent"]
+[node name="Scroll" type="ScrollContainer" parent="Margin/HSplit/MainContent" unique_id=1317931321]
 layout_mode = 2
 
-[node name="Margin" type="MarginContainer" parent="Margin/HSplit/MainContent/Scroll"]
+[node name="Margin" type="MarginContainer" parent="Margin/HSplit/MainContent/Scroll" unique_id=1311668594]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="ContentLabel" type="RichTextLabel" parent="Margin/HSplit/MainContent/Scroll/Margin"]
+[node name="ContentLabel" type="RichTextLabel" parent="Margin/HSplit/MainContent/Scroll/Margin" unique_id=1181386328]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -103,7 +102,7 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="SlipOverlay" type="Control" parent="."]
+[node name="SlipOverlay" type="Control" parent="." unique_id=1117657519]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -112,7 +111,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="SlipPaper" type="PanelContainer" parent="SlipOverlay"]
+[node name="SlipPaper" type="PanelContainer" parent="SlipOverlay" unique_id=1518963678]
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -121,22 +121,20 @@ offset_left = -200.0
 offset_top = -120.0
 offset_right = 200.0
 offset_bottom = -60.0
-visible = false
 
-[node name="Margin" type="MarginContainer" parent="SlipOverlay/SlipPaper"]
+[node name="Margin" type="MarginContainer" parent="SlipOverlay/SlipPaper" unique_id=1010258420]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 12
 
-[node name="SlipLabel" type="Label" parent="SlipOverlay/SlipPaper/Margin"]
+[node name="SlipLabel" type="Label" parent="SlipOverlay/SlipPaper/Margin" unique_id=421231280]
 layout_mode = 2
 text = "纸条弹窗"
 horizontal_alignment = 1
 
 [connection signal="pressed" from="Margin/TopBar/BackBtn" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="Margin/TabBar/CardsTab" to="." method="_on_cards_tab_pressed"]
+[connection signal="pressed" from="Margin/TopBar/CardsTab" to="." method="_on_cards_tab_pressed"]
 [connection signal="pressed" from="Margin/TabBar/FragmentsTab" to="." method="_on_fragments_tab_pressed"]
 [connection signal="meta_clicked" from="Margin/HSplit/MainContent/Scroll/Margin/ContentLabel" to="." method="_on_content_meta_clicked"]
-[connection signal="pressed" from="SlipOverlay/SlipPaper" to="." method="_on_slip_pressed"]

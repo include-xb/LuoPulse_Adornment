@@ -6,7 +6,7 @@ extends Node
 
 @export var KEY: String = "D" # "F", "J", "K"
 
-@onready var note_pool: Node2D = $NotePool
+@onready var note_pool: Node3D = $NotePool
 
 
 # 按键是否按下

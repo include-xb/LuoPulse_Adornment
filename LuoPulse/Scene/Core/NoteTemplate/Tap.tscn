@@ -1,6 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://dlod24c0w1wsi"]
+[gd_scene format=3 uid="uid://dlod24c0w1wsi"]
 
 [ext_resource type="Script" uid="uid://bdc2ytkbescnv" path="res://Script/Core/NoteTemplate/Tap.gd" id="1_yt8n7"]
 
-[node name="Tap" type="Sprite2D"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yt8n7"]
+shading_mode = 0
+albedo_color = Color(0.4, 0.8, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1lfxb"]
+transparency = 1
+albedo_color = Color(0.4, 0.8, 1, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_r723p"]
+material = SubResource("StandardMaterial3D_1lfxb")
+size = Vector2(0.8, 0.2)
+
+[node name="Tap" type="MeshInstance3D" unique_id=961455817]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+material_override = SubResource("StandardMaterial3D_yt8n7")
+mesh = SubResource("PlaneMesh_r723p")
 script = ExtResource("1_yt8n7")

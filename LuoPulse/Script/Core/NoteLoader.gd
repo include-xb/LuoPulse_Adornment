@@ -7,30 +7,17 @@ extends Node
 class_name NoteLoader
 
 
-@onready var tap: PackedScene = preload("res://Scene/Core/NoteTemplate/Tap.tscn")
-@onready var drag: PackedScene = preload("res://Scene/Core/NoteTemplate/Drag.tscn")
-@onready var release: PackedScene = preload("res://Scene/Core/NoteTemplate/Release.tscn")
-@onready var hold: PackedScene = preload("res://Scene/Core/NoteTemplate/Hold.tscn")
-@onready var heart: PackedScene = preload("res://Scene/Core/NoteTemplate/Heart.tscn")
-
-
 var note_type: Dictionary = {
-	"tap": tap,
-	"drag": drag,
-	"release": release,
-	"hold": hold,
-	"heart": heart,
+	"tap": preload("res://Scene/Core/NoteTemplate/Tap.tscn"),
+	#"drag": preload("res://Scene/Core/NoteTemplate/Drag.tscn"),
+	#"release": preload("res://Scene/Core/NoteTemplate/Release.tscn"),
+	"hold": preload("res://Scene/Core/NoteTemplate/Hold.tscn"),
+	#"heart": preload("res://Scene/Core/NoteTemplate/Heart.tscn"),
 }
 
-#var column_node: Dictionary = {
-	#0: $"../Track/Column1/NotePool",
-	#1: $"../Track/Column2/NotePool",
-	#2: $"../Track/Column3/NotePool",
-	#3: $"../Track/Column4/NotePool",
-#}
 
 
-var note_template: Sprite2D = null
+var note_template: MeshInstance3D = null
 
 
 ## 加载音符
@@ -38,17 +25,33 @@ var note_template: Sprite2D = null
 ## time: 音符到达判定线的时间
 ## duration: 音符持续时间
 ## column: 音符所在列
-func load_note(type: String, time: float, duration: float, column: int):
+func load_note(type: String, time: int, duration: int, column: int, track: Node3D):
 	# 实例化音符模板
-	note_template = note_type[type].instance()
+	note_template = note_type[type].instantiate()
+	
 	# 设置音符时间
-	note_template.time = time
+	note_template.time = time # 此处的时间单位为毫秒
+	
 	# 设置音符持续时间
 	note_template.duration = duration
+	
 	# 设置音符所在列
 	note_template.column = column
+	note_template.position.x = column - 2.5
+	
+	note_template.position.z = 0.0 - (float(Global.start_duration) / 1000.0) * Global.note_speed
+	
+	if type == "hold":
+		var length_should_be: float = float(duration) / 1000.0 * Global.note_speed
+		var length_current_be: float = note_template.get_mesh().size.y
+		if length_current_be > 0.0:
+			note_template.scale.z = length_should_be / length_current_be
+			pass
+		note_template.position.z -= length_should_be / 2.0
+		pass
+	
 	# 获取对应的轨道节点
 	# 获取该轨道节点的 NotePool 节点
 	# 将音符添加到 NotePool 节点下
-	
+	track.get_node("Column" + str(column)).add_child(note_template)
 	pass
