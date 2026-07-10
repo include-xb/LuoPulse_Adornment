@@ -37,7 +37,7 @@ func load_note(type: String, time: int, duration: int, column: int, track: Node3
 	
 	# 设置音符所在列
 	note_template.column = column
-	note_template.position.x = column - 2.5
+	# note_template.position.x = column - 2.5
 	
 	note_template.position.z = 0.0 - (float(Global.start_duration) / 1000.0) * Global.note_speed
 	
@@ -53,5 +53,5 @@ func load_note(type: String, time: int, duration: int, column: int, track: Node3
 	# 获取对应的轨道节点
 	# 获取该轨道节点的 NotePool 节点
 	# 将音符添加到 NotePool 节点下
-	track.get_node("Column" + str(column)).add_child(note_template)
+	track.get_node("Column" + str(column) + "/NotePool").add_child(note_template)
 	pass

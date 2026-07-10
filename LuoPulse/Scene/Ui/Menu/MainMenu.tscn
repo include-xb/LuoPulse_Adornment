@@ -4,17 +4,15 @@
 [ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="2_558w5"]
 [ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_cwtva"]
 [ext_resource type="PackedScene" uid="uid://bifeqp1xtt7v3" path="res://Scene/Ui/Widget/UnderlineButton.tscn" id="3_ubtn"]
+[ext_resource type="Texture2D" uid="uid://bnx5llv6j70ya" path="res://Asset/Image/Godot-headimg.png" id="5_cwtva"]
+[ext_resource type="Shader" uid="uid://c3jlu0sqnjppg" path="res://Shader/circular_mask.gdshader" id="6_circle"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cwtva"]
 shader = ExtResource("2_cwtva")
 shader_parameter/gray_scale = 0.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a34cl"]
-bg_color = Color(0.952941, 0.933333, 0.866667, 1)
-corner_radius_top_left = 54
-corner_radius_top_right = 54
-corner_radius_bottom_right = 54
-corner_radius_bottom_left = 54
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_circle"]
+shader = ExtResource("6_circle")
 
 [node name="MainMenu" type="Control" unique_id=399667804]
 clip_contents = true
@@ -83,7 +81,7 @@ anchor_bottom = 1.0
 offset_top = -78.0
 offset_right = 175.0
 grow_vertical = 0
-theme_override_constants/margin_left = 60
+theme_override_constants/margin_left = 80
 theme_override_constants/margin_bottom = 40
 
 [node name="Version" type="Label" parent="MarginContainer" unique_id=163397353]
@@ -123,32 +121,62 @@ theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
 theme_override_font_sizes/font_size = 38
 text = "114514"
 
-[node name="Profile" type="VBoxContainer" parent="." unique_id=2014772999]
+[node name="Profile" type="MarginContainer" parent="." unique_id=796310722]
 layout_mode = 1
-offset_left = 63.0
-offset_top = 66.0
-offset_right = 200.0
-offset_bottom = 203.0
-theme_override_constants/separation = 4
+offset_right = 190.0
+offset_bottom = 276.0
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 60
 
-[node name="AvatarPanel" type="PanelContainer" parent="Profile" unique_id=1566971643]
+[node name="VBoxContainer" type="VBoxContainer" parent="Profile" unique_id=1058110005]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme_override_constants/separation = 12
+
+[node name="AvatarPanel" type="Panel" parent="Profile/VBoxContainer" unique_id=2091374540]
+clip_children = 1
 custom_minimum_size = Vector2(108, 108)
-clip_contents = true
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_a34cl")
+size_flags_horizontal = 0
+size_flags_vertical = 0
 
-[node name="Username" type="Label" parent="Profile" unique_id=584728887]
+[node name="Avatar" type="TextureRect" parent="Profile/VBoxContainer/AvatarPanel" unique_id=871979490]
+material = SubResource("ShaderMaterial_circle")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("5_cwtva")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="InfoPanel" type="VBoxContainer" parent="Profile/VBoxContainer" unique_id=1309611662]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Username" type="Label" parent="Profile/VBoxContainer/InfoPanel" unique_id=94460193]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
 text = "小小白"
+horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Level" type="Label" parent="Profile" unique_id=7557958]
+[node name="HBoxContainer" type="HBoxContainer" parent="Profile/VBoxContainer/InfoPanel" unique_id=1159166728]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.35, 0.35, 0.8)
-theme_override_font_sizes/font_size = 16
-text = "共鸣 #114"
+
+[node name="Level" type="Label" parent="Profile/VBoxContainer/InfoPanel/HBoxContainer" unique_id=363813794]
+layout_mode = 2
+text = "共鸣%"
+
+[node name="value" type="Label" parent="Profile/VBoxContainer/InfoPanel/HBoxContainer" unique_id=483545035]
+layout_mode = 2
+text = "114"
 
 [connection signal="pressed" from="MenuButtons/Sympathy" to="." method="_on_sympathy_pressed"]
 [connection signal="pressed" from="MenuButtons/Album" to="." method="_on_album_pressed"]

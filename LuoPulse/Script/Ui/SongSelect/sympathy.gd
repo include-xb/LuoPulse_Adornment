@@ -34,8 +34,10 @@ extends Control
 
 func _ready() -> void:
 	Global.game_mode = Global.GameMode.Sympathy
-	background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
-	cover.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	
+	# 页面背景色彩变化并非线性, 而是 U 形变化
+	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	# cover.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	
 	animation_player.play("unfold")
 	print(Global.sympath_song_path_list)

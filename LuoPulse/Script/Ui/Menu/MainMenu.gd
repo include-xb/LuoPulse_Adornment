@@ -19,7 +19,8 @@ extends Control
 
 
 func _ready() -> void:
-	background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	# 主页面背景色彩变化并非线性, 而是 U 形变化
+	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	pass
 
 

@@ -60,7 +60,13 @@ var column_list: Array = []
 # 是否正在加载
 var is_loading_note: bool = true
 
+# 音频是否开始播放
 var is_audio_start: bool = false
+
+# 音频总时长 (毫秒)
+var audio_length: int = 0
+
+var is_gaming: bool = true
 
 
 func _ready() -> void:
@@ -72,51 +78,75 @@ func _ready() -> void:
 	write_in_list()
 	# 启动计时器
 	start_time = Time.get_ticks_msec()
-	#audio_system.play()
 	pass
 
 
 @warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
-	current_time = Time.get_ticks_msec() - start_time
+	# 获取流逝时间
+	if is_gaming:
+		current_time = Time.get_ticks_msec() - start_time
+		pass
 	
+	# 加载音符
 	if is_audio_start == false && current_time >= 3000:
 		audio_system.play()
 		is_audio_start = true
 		pass
 	
 	if is_loading_note:
-		if current_note_index >= total_notes:
-			# 加载完毕
-			is_loading_note = false
-			return
-		
-		if current_time >= time_list[current_note_index]:
-			# 加载音符
-			load_note(current_note_index)
-			print("正在加载第 %d 个音符" % current_note_index)
-			# 检查接下来是否有相同时间的音符
-			for i in range(Global.COLUMN_NUM - 1):
-				# 获取下一个音符的索引
-				var next_note_index: int = current_note_index + 1
-				# 如果下一个音符索引超出范围，则退出循环
-				if next_note_index >= total_notes:
-					is_loading_note = false
-					break
-				# 如果下一个音符的时间与当前音符相同，则加载下一个音符
-				if time_list[current_note_index] == time_list[next_note_index]:
-					load_note(next_note_index)
-					print("正在加载第 %d 个音符" % current_note_index)
-					# 更新当前音符索引
-					current_note_index += 1
-					pass
-				pass
-			
-			# 更新当前音符索引
-			current_note_index += 1
-			pass
+		load_note_process()
+		## 当正在加载音符时, 代码不会向下执行
+		#return
+		pass
+	
+	# 背景色彩变化
+	var current_progress: float = float(current_time) / float(audio_length)
+	progress_bar.value = current_progress * 100
+	background.material.set_shader_parameter(
+		"gray_scale", 
+		(1.0 - current_progress) * 1.0 # 此处乘 1.0 是最终背景色彩恢复情况, 1.0 为最终色彩恢复至原图
+	)
+	
+	# 结束游戏
+	if current_time >= audio_length && is_gaming:
+		game_finished()
+		pass
+	
+	pass
+
+
+# 加载音符总过程
+func load_note_process() -> void:
+	if current_note_index >= total_notes:
+		# 加载完毕
+		is_loading_note = false
 		return
-		# 当正在加载音符时, 代码不会向下执行
+	
+	if current_time >= time_list[current_note_index]:
+		# 加载音符
+		load_note(current_note_index)
+		print("正在加载第 %d 个音符" % current_note_index)
+		# 检查接下来是否有相同时间的音符
+		for i in range(Global.COLUMN_NUM - 1):
+			# 获取下一个音符的索引
+			var next_note_index: int = current_note_index + 1
+			# 如果下一个音符索引超出范围，则退出循环
+			if next_note_index >= total_notes:
+				is_loading_note = false
+				break
+			# 如果下一个音符的时间与当前音符相同，则加载下一个音符
+			if time_list[current_note_index] == time_list[next_note_index]:
+				load_note(next_note_index)
+				print("正在加载第 %d 个音符" % current_note_index)
+				# 更新当前音符索引
+				current_note_index += 1
+				pass
+			pass
+		
+		# 更新当前音符索引
+		current_note_index += 1
+		pass
 	
 	pass
 
@@ -142,6 +172,7 @@ func load_list() -> void:
 	
 	background.texture = img
 	audio_system.stream = audio_stream
+	audio_length = int(audio_stream.get_length() * 1000)
 	chart = chart_raw.get("HitObjects")
 	# print(chart)
 	pass
@@ -166,7 +197,9 @@ func write_in_list() -> void:
 	
 	pass
 
+
 # 游戏结束
 func game_finished() -> void:
+	is_gaming = false
 	# 转到结算场景
 	pass

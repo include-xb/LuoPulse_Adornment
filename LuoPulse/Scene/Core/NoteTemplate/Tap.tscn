@@ -1,21 +1,21 @@
-[gd_scene format=3 uid="uid://dlod24c0w1wsi"]
+[gd_scene format=3 uid="uid://co5vpdhh35rbk"]
 
+[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note_edge.gdshader" id="1_r723p"]
 [ext_resource type="Script" uid="uid://bdc2ytkbescnv" path="res://Script/Core/NoteTemplate/Tap.gd" id="1_yt8n7"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yt8n7"]
-shading_mode = 0
-albedo_color = Color(0.4, 0.8, 1, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yt8n7"]
+render_priority = 0
+shader = ExtResource("1_r723p")
+shader_parameter/edge_color = Color(0, 0, 0, 0)
+shader_parameter/edge_width_y = 0.5
+shader_parameter/edge_width_x = 0.1
+shader_parameter/original_color = Color(0.4, 0.8, 1, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1lfxb"]
-transparency = 1
-albedo_color = Color(0.4, 0.8, 1, 1)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_r723p"]
-material = SubResource("StandardMaterial3D_1lfxb")
+[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
+material = SubResource("ShaderMaterial_yt8n7")
 size = Vector2(0.8, 0.2)
 
-[node name="Tap" type="MeshInstance3D" unique_id=961455817]
+[node name="Tap" type="MeshInstance3D" unique_id=912281445]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
-material_override = SubResource("StandardMaterial3D_yt8n7")
-mesh = SubResource("PlaneMesh_r723p")
+mesh = SubResource("PlaneMesh_s4y3q")
 script = ExtResource("1_yt8n7")

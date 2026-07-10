@@ -1,8 +1,41 @@
 [gd_scene format=3 uid="uid://cit22tbr0bvx8"]
 
 [ext_resource type="Script" uid="uid://bpujobp6ug4v5" path="res://Script/Core/InputProcesser.gd" id="1_ogl7y"]
+[ext_resource type="Shader" uid="uid://dtrackedge001" path="res://Shader/track_edge.gdshader" id="2_8ks2l"]
+[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note_edge.gdshader" id="3_bhst1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8ks2l"]
+render_priority = 0
+shader = ExtResource("2_8ks2l")
+shader_parameter/edge_color = Color(0, 0, 0, 0.078)
+shader_parameter/edge_width = 0.5
+shader_parameter/track_color = Color(0, 0, 0, 0.47)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
+material = SubResource("ShaderMaterial_8ks2l")
+size = Vector2(1, 22)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ogl7y"]
+render_priority = 0
+shader = ExtResource("3_bhst1")
+shader_parameter/edge_color = Color(0, 0, 0, 0)
+shader_parameter/edge_width_y = 0.5
+shader_parameter/edge_width_x = 0.5
+shader_parameter/original_color = Color(0, 0, 0, 0.39215687)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_in2dp"]
+material = SubResource("ShaderMaterial_ogl7y")
+size = Vector2(0.9, 0.2)
+center_offset = Vector3(0, 0.01, 0)
 
 [node name="Column" type="Node3D" unique_id=1704662228]
 script = ExtResource("1_ogl7y")
 
 [node name="NotePool" type="Node3D" parent="." unique_id=270649043]
+
+[node name="SingleTrack" type="MeshInstance3D" parent="." unique_id=890675141]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+mesh = SubResource("PlaneMesh_s4y3q")
+
+[node name="Judging" type="MeshInstance3D" parent="." unique_id=185629654]
+mesh = SubResource("PlaneMesh_in2dp")
