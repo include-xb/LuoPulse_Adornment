@@ -123,11 +123,11 @@ func _on_play_song() -> void:
 	Global.current_song_artist = song.get("producer", "")
 	Global.current_song_bpm = ""
 	Global.game_mode = Global.GameMode.Album
-	SceneManager.change_scene("res://Scene/Core/Gameplay.tscn")
+	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn")
 
 
 func _on_album_back() -> void:
-	SceneManager.change_scene("res://Scene/Ui/Menu/MainMenu.tscn")
+	$"..".back_to_previous_scene()
 
 
 func _on_song_back() -> void:

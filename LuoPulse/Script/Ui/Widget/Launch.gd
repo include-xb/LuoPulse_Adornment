@@ -24,6 +24,7 @@ func _ready() -> void:
 	_setup_animations()
 	load_sympathy_song()
 	_play_intro_sequence()
+	
 
 
 func _setup_animations() -> void:
@@ -89,7 +90,7 @@ func _play_intro_sequence() -> void:
 	await animation_player.animation_finished
 
 	# 通过 SceneManager 切换到主菜单（带淡入淡出效果）
-	SceneManager.change_scene("res://Scene/Ui/Menu/MainMenu.tscn")
+	$"..".start_scene_by_path("res://Scene/Ui/Menu/MainMenu.tscn")
 
 
 func load_config() -> void:

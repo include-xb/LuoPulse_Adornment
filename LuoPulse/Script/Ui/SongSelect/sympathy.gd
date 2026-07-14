@@ -106,7 +106,7 @@ func _on_back_pressed() -> void:
 	audio_stream_player.stop()
 	Global.play_ui_click_audio()
 	Global.game_mode = Global.GameMode.None
-	SceneManager.change_scene("res://Scene/Ui/Menu/MainMenu.tscn")
+	$"..".back_to_previous_scene()
 	pass # Replace with function body.
 
 
@@ -143,5 +143,5 @@ func _on_start_pressed() -> void:
 	audio_stream_player.stop()
 	Global.play_ui_click_audio()
 	# SceneManager.change_scene("res://Scene/Core/Gameplay.tscn")
-	SceneManager.change_scene_with_img("res://Scene/Core/Gameplay.tscn", cover.texture)
+	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
 	pass # Replace with function body.

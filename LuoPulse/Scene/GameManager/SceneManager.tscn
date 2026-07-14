@@ -2,18 +2,12 @@
 
 [ext_resource type="Script" uid="uid://bj84hr26lx2bj" path="res://Script/GameManager/SceneManager.gd" id="1_pibfg"]
 
-[node name="SceneManager" type="CanvasLayer" unique_id=685891414]
+[node name="SceneManager" type="Node" unique_id=547550823]
 script = ExtResource("1_pibfg")
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1262607778]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=623813923]
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=835133472]
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=835133472]
 visible = false
 self_modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
@@ -22,3 +16,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer" unique_id=1262607778]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

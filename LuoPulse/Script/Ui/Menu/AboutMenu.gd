@@ -5,8 +5,8 @@ extends Control
 
 
 func _on_back_pressed() -> void:
-	SceneManager.change_scene("res://Scene/Ui/Menu/MainMenu.tscn")
+	$"..".back_to_previous_scene()
 
 
 func _on_thanks_pressed() -> void:
-	SceneManager.change_scene("res://Scene/Ui/Menu/ThanksMenu.tscn")
+	$"..".start_scene_by_path("res://Scene/Ui/Menu/ThanksMenu.tscn")

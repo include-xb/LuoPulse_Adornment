@@ -27,9 +27,9 @@ func _ready() -> void:
 
 func _on_back_pressed() -> void:
 	if Global.notebook_return_scene == "results":
-		SceneManager.change_scene("res://Scene/Ui/SongSelect/Sympathy.tscn")
+		$"..".start_scene_by_path("res://Scene/Ui/SongSelect/Sympathy.tscn")
 	else:
-		SceneManager.change_scene("res://Scene/Ui/Menu/MainMenu.tscn")
+		$"..".back_to_previous_scene()
 	Global.notebook_return_scene = "home"
 
 

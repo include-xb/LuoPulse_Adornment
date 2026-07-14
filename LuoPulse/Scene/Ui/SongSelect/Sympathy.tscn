@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cyby1mdapaw3i"]
 
-[ext_resource type="Script" uid="uid://dhs52o7d8c1qx" path="res://Script/Ui/SongSelect/Sympathy.gd" id="1_sd8b3"]
+[ext_resource type="Script" uid="uid://dhs52o7d8c1qx" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
 [ext_resource type="Texture2D" uid="uid://ckkflwkuu1poh" path="res://Asset/Image/最初日.png" id="2_8by2n"]
 [ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_qx1yg"]
 

@@ -16,15 +16,14 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="LuoPulse_from_git"
 config/tags=PackedStringArray("初始化后的lp仓库")
-run/main_scene="uid://dk6axgnha1fv5"
+run/main_scene="uid://cwgd5663wpeft"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 Global="*res://Scene/GameManager/Global.tscn"
-SceneManager="*res://Scene/GameManager/SceneManager.tscn"
-MCPRuntime="*uid://732g0yf236a7"
+McpRuntime="*uid://732g0yf236a7"
 
 [display]
 
