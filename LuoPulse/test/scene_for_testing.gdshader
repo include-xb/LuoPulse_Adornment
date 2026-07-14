@@ -1,24 +1,55 @@
 shader_type canvas_item;
 
 // ============ 可调参数 ============
-// 纸色（泛黄）
+// 纸色（泛黄）[mmm]
 uniform vec3 paper_color : source_color = vec3(0.95, 0.88, 0.78);
 
 // 边缘淡出范围（距离中心的归一化半径，0~1）
-uniform float fade_start : hint_range(0.0, 0.7) = 0.3;
+uniform float fade_start : hint_range(0.0, 1.0) = 0.3;
 uniform float fade_end   : hint_range(0.0, 1.0) = 0.9;
 
 // 彩铅颜色调整
 uniform float saturation : hint_range(0.0, 1.0) = 1.0;   // 颜色饱和度（越低越灰）
 uniform float brightness : hint_range(0.5, 1.5) = 0.9;   // 整体亮度
 
+uniform float gray_scale   : hint_range(0.0, 1.0) = 0.0;   // 整体灰度
+
 // 铅笔线条控制
 uniform float line_strength : hint_range(0.0, 1.0) = 0.3; // 线条黑度
-uniform float edge_threshold : hint_range(0.0, 0.3) = 0.05; // 边缘敏感度（越小线条越多）
+uniform float edge_threshold : hint_range(0.0, 1.0) = 0.05; // 边缘敏感度（越小线条越多）
 
 // 纸张纹理
 uniform float texture_strength : hint_range(0.0, 0.15) = 0.06;
 uniform float texture_scale    : hint_range(10.0, 500.0) = 180.0;
+
+
+
+// BPM
+uniform float bpm = 120.0;
+
+// 当前音量 0~1
+uniform float audio_volume : hint_range(0.0,1.0)=0.0;
+
+
+// 节奏影响强度
+uniform float bpm_effect : hint_range(0.0,1.0)=0.35;
+
+
+// 音量影响强度
+uniform float volume_effect : hint_range(0.0,1.0)=0.5;
+
+
+// 动态笔触速度
+uniform float pencil_speed : hint_range(0.0,5.0)=1.0;
+
+
+// 暗角
+uniform float vignette_strength 
+    : hint_range(0.0,1.0)=0.35;
+
+
+
+
 
 // ============ 噪声函数（用于纸张纹理） ============
 float hash(vec2 p) {
@@ -102,7 +133,42 @@ void fragment() {
     // 用阈值控制线条粗细
     float line_mask = smoothstep(edge_threshold, edge_threshold + 0.15, edge);
     // 线条黑色混合系数（边缘强 => 黑色重）
-    float line_mix = line_strength * line_mask;
+    // float line_mix = line_strength * line_mask;
+	float beat =
+    sin(
+        TIME *
+        bpm/60.0 *
+        6.283
+    );
+
+
+// 0~1
+beat =
+    beat*0.5+0.5;
+
+
+float music_line_boost =
+    1.0
+    +
+    beat *
+    bpm_effect
+    *
+    audio_volume;
+
+
+float line_mix =
+    line_strength
+    *
+    line_mask
+    *
+    music_line_boost;
+	
+	
+	
+	
+	
+	
+	
     // 叠加黑色线条（边缘变黑）
     color = mix(color, vec3(0.0), line_mix);
 
@@ -114,11 +180,117 @@ void fragment() {
 
     // ---------- 纸张纹理（叠加在最终颜色上） ----------
     vec2 tex_uv = uv * texture_scale;
-    float paper_noise = fbm(tex_uv);
+    // float paper_noise = fbm(tex_uv);
+	// ---------- 动态铅笔纹理 ----------
+
+// BPM产生周期运动
+float beat_time =
+    TIME *
+    (bpm / 60.0);
+
+
+// 音量增强扰动
+float dynamic_strength =
+    1.0 +
+    audio_volume *
+    volume_effect;
+
+
+// 随时间移动
+vec2 moving_uv =
+    tex_uv +
+    vec2(
+        beat_time * 0.15,
+        sin(beat_time)*0.05
+    )
+    *
+    pencil_speed;
+
+
+float paper_noise =
+    fbm(
+        moving_uv *
+        dynamic_strength
+    );
+	
+	
+	
+	
+	
     // 纹理强度随边缘淡出而增强（边缘纸纹更明显），但也可均匀
-    float texture_factor = texture_strength * (0.5 + 0.5 * t); // 边缘更强
+    // float texture_factor = texture_strength * (0.5 + 0.5 * t); // 边缘更强
+	float music_texture_boost =
+    1.0
+    +
+    audio_volume *
+    volume_effect;
+
+
+// BPM跳动
+float beat_wave =
+    sin(
+        TIME *
+        bpm/60.0 *
+        6.283
+    )
+    *
+    0.5
+    +
+    0.5;
+
+
+float texture_factor =
+    texture_strength
+    *
+    (0.5+0.5*t)
+    *
+    music_texture_boost
+    *
+    mix(
+        1.0,
+        1.2,
+        beat_wave*bpm_effect
+    );
+	
+	
+	
+	
+	
+	
+	
     float texture_offset = (paper_noise - 0.5) * texture_factor * 2.0; // 亮度扰动
     final_color += vec3(texture_offset);
+	
+	// ---------- Vignette 暗角 ----------
+
+vec2 vignette_uv =
+    uv -
+    vec2(0.5);
+
+
+float vignette_dist =
+    length(vignette_uv);
+
+
+float vignette =
+    smoothstep(
+        0.35,
+        0.75,
+        vignette_dist
+    );
+
+
+final_color *=
+    1.0 -
+    vignette *
+    vignette_strength;
+	
+	
+	
+	
+
+    //---------- 饱和度 ----------
+    final_color = mix(vec3(dot(final_color, vec3(0.299, 0.587, 0.114))), final_color, (1.0 - gray_scale));
 
     // 输出（保留原图透明度）
     COLOR = vec4(final_color, img.a);

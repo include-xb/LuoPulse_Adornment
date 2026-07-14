@@ -8,13 +8,20 @@
 shader = ExtResource("1_xn56q")
 shader_parameter/paper_color = Color(0.95, 0.88, 0.78, 1)
 shader_parameter/fade_start = 0.3
-shader_parameter/fade_end = 0.89999997615814
+shader_parameter/fade_end = 1.0
 shader_parameter/saturation = 1.0
 shader_parameter/brightness = 0.9
+shader_parameter/gray_scale = 0.0
 shader_parameter/line_strength = 0.3
 shader_parameter/edge_threshold = 0.05
-shader_parameter/texture_strength = 0.06
+shader_parameter/texture_strength = 0.1390000066025
 shader_parameter/texture_scale = 180.0
+shader_parameter/bpm = 120.0
+shader_parameter/audio_volume = 0.1750000083125
+shader_parameter/bpm_effect = 0.6400000304
+shader_parameter/volume_effect = 0.918000043605
+shader_parameter/pencil_speed = 4.9150002334625
+shader_parameter/vignette_strength = 1.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_h363u"]
 shader = ExtResource("1_xn56q")
@@ -23,10 +30,17 @@ shader_parameter/fade_start = 0.10000000475
 shader_parameter/fade_end = 1.0
 shader_parameter/saturation = 0.70000003325
 shader_parameter/brightness = 1.00000002375
+shader_parameter/gray_scale = 0.0
 shader_parameter/line_strength = 0.3
 shader_parameter/edge_threshold = 0.05
 shader_parameter/texture_strength = 0.06
 shader_parameter/texture_scale = 180.0
+shader_parameter/bpm = 120.0
+shader_parameter/audio_volume = 0.0
+shader_parameter/bpm_effect = 0.35
+shader_parameter/volume_effect = 0.5
+shader_parameter/pencil_speed = 1.0
+shader_parameter/vignette_strength = 0.35
 
 [node name="SceneForTesting" type="Control" unique_id=1162820125]
 clip_contents = true

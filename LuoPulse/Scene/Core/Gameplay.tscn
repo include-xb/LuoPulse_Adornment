@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://4d8t7kcp1p3i" path="res://Script/Core/NoteLoader.gd" id="2_ovtvy"]
 [ext_resource type="PackedScene" uid="uid://cit22tbr0bvx8" path="res://Scene/Core/Column.tscn" id="3_21dkn"]
 [ext_resource type="Theme" uid="uid://kb7wugiy2jme" path="res://Theme/Genrial.tres" id="3_i27d6"]
+[ext_resource type="Shader" uid="uid://d1dnw1f0qxiy" path="res://Shader/dark_manager.gdshader" id="5_j17h8"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
 transparency = 1
@@ -19,7 +20,20 @@ size = Vector2(4, 22)
 shader = ExtResource("2_j17h8")
 shader_parameter/gray_scale = 0.800000038
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_uegkn"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fdpuf"]
+shader = ExtResource("5_j17h8")
+shader_parameter/paper_color = Color(0.012061696, 0.01141428, 0.010481979, 1)
+shader_parameter/fade_start = 0.800000038
+shader_parameter/fade_end = 1.0
+shader_parameter/saturation = 1.0
+shader_parameter/brightness = 1.00000002375
+shader_parameter/gray_scale = 1.0
+shader_parameter/line_strength = 0.350000016625
+shader_parameter/edge_threshold = 0.800000038
+shader_parameter/texture_strength = 0.06
+shader_parameter/texture_scale = 180.0
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_l7374"]
 viewport_path = NodePath("SubViewport")
 
 [node name="Gameplay" type="Node2D" unique_id=2106804085 groups=["JudgeArea"]]
@@ -76,6 +90,7 @@ grow_vertical = 2
 texture = ExtResource("2_fdpuf")
 
 [node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="UI" unique_id=944301310]
+material = SubResource("ShaderMaterial_fdpuf")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -99,7 +114,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_uegkn")
+texture = SubResource("ViewportTexture_l7374")
 expand_mode = 3
 
 [node name="NoteLoader" type="Node" parent="." unique_id=380954061]

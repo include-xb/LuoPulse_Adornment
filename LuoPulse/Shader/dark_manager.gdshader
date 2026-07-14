@@ -5,7 +5,7 @@ shader_type canvas_item;
 uniform vec3 paper_color : source_color = vec3(0.95, 0.88, 0.78);
 
 // 边缘淡出范围（距离中心的归一化半径，0~1）
-uniform float fade_start : hint_range(0.0, 0.7) = 0.3;
+uniform float fade_start : hint_range(0.0, 1.0) = 0.3;
 uniform float fade_end   : hint_range(0.0, 1.0) = 0.9;
 
 // 彩铅颜色调整
@@ -16,7 +16,7 @@ uniform float gray_scale   : hint_range(0.0, 1.0) = 0.0;   // 整体灰度
 
 // 铅笔线条控制
 uniform float line_strength : hint_range(0.0, 1.0) = 0.3; // 线条黑度
-uniform float edge_threshold : hint_range(0.0, 0.3) = 0.05; // 边缘敏感度（越小线条越多）
+uniform float edge_threshold : hint_range(0.0, 1.0) = 0.05; // 边缘敏感度（越小线条越多）
 
 // 纸张纹理
 uniform float texture_strength : hint_range(0.0, 0.15) = 0.06;

@@ -91,6 +91,9 @@ func _process(delta: float) -> void:
 	# 加载音符
 	if is_audio_start == false && current_time >= 3000:
 		audio_system.play()
+		if video_stream_player.stream != null: 
+			video_stream_player.play()
+			pass
 		is_audio_start = true
 		pass
 	
@@ -103,10 +106,15 @@ func _process(delta: float) -> void:
 	# 背景色彩变化
 	var current_progress: float = float(current_time) / float(audio_length)
 	progress_bar.value = current_progress * 100
+	video_stream_player.material.set_shader_parameter(
+		"gray_scale", 
+		(1.0 - current_progress) * 0.6 # 此处乘 0.6 是最终背景色彩恢复情况, 1.0 为最终色彩恢复至原图
+	)
 	background.material.set_shader_parameter(
 		"gray_scale", 
-		(1.0 - current_progress) * 1.0 # 此处乘 1.0 是最终背景色彩恢复情况, 1.0 为最终色彩恢复至原图
+		(1.0 - current_progress) * 0.6 # 此处乘 0.6 是最终背景色彩恢复情况, 1.0 为最终色彩恢复至原图
 	)
+	print(video_stream_player.material.get_shader_parameter("gray_scale"))
 	
 	# 结束游戏
 	if current_time >= audio_length && is_gaming:
@@ -169,11 +177,13 @@ func load_list() -> void:
 	var img: ImageTexture = Global._read_cover_from_lpz(path)
 	var audio_stream: AudioStream = Global._read_audio_from_lpz(path)
 	var chart_raw: Dictionary = Global._read_chart_from_lpz(path)
+	var video_stream: VideoStream = Global._read_video_from_lpz(path)
 	
 	background.texture = img
 	audio_system.stream = audio_stream
 	audio_length = int(audio_stream.get_length() * 1000)
 	chart = chart_raw.get("HitObjects")
+	video_stream_player.stream = video_stream
 	# print(chart)
 	pass
 

@@ -253,6 +253,45 @@ func _read_chart_from_lpz(lpz_path: String) -> Dictionary:
 	return data
 
 
+## 从 .lpz 文件中读取 video.ogv
+func _read_video_from_lpz(lpz_path: String) -> VideoStream:
+	var zip := ZIPReader.new()
+	var err := zip.open(lpz_path)
+	if err != OK:
+		push_error("无法打开 .lpz 文件: %s" % lpz_path)
+		return null
+
+	var video_path := ""
+	for f in zip.get_files():
+		if f.get_file() == "video.ogv":
+			video_path = f
+			break
+
+	if video_path == "":
+		zip.close()
+		return null
+
+	var video_bytes := zip.read_file(video_path)
+	zip.close()
+
+	# VideoStreamTheora 没有 load_from_buffer 方法，需要先写入临时文件再加载
+	var temp_dir := OS.get_user_data_dir().path_join("temp")
+	if not DirAccess.dir_exists_absolute(temp_dir):
+		DirAccess.make_dir_recursive_absolute(temp_dir)
+
+	var temp_path := temp_dir.path_join("_video_temp.ogv")
+	var file := FileAccess.open(temp_path, FileAccess.WRITE)
+	if file == null:
+		push_error("无法创建临时视频文件: %s" % temp_path)
+		return null
+	file.store_buffer(video_bytes)
+	file.close()
+
+	var video_stream := VideoStreamTheora.new()
+	video_stream.file = temp_path
+	return video_stream
+
+
 
 func display_notice(info: String) -> void:
 	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
