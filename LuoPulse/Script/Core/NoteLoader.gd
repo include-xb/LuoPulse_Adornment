@@ -25,9 +25,12 @@ var note_template: MeshInstance3D = null
 ## time: 音符到达判定线的时间
 ## duration: 音符持续时间
 ## column: 音符所在列
-func load_note(type: String, time: int, duration: int, column: int, track: Node3D):
+func load_note(type: String, time: int, duration: int, column: int, index: int, track: Node3D):
 	# 实例化音符模板
 	note_template = note_type[type].instantiate()
+
+	# 此处的 index 为音符在轨道上的索引，从 0 开始
+	note_template.index = index
 	
 	# 设置音符时间
 	note_template.time = time # 此处的时间单位为毫秒
