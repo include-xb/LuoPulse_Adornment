@@ -62,18 +62,19 @@ mesh = SubResource("PlaneMesh_s4y3q")
 
 [node name="Column1" parent="SubViewport/Node3D/Track" unique_id=1829621600 instance=ExtResource("3_21dkn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
+column = 1
 
 [node name="Column2" parent="SubViewport/Node3D/Track" unique_id=792229827 instance=ExtResource("3_21dkn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
-KEY = "F"
+column = 2
 
 [node name="Column3" parent="SubViewport/Node3D/Track" unique_id=1047817573 instance=ExtResource("3_21dkn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
-KEY = "J"
+column = 3
 
 [node name="Column4" parent="SubViewport/Node3D/Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
-KEY = "K"
+column = 4
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 3

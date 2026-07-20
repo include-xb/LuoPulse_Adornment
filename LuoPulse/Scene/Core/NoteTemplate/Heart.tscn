@@ -1,3 +1,21 @@
 [gd_scene format=3 uid="uid://ciobpeh52btrk"]
 
-[node name="Heart" type="Sprite2D"]
+[ext_resource type="Shader" path="res://Shader/note_edge.gdshader" id="1_r723p"]
+[ext_resource type="Script" path="res://Script/Core/NoteTemplate/Heart.gd" id="1_script"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_heart"]
+render_priority = 0
+shader = ExtResource("1_r723p")
+shader_parameter/edge_color = Color(0, 0, 0, 0)
+shader_parameter/edge_width_y = 0.5
+shader_parameter/edge_width_x = 0.1
+shader_parameter/original_color = Color(0.44, 0.06, 0.06, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
+material = SubResource("ShaderMaterial_heart")
+size = Vector2(0.8, 0.2)
+
+[node name="Heart" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("PlaneMesh_s4y3q")
+script = ExtResource("1_script")
