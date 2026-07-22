@@ -40,14 +40,17 @@ const START_JUDGE_TIME: int = -240
 # 结束判定时间 (单位: 毫秒)
 const END_JUDGE_TIME: int = 240
 
-# 共鸣判定区间: [-60, 60]
-const SYMPATHY_TIME: int = 60
+# 和一 (Harmonious) 判定区间: [-60, 60]
+const HARMONIOUS_TIME: int = 60
 
-# 同步判定区间: [-120, -60) and (60, 120]
-const SYNCED_TIME: int = 120
+# 共鸣 (Sympathetic) 判定区间: [-120, -60) and (60, 120]
+const SYMPATHETIC_TIME: int = 120
 
-# 连接判定区间: [-180, -120) and (120, 180]
-const CONNECTED_TIME: int = 180
+# 觉醒 (Aware) 判定区间: [-180, -120) and (120, 180]
+const AWARE_TIME: int = 180
+
+# 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
+const LOST_TIME: int = 240
 
 
 
@@ -97,11 +100,17 @@ var sympathetic: int = 0
 var aware: int = 0
 var lost: int = 0
 
+# 已判定音符总数 (用于计算准度)
+var total_judged: int = 0
+
 # 连击数
 var combo: int = 0
 
 # 准度
 var accuracy: float = 0.0
+
+# 当前主时间 (由 Gameplay 每帧更新, 基于音频播放位置)
+var master_time: float = -3000.0
 
 # 处在判定区间中的音符
 var judging_area: Array = [ ]

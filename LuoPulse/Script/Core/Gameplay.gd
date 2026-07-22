@@ -25,22 +25,23 @@ extends Node2D
 
 @onready var video_stream_player: VideoStreamPlayer = $UI/VideoStreamPlayer
 
+@onready var _subviewport: SubViewport = $SubViewport
+
+@onready var _camera: Camera3D = $SubViewport/Node3D/Camera3D
+
 
 
 # 解析完成的谱面数据
 var chart: Array = [ ]
 
-# 当前时间
-var current_time: int = 0
+# 主时间 (ms), 基于音频播放位置, 是判定和音符定位的唯一时钟源
+var master_time: float = -3000.0
 
-# 开始计时的时间, 与 Time.get_ticks_msec() 相减得到 current_time
+# 开始计时的时间, 与 Time.get_ticks_msec() 相减得到运行时间
 var start_time: int = 0
 
 # 总音符数
 var total_notes: int = 0
-
-# 当前音符
-var current_note: Sprite2D = null
 
 # 当前加载的音符索引
 var current_note_index: int = 0
@@ -74,6 +75,16 @@ var lost: int = 0
 
 # 是否正在游戏
 var is_gaming: bool = true
+
+# 各列的 InputProcesser 引用
+var input_processers: Array = []
+
+# 触屏状态追踪 (touch_index -> column)
+var active_touches: Dictionary = {}
+
+# 轨道在屏幕空间的 X 范围 (通过摄像机投影计算)
+var _track_screen_min: float = 0.0
+var _track_screen_max: float = 0.0
 
 # 用于测试
 var default_chart: Array = [
@@ -341,8 +352,12 @@ var is_test: bool = false
 
 
 func _ready() -> void:
-	# 连接音频播放器的 finished 信号: 播放完毕即游戏结束
+	_calculate_track_screen_bounds()
+
 	audio_system.connect("finished", game_finished)
+
+	_collect_input_processers()
+
 	if is_test == false:
 		# 从当前选择的曲包中加载谱面数据
 		load_list()
@@ -353,13 +368,52 @@ func _ready() -> void:
 		test()
 		write_in_list()
 		pass
-	# 启动计时器
+
+	# 记录程序起始时间 (仅用于预加载段的计时)
 	start_time = Time.get_ticks_msec()
 	pass
 
 
-# 测试画面崩溃
-# 为啥会崩溃呐 <- 全局变量当成了函数内的局部变量 INFO: 已解决
+func _collect_input_processers() -> void:
+	var track: Node3D = $SubViewport/Node3D/Track
+	for i in range(Global.COLUMN_NUM):
+		var column_node: Node3D = track.get_node("Column" + str(i + 1))
+		input_processers.append(column_node)
+		pass
+	pass
+
+
+func _calculate_track_screen_bounds() -> void:
+	var col_count: int = Global.COLUMN_NUM
+	var half_width: float = float(col_count) / 2.0
+
+	var left_point: Vector3 = Vector3(-half_width, 0.0, 0.0)
+	var right_point: Vector3 = Vector3(half_width, 0.0, 0.0)
+
+	var left_vp: Vector2 = _camera.unproject_position(left_point)
+	var right_vp: Vector2 = _camera.unproject_position(right_point)
+
+	if is_inf(left_vp.x) or is_inf(right_vp.x):
+		_track_screen_min = 0.0
+		_track_screen_max = get_viewport().get_visible_rect().size.x
+		return
+
+	var vp_w: float = float(_subviewport.size.x)
+	var screen_w: float = get_viewport().get_visible_rect().size.x
+	var scale: float = screen_w / vp_w
+
+	_track_screen_min = left_vp.x * scale
+	_track_screen_max = right_vp.x * scale
+	pass
+
+
+func get_input_processor(column: int) -> Node3D:
+	if column >= 0 and column < input_processers.size():
+		return input_processers[column]
+	return null
+
+
+# 测试画面
 func test() -> void:
 	var audio_stream: AudioStream = audio_system.stream
 	audio_length = int(audio_stream.get_length() * 1000)
@@ -369,82 +423,160 @@ func test() -> void:
 	pass
 
 
-@warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
-	# 获取流逝时间
-	if is_gaming:
-		current_time = Time.get_ticks_msec() - start_time
-		pass
-	
-	# 加载音符
-	if is_audio_start == false && current_time >= 3000:
+	_update_master_time()
+
+	if not is_gaming:
+		return
+
+	# 音频启动
+	if is_audio_start == false && master_time >= 0.0:
 		audio_system.play()
-		if video_stream_player.stream != null: 
+		if video_stream_player.stream != null:
 			video_stream_player.play()
 			pass
 		is_audio_start = true
 		pass
-	
+
+	# 加载音符
 	if is_loading_note:
 		load_note_process()
-		## 当正在加载音符时, 代码不会向下执行
-		#return
 		pass
-	
+
 	# 背景色彩变化
-	var current_progress: float = float(current_time) / float(audio_length)
-	progress_bar.value = current_progress * 100
+	var current_progress: float = clampf(master_time / float(audio_length), 0.0, 1.0)
+	progress_bar.value = current_progress * 100.0
 	video_stream_player.material.set_shader_parameter(
-		"gray_scale", 
-		(1.0 - current_progress) * 0.6 # 此处乘 0.6 是最终背景色彩恢复情况, 1.0 为最终色彩恢复至原图
+		"gray_scale",
+		(1.0 - current_progress) * 0.6
 	)
 	background.material.set_shader_parameter(
-		"gray_scale", 
-		(1.0 - current_progress) * 0.6 # 此处乘 0.6 是最终背景色彩恢复情况, 1.0 为最终色彩恢复至原图
+		"gray_scale",
+		(1.0 - current_progress) * 0.6
 	)
-	# print("进度: " + str(current_progress))
-	# print("video 灰度" + str(video_stream_player.material.get_shader_parameter("gray_scale")))
-	
+
 	# 结束游戏
-	if current_time >= audio_length && is_gaming:
+	if master_time >= audio_length && is_gaming:
 		game_finished()
 		pass
-	
+
+	pass
+
+
+func _update_master_time() -> void:
+	master_time = _compute_master_time()
+	Global.master_time = master_time
+	pass
+
+
+func _compute_master_time() -> float:
+	if is_audio_start:
+		return audio_system.get_playback_position() * 1000.0 + float(Global.chart_offset)
+	return float(Time.get_ticks_msec() - start_time) - float(Global.start_duration)
+
+
+func _input(event: InputEvent) -> void:
+	if not is_gaming:
+		return
+
+	# 获取当前时刻的主时间 (解决 _input 比 _process 先执行的延迟问题)
+	var input_time: float = _compute_master_time()
+
+	if event is InputEventScreenTouch:
+		var col: int = _get_column_from_x(event.position.x)
+		if col >= 0:
+			if event.pressed:
+				active_touches[event.index] = col
+				_on_column_touch_pressed(col, input_time)
+				pass
+			else:
+				if active_touches.has(event.index):
+					var released_col: int = active_touches[event.index]
+					active_touches.erase(event.index)
+					_on_column_touch_released(released_col, input_time)
+			pass
+		pass
+
+	# 桌面键盘输入 (开发调试用)
+	if event is InputEventKey and event.pressed and not event.echo:
+		var col: int = _get_column_from_key(event)
+		if col >= 0:
+			_on_column_touch_pressed(col, input_time)
+			pass
+		pass
+
+	if event is InputEventKey and not event.echo and not event.pressed:
+		var col: int = _get_column_from_key(event)
+		if col >= 0:
+			_on_column_touch_released(col, input_time)
+			pass
+		pass
+
+	pass
+
+
+func _get_column_from_x(x: float) -> int:
+	var col_count: int = Global.COLUMN_NUM
+	var range: float = _track_screen_max - _track_screen_min
+	if range <= 0.0:
+		range = get_viewport().get_visible_rect().size.x
+	var normalized: float = (x - _track_screen_min) / range
+	var col: int = int(normalized * float(col_count))
+	if col >= 0 and col < col_count:
+		return col
+	return -1
+
+
+func _get_column_from_key(event: InputEventKey) -> int:
+	var key_map: Dictionary = {
+		KEY_D: 0,
+		KEY_F: 1,
+		KEY_J: 2,
+		KEY_K: 3,
+	}
+	if key_map.has(event.keycode):
+		return key_map[event.keycode]
+	return -1
+
+
+func _on_column_touch_pressed(column: int, input_time: float) -> void:
+	var processor: Node3D = get_input_processor(column)
+	if processor and processor.has_method("on_touch_pressed"):
+		processor.on_touch_pressed(input_time)
+		pass
+	pass
+
+
+func _on_column_touch_released(column: int, input_time: float) -> void:
+	var processor: Node3D = get_input_processor(column)
+	if processor and processor.has_method("on_touch_released"):
+		processor.on_touch_released(input_time)
+		pass
 	pass
 
 
 # 加载音符总过程
 func load_note_process() -> void:
 	if current_note_index >= total_notes:
-		# 加载完毕
 		is_loading_note = false
 		return
-	
-	if current_time >= time_list[current_note_index]:
-		# 加载音符
+
+	var note_time: float = float(time_list[current_note_index])
+	var load_deadline: float = note_time - float(Global.start_duration)
+
+	if master_time < load_deadline:
+		return
+
+	var batch_time: float = note_time
+	while current_note_index < total_notes and float(time_list[current_note_index]) == batch_time:
 		load_note(current_note_index, current_note_index)
 		print("正在加载第 %d 个音符" % current_note_index)
-		# 检查接下来是否有相同时间的音符
-		for i in range(Global.COLUMN_NUM - 1):
-			# 获取下一个音符的索引
-			var next_note_index: int = current_note_index + 1
-			# 如果下一个音符索引超出范围，则退出循环
-			if next_note_index >= total_notes:
-				is_loading_note = false
-				break
-			# 如果下一个音符的时间与当前音符相同，则加载下一个音符
-			if time_list[current_note_index] == time_list[next_note_index]:
-				load_note(next_note_index, current_note_index + 1)
-				print("正在加载第 %d 个音符" % (current_note_index + 1))
-				# 更新当前音符索引
-				current_note_index += 1
-				pass
-			pass
-		
-		# 更新当前音符索引
 		current_note_index += 1
 		pass
-	
+
+	if current_note_index >= total_notes:
+		is_loading_note = false
+		pass
 	pass
 
 
@@ -457,6 +589,7 @@ func load_note(note_index: int, index: int) -> void:
 		column_list[note_index],
 		index,
 		$SubViewport/Node3D/Track,
+		self,
 	)
 	pass
 
@@ -468,33 +601,30 @@ func load_list() -> void:
 	var audio_stream: AudioStream = Global._read_audio_from_lpz(path)
 	var chart_raw: Dictionary = Global._read_chart_from_lpz(path)
 	var video_stream: VideoStream = Global._read_video_from_lpz(path)
-	
+
 	background.texture = img
 	audio_system.stream = audio_stream
 	audio_length = int(audio_stream.get_length() * 1000)
 	chart = chart_raw.get("HitObjects")
 	video_stream_player.stream = video_stream
-	# print(chart)
 	pass
 
 
 # 将谱面数据写入到各数组中
 func write_in_list() -> void:
-	# INFO: 没有 duration 元素则默认为 0
-	
 	total_notes = len(chart)
 	for i: Dictionary in chart:
 		var time: int = i.get("time")
 		var type: String = i.get("type")
 		var column: int = i.get("column")
-		var duration: int = i.get("duration", 0.0)
-		
+		var duration: int = i.get("duration", 0)
+
 		time_list.append(time)
 		type_list.append(type)
 		column_list.append(column)
 		duration_list.append(duration)
 		pass
-	
+
 	pass
 
 
