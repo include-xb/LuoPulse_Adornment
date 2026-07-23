@@ -71,21 +71,30 @@ func judge(master_time: float) -> void:
 	var time_offset: int = int(master_time - float(time))
 	var abs_offset: int = abs(time_offset)
 
+	var level: String = "lost"
+
 	if abs_offset <= Global.HARMONIOUS_TIME:
 		Global.harmonious += 1
 		a = 1.0
+		level = "harmonious"
 		pass
 	elif abs_offset <= Global.SYMPATHETIC_TIME:
 		Global.sympathetic += 1
 		a = 0.7
+		level = "sympathetic"
 		pass
 	elif abs_offset <= Global.AWARE_TIME:
 		Global.aware += 1
 		a = 0.5
+		level = "aware"
 		pass
 	else:
 		Global.lost += 1
 		a = 0.0
+		pass
+
+	if gameplay and gameplay.has_method("show_judgment_feedback"):
+		gameplay.show_judgment_feedback(time_offset, level, column)
 		pass
 
 	_finish_judge()
@@ -103,7 +112,13 @@ func _lose() -> void:
 		return
 	is_removed = true
 	Global.lost += 1
+	Global.combo = 0
 	a = 0.0
+
+	if gameplay and gameplay.has_method("show_judgment_feedback"):
+		gameplay.show_judgment_feedback(0, "lost", column)
+		pass
+
 	_update_accuracy()
 	_remove_from_judging()
 	explode()
@@ -113,6 +128,7 @@ func _lose() -> void:
 func _finish_judge() -> void:
 	is_judged = true
 	is_removed = true
+	Global.combo += 1
 	_update_accuracy()
 	_remove_from_judging()
 	explode()
@@ -123,7 +139,6 @@ func _update_accuracy() -> void:
 	Global.total_judged += 1
 	var n: int = Global.total_judged
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
-	Global.combo += 1
 	pass
 
 

@@ -155,7 +155,24 @@ var note_flow_speed: int = 10
 
 
 
-# 计算当前主线进度 -> 得到当前灰度
+# 最后一场游戏的结果数据
+var gameplay_result: Dictionary = {
+	"accuracy": 0.0,
+	"grade": "",
+	"grade_color": Color.GRAY,
+	"harmonious": 0,
+	"sympathetic": 0,
+	"aware": 0,
+	"lost": 0,
+	"max_combo": 0,
+	"total_notes": 0,
+	"crystal_earned": 0,
+}
+# 当前最大连击 (由 Gameplay 每帧更新)
+var max_combo: int = 0
+
+
+
 func get_current_gray_scale() -> float:
 	var progress: float = float(current_unlocked_song_index) / float(sympath_song_num)
 	var gray_scale: float = 1.0 - progress
@@ -165,6 +182,38 @@ func get_current_gray_scale() -> float:
 func play_ui_click_audio() -> void:
 	ui_click.play()
 	pass
+
+
+## 根据准度计算评级
+## 返回 Dictionary { "grade": String, "color": Color }
+func get_grade(acc: float) -> Dictionary:
+	if acc >= 0.95:
+		return { "grade": "∞ Infinity", "color": Color.GOLDENROD }
+	elif acc >= 0.85:
+		return { "grade": "A", "color": Color.ORANGE }
+	elif acc >= 0.70:
+		return { "grade": "B", "color": Color.YELLOW }
+	elif acc >= 0.50:
+		return { "grade": "C", "color": Color.CORNFLOWER_BLUE }
+	return { "grade": "D", "color": Color.GRAY }
+
+
+## 根据准度计算水晶奖励
+func get_crystal_reward(acc: float) -> int:
+	var result: float = 0.0
+	if acc <= 0.0:
+		result = 0.0
+	elif acc < 0.75:
+		result = 10.0
+	elif acc < 0.91:
+		result = 20.0 * acc - 4.0
+	elif acc < 0.95:
+		result = 40.0 * acc - 22.0
+	elif acc < 1.0:
+		result = 60.0 * acc - 41.0
+	else:
+		result = 20.0
+	return int(round(result))
 
 
 ## ============================================================

@@ -72,7 +72,13 @@ func lose(master_time: float) -> void:
 	is_judged = true
 	is_removed = true
 	Global.lost += 1
+	Global.combo = 0
 	a = 0.0
+
+	if gameplay and gameplay.has_method("show_judgment_feedback"):
+		gameplay.show_judgment_feedback(0, "lost", column)
+		pass
+
 	_update_accuracy()
 	_remove_from_judging()
 	explode()

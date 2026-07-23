@@ -29,6 +29,10 @@ extends Node2D
 
 @onready var _camera: Camera3D = $SubViewport/Node3D/Camera3D
 
+@onready var _ui: Control = $UI
+
+@onready var _combo_label: Label = $UI/Combo
+
 
 
 # 解析完成的谱面数据
@@ -85,6 +89,35 @@ var active_touches: Dictionary = {}
 # 轨道在屏幕空间的 X 范围 (通过摄像机投影计算)
 var _track_screen_min: float = 0.0
 var _track_screen_max: float = 0.0
+
+# ---- 判定视觉反馈 ----
+
+const JUDGMENT_TEXT: Dictionary = {
+	"harmonious": "和一",
+	"sympathetic": "共鸣",
+	"aware": "觉醒",
+	"lost": "丢失",
+}
+
+const JUDGMENT_COLORS: Dictionary = {
+	"harmonious": Color(1.0, 0.85, 0.3, 1.0),
+	"sympathetic": Color(0.5, 0.9, 0.5, 1.0),
+	"aware": Color(0.4, 0.7, 1.0, 1.0),
+	"lost": Color(0.6, 0.6, 0.6, 1.0),
+}
+
+const EARLY_COLOR: Color = Color(0.4, 0.7, 1.0, 1.0)
+const LATE_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
+
+const FEEDBACK_DURATION: float = 0.5
+const FEEDBACK_FLOAT_Y: float = -30.0
+const FEEDBACK_FONT_SIZE: int = 24
+const FEEDBACK_EARLY_LATE_FONT_SIZE: int = 18
+
+var _judgment_container: Control = null
+var _feedback_labels: Array[Label] = []
+var _feedback_index: int = 0
+var _max_feedback_labels: int = 16
 
 # 用于测试
 var default_chart: Array = [
@@ -353,6 +386,8 @@ var is_test: bool = false
 
 func _ready() -> void:
 	_calculate_track_screen_bounds()
+	_reset_judging_stats()
+	_setup_judgment_feedback()
 
 	audio_system.connect("finished", game_finished)
 
@@ -459,6 +494,18 @@ func _process(delta: float) -> void:
 	if master_time >= audio_length && is_gaming:
 		game_finished()
 		pass
+
+	# 追踪最大连击数
+	if Global.combo > Global.max_combo:
+		Global.max_combo = Global.combo
+		pass
+		
+
+	if Global.combo != 0:
+		_combo_label.visible = true
+		_combo_label.text = str(Global.combo) + " COMBO"
+	else :
+		_combo_label.visible = false
 
 	pass
 
@@ -628,8 +675,149 @@ func write_in_list() -> void:
 	pass
 
 
+func _reset_judging_stats() -> void:
+	Global.harmonious = 0
+	Global.sympathetic = 0
+	Global.aware = 0
+	Global.lost = 0
+	Global.total_judged = 0
+	Global.combo = 0
+	Global.accuracy = 0.0
+	Global.max_combo = 0
+	Global.judging_area = [ ]
+	_feedback_index = 0
+	pass
+
+
+func _setup_judgment_feedback() -> void:
+	_judgment_container = Control.new()
+	_judgment_container.anchor_left = 0.0
+	_judgment_container.anchor_right = 1.0
+	_judgment_container.anchor_top = 0.0
+	_judgment_container.anchor_bottom = 1.0
+	_judgment_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ui.add_child(_judgment_container)
+
+	for _i in range(_max_feedback_labels):
+		var lbl: Label = Label.new()
+		lbl.add_theme_font_size_override("font_size", FEEDBACK_FONT_SIZE)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.visible = false
+		lbl.modulate.a = 0.0
+		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_judgment_container.add_child(lbl)
+		_feedback_labels.append(lbl)
+		pass
+	pass
+
+
+func show_judgment_feedback(time_offset: int, judgment_level: String, column: int) -> void:
+	var lbl: Label = _feedback_labels[_feedback_index]
+	_feedback_index = (_feedback_index + 1) % _max_feedback_labels
+
+	# 终止旧动画
+	var old_tween: Tween = null
+	if lbl.has_meta("_feedback_tween"):
+		old_tween = lbl.get_meta("_feedback_tween")
+		if old_tween and old_tween.is_valid():
+			old_tween.kill()
+			pass
+		pass
+
+	# 判断文字
+	var jtext: String = JUDGMENT_TEXT.get(judgment_level, "丢失")
+	var jcolor: Color = JUDGMENT_COLORS.get(judgment_level, Color.GRAY)
+
+	var early_late_text: String = ""
+	var text_color: Color = jcolor
+
+	if judgment_level != "lost":
+		if time_offset < 0:
+			early_late_text = "▲ EARLY"
+			text_color = EARLY_COLOR
+			pass
+		elif time_offset > 0:
+			early_late_text = "▼ LATE"
+			text_color = LATE_COLOR
+			pass
+		pass
+
+	var display_text: String = jtext
+	if early_late_text != "":
+		display_text = early_late_text + "\n" + jtext
+		pass
+
+	lbl.text = display_text
+	lbl.add_theme_color_override("font_color", text_color)
+
+	var screen_x: float = _get_column_screen_x(column)
+	lbl.position = Vector2(screen_x - 60.0, _get_judgment_line_y())
+	lbl.size = Vector2(120, 50)
+	lbl.visible = true
+	lbl.modulate.a = 1.0
+
+	var tween: Tween = create_tween()
+	lbl.set_meta("_feedback_tween", tween)
+	tween.set_parallel(true)
+	tween.tween_property(lbl, "position:y", lbl.position.y + FEEDBACK_FLOAT_Y, FEEDBACK_DURATION)
+	tween.tween_property(lbl, "modulate:a", 0.0, FEEDBACK_DURATION).set_ease(Tween.EASE_IN).set_delay(0.15)
+	pass
+
+
+
+func _get_column_screen_x(column: int) -> float:
+	var col_count: int = Global.COLUMN_NUM
+	var viewport_width: float = get_viewport().get_visible_rect().size.x
+	var track_width: float = _track_screen_max - _track_screen_min
+	if track_width <= 0.0:
+		track_width = viewport_width * 0.5
+		_track_screen_min = (viewport_width - track_width) * 0.5
+		pass
+	var col_norm: float = (float(column) - 0.5) / float(col_count)
+	return _track_screen_min + col_norm * track_width
+
+
+func _get_judgment_line_y() -> float:
+	var viewport_height: float = get_viewport().get_visible_rect().size.y
+	return viewport_height * 0.72
+
+
 # 游戏结束
 func game_finished() -> void:
+	if not is_gaming:
+		return
 	is_gaming = false
-	# 转到结算场景
+
+	var acc: float = Global.accuracy
+	var grade_info: Dictionary = Global.get_grade(acc)
+	var crystal_earned: int = Global.get_crystal_reward(acc)
+
+	# 存储结果到 Global
+	Global.gameplay_result = {
+		"accuracy": acc,
+		"grade": grade_info["grade"],
+		"grade_color": grade_info["color"],
+		"harmonious": Global.harmonious,
+		"sympathetic": Global.sympathetic,
+		"aware": Global.aware,
+		"lost": Global.lost,
+		"max_combo": Global.max_combo,
+		"total_notes": total_notes,
+		"crystal_earned": crystal_earned,
+	}
+
+	Global.crystal += crystal_earned
+	Global.current_unlocked_song_index = maxi(Global.current_unlocked_song_index, Global.current_song_index + 1)
+
+	# 同步本地计数
+	harmonious = Global.harmonious
+	sympathetic = Global.sympathetic
+	aware = Global.aware
+	lost = Global.lost
+
+	var scene_manager: Node = get_parent()
+	if scene_manager and scene_manager.has_method("start_scene_by_path"):
+		scene_manager.start_scene_by_path("res://Scene/Ui/Menu/FinishMenu.tscn")
+		pass
 	pass

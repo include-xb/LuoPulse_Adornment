@@ -165,17 +165,26 @@ func judge_head(master_time: float) -> void:
 	var time_offset: int = int(master_time - float(time))
 	var abs_offset: int = abs(time_offset)
 
+	var level: String = "lost"
+
 	if abs_offset <= Global.HARMONIOUS_TIME:
 		a = 1.0
+		level = "harmonious"
 		pass
 	elif abs_offset <= Global.SYMPATHETIC_TIME:
 		a = 0.7
+		level = "sympathetic"
 		pass
 	elif abs_offset <= Global.AWARE_TIME:
 		a = 0.5
+		level = "aware"
 		pass
 	else:
 		a = 0.0
+		pass
+
+	if gameplay and gameplay.has_method("show_judgment_feedback"):
+		gameplay.show_judgment_feedback(time_offset, level, column)
 		pass
 
 	is_head_judged = true
@@ -207,6 +216,10 @@ func _complete_hold() -> void:
 		Global.lost += 1
 		a = 0.0
 		Global.combo = 0
+
+		if gameplay and gameplay.has_method("show_judgment_feedback"):
+			gameplay.show_judgment_feedback(0, "lost", column)
+			pass
 		pass
 	else:
 		if a >= 1.0:
@@ -238,7 +251,12 @@ func _lose() -> void:
 
 	is_removed = true
 	Global.lost += 1
+	Global.combo = 0
 	a = 0.0
+
+	if gameplay and gameplay.has_method("show_judgment_feedback"):
+		gameplay.show_judgment_feedback(0, "lost", column)
+		pass
 
 	Global.total_judged += 1
 	var n: int = Global.total_judged
