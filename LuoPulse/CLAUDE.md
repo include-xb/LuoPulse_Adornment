@@ -38,11 +38,11 @@ Theme: Telling stories of Chinese Vocaloid culture — producers and their creat
 
 ```
 Launch ──→ MainMenu ──→ Sympathy (song select) ──→ Gameplay ──→ FinishMenu
-                ├──→ Side Line (断章, unlocked at ≥60% 共鸣)
-                ├──→ Notebook (资料卡 + 故事碎片)
-                └──→ Settings (设置)
-                      ├──→ About (关于 + 开发者页面)                         │
-                      └──→ Credits (感谢名单, 共鸣100%后解锁)
+				├──→ Side Line (断章, unlocked at ≥60% 共鸣)
+				├──→ Notebook (资料卡 + 故事碎片)
+				└──→ Settings (设置)
+					  ├──→ About (关于 + 开发者页面)                         │
+					  └──→ Credits (感谢名单, 共鸣100%后解锁)
 ```
 
 > **Current code vs design doc**: MainMenu currently uses `Album` naming for 断章. Settings button currently goes to Notebook, and About button goes to SettingMenu. These need rework to match the design.
@@ -53,22 +53,22 @@ Currently implemented via `OS.get_user_data_dir()`.
 
 ```
 OS.get_user_data_dir()/
-    ├── CustomizedPlaylist/
-    │   ├── xxx.lpz
-    │   ├── yyy.lpz
-    │   └── zzz.lpz
-    ├── user.json        # User data
-    └── config.json      # Game config
+	├── CustomizedPlaylist/
+	│   ├── xxx.lpz
+	│   ├── yyy.lpz
+	│   └── zzz.lpz
+	├── user.json        # User data
+	└── config.json      # Game config
 ```
 
 **user.json** (auto-created with defaults if missing):
 
 ```json
 {
-    "username": "小白",
-    "main_line_unlocked": 13,        // count of unlocked 共鸣 songs
-    "crystal": 250,                  // crystal currency
-    "story_fragments_unlocked": [1, 3, 5]  // discovered fragment IDs
+	"username": "小白",
+	"main_line_unlocked": 13,        // count of unlocked 共鸣 songs
+	"crystal": 250,                  // crystal currency
+	"story_fragments_unlocked": [1, 3, 5]  // discovered fragment IDs
 }
 ```
 
@@ -76,12 +76,12 @@ OS.get_user_data_dir()/
 
 ```json
 {
-    "version": "0.0.0.1",
-    "volume_song": 90,
-    "volume_note": 70,
-    "volume_ui": 60,
-    "offset": 0,          // milliseconds, chart offset
-    "speed": 10           // note scroll speed (1-20)
+	"version": "0.0.0.1",
+	"volume_song": 90,
+	"volume_note": 70,
+	"volume_ui": 60,
+	"offset": 0,          // milliseconds, chart offset
+	"speed": 10           // note scroll speed (1-20)
 }
 ```
 
@@ -204,22 +204,22 @@ A `.lpz` file is a ZIP archive:
 
 ```json
 {
-    "General": {
-        "Title": "title",
-        "Producer": "...",
-        "Vocalist": "...",
-        "Creator": "...",
-        //"Difficulty": "EZ",      // EZ / NM / HD
-        "Version": "1.0",
-        "BPM": 80
-    },
-    "HitObjects": [
-        { "type": "tap", "time": 1000, "column": 1 },
-        { "type": "drag", "time": 1000, "column": 2 },
-        { "type": "release", "time": 1000, "column": 3 },
-        { "type": "hold", "time": 1000, "column": 4, "duration": 1500 },
-        { "type": "heart", "time": 1500, "column": 2, "map": [4, 2, 3, 1] }
-    ]
+	"General": {
+		"Title": "title",
+		"Producer": "...",
+		"Vocalist": "...",
+		"Creator": "...",
+		//"Difficulty": "EZ",      // EZ / NM / HD
+		"Version": "1.0",
+		"BPM": 80
+	},
+	"HitObjects": [
+		{ "type": "tap", "time": 1000, "column": 1 },
+		{ "type": "drag", "time": 1000, "column": 2 },
+		{ "type": "release", "time": 1000, "column": 3 },
+		{ "type": "hold", "time": 1000, "column": 4, "duration": 1500 },
+		{ "type": "heart", "time": 1500, "column": 2, "map": [4, 2, 3, 1] }
+	]
 }
 ```
 
@@ -266,14 +266,14 @@ The "soul" of LuoPulse — a personal narrative about school bullying, broken fa
 
 ```json
 {
-    "fragment_id": 1,
-    "title": "伊甸园",
-    "date": "23/2/22",
-    "day_of_week": "周一",
-    "weather": "阴",
-    "content": "我的压力不来自于学习...",
-    "trigger_progress": 0.05,
-    "trigger_type": "progress"
+	"fragment_id": 1,
+	"title": "伊甸园",
+	"date": "23/2/22",
+	"day_of_week": "周一",
+	"weather": "阴",
+	"content": "我的压力不来自于学习...",
+	"trigger_progress": 0.05,
+	"trigger_type": "progress"
 }
 ```
 

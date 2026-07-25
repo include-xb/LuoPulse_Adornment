@@ -73,5 +73,7 @@ pointing/emulate_touch_from_mouse=true
 
 [rendering]
 
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 viewport/hdr_2d=true
 anti_aliasing/hdr_2d=false
