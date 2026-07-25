@@ -11,6 +11,7 @@ var _scene_track: Array = []
 var _args: Dictionary = {}
 var _last_animation_name: String = "fade"
 var _launch_scene: Node = null
+var _is_finish = false
 
 func _ready() -> void:
 	color_rect.self_modulate.a = 0
@@ -27,6 +28,9 @@ func _ready() -> void:
 ## @param pass_args: 可选，要传递的参数字典
 ## @param img: 可选，图像资源, 仅在切换动画为 img 时有效
 func start_scene_by_path(scene_path: String, pass_args: Dictionary = {}, animation_name: String = "fade", img: ImageTexture = null) -> void:
+	if scene_path == "res://Scene/Ui/Menu/FinishMenu.tscn":
+		_is_finish = true
+	
 	if not _is_launch_scene(scene_path):
 		await _play_enter_animation(animation_name, img)
 		_args = pass_args
@@ -46,6 +50,11 @@ func back_to_previous_scene() -> void:
 	await _play_enter_animation(_last_animation_name)
 
 	var old_scene: Node = _scene_track.pop_back()
+	
+	if _is_finish:
+		_scene_track.pop_back()
+		_is_finish = false
+	
 	self.remove_child(old_scene)
 	old_scene.queue_free()
 
