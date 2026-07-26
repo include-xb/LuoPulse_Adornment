@@ -62,6 +62,8 @@ func back_to_previous_scene() -> void:
 		self.add_child(_scene_track.back())
 
 	await _play_exit_animation(_last_animation_name)
+	
+	_last_animation_name = "fade"
 
 
 ## 获取上个场景传参

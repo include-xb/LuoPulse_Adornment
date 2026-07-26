@@ -33,6 +33,10 @@ extends Node2D
 
 @onready var _combo_label: Label = $UI/Combo
 
+@onready var _pause_button: Button = $"UI/PauseButton"
+
+@onready var _pause_panel: PanelContainer = $"UI/PausePanel"
+
 
 
 # 解析完成的谱面数据
@@ -79,6 +83,22 @@ var lost: int = 0
 
 # 是否正在游戏
 var is_gaming: bool = true
+
+# 暂停时记录的音频播放位置 (秒)
+var _pause_playback_position: float = 0.0
+
+# 暂停时记录的 tick (用于补偿非音频阶段的暂停时间)
+var _pause_frozen_tick: int = 0
+
+# 暂停面板是否正在显示
+var _is_pause_panel_visible: bool = false
+
+# 倒计时状态
+var _is_counting_down: bool = false
+var _countdown_remaining: float = 0.0
+const COUNTDOWN_DURATION: float = 3.0
+
+var _countdown_label: Label = null
 
 # 各列的 InputProcesser 引用
 var input_processers: Array = []
@@ -393,6 +413,11 @@ func _ready() -> void:
 
 	_collect_input_processers()
 
+	_pause_panel.visible = false
+	_pause_panel.modulate.a = 0.0
+	_setup_countdown_label()
+
+
 	if is_test == false:
 		# 从当前选择的曲包中加载谱面数据
 		load_list()
@@ -459,9 +484,13 @@ func test() -> void:
 
 
 func _process(delta: float) -> void:
-	_update_master_time()
+	if not _is_counting_down:
+		_update_master_time()
 
 	if not is_gaming:
+		if _is_counting_down:
+			_countdown_tick(delta)
+			pass
 		return
 
 	# 音频启动
@@ -523,6 +552,17 @@ func _compute_master_time() -> float:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		if _is_counting_down:
+			return
+		if _is_pause_panel_visible:
+			_on_continue_button_pressed()
+			pass
+		else:
+			_on_pause_button_pressed()
+			pass
+		return
+
 	if not is_gaming:
 		return
 
@@ -530,6 +570,10 @@ func _input(event: InputEvent) -> void:
 	var input_time: float = _compute_master_time()
 
 	if event is InputEventScreenTouch:
+		var btn_rect: Rect2 = _pause_button.get_global_rect()
+		if btn_rect.has_point(event.position):
+			return
+
 		var col: int = _get_column_from_x(event.position.x)
 		if col >= 0:
 			if event.pressed:
@@ -735,11 +779,11 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 	if judgment_level != "lost":
 		if time_offset < 0:
 			early_late_text = "▲ EARLY"
-			text_color = EARLY_COLOR
+			text_color = jcolor
 			pass
 		elif time_offset > 0:
 			early_late_text = "▼ LATE"
-			text_color = LATE_COLOR
+			text_color = jcolor
 			pass
 		pass
 
@@ -820,4 +864,223 @@ func game_finished() -> void:
 	if scene_manager and scene_manager.has_method("start_scene_by_path"):
 		scene_manager.start_scene_by_path("res://Scene/Ui/Menu/FinishMenu.tscn")
 		pass
+	pass
+
+
+func _on_pause_button_pressed() -> void:
+	if _is_pause_panel_visible or not is_gaming or _is_counting_down:
+		return
+
+	var pause_time: float = _compute_master_time()
+	for col in active_touches.values():
+		_on_column_touch_released(col, pause_time)
+	active_touches.clear()
+
+	is_gaming = false
+	_pause_playback_position = audio_system.get_playback_position()
+	_pause_frozen_tick = Time.get_ticks_msec()
+	audio_system.stream_paused = true
+	if video_stream_player.stream != null:
+		video_stream_player.paused = true
+		pass
+	_show_pause_panel()
+	pass
+
+
+func _on_continue_button_pressed() -> void:
+	if not _is_pause_panel_visible:
+		return
+
+	_hide_pause_panel()
+	_start_countdown()
+	pass
+
+
+func _on_retry_button_pressed() -> void:
+	if not _is_pause_panel_visible:
+		return
+
+	_restart_game()
+	pass
+
+
+func _on_exit_button_pressed() -> void:
+	if not _is_pause_panel_visible:
+		return
+
+	audio_system.stop()
+	video_stream_player.stop()
+	is_gaming = false
+	var scene_manager: Node = get_parent()
+	if scene_manager and scene_manager.has_method("back_to_previous_scene"):
+		scene_manager.back_to_previous_scene()
+		pass
+	pass
+
+
+func _show_pause_panel() -> void:
+	if _is_pause_panel_visible:
+		return
+	_is_pause_panel_visible = true
+	_pause_panel.visible = true
+	_pause_panel.modulate.a = 0.0
+
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(_pause_panel, "modulate:a", 1.0, 0.3)
+
+	var scale_tween: Tween = create_tween()
+	scale_tween.set_trans(Tween.TRANS_CUBIC)
+	scale_tween.set_ease(Tween.EASE_OUT)
+	_pause_panel.pivot_offset = _pause_panel.size * 0.5
+	_pause_panel.scale = Vector2(0.85, 0.85)
+	scale_tween.tween_property(_pause_panel, "scale", Vector2.ONE, 0.3)
+	pass
+
+
+func _hide_pause_panel() -> void:
+	if not _is_pause_panel_visible:
+		return
+	_is_pause_panel_visible = false
+
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_IN)
+	tween.tween_property(_pause_panel, "modulate:a", 0.0, 0.2)
+	await tween.finished
+	_pause_panel.visible = false
+	_pause_panel.scale = Vector2.ONE
+	pass
+
+
+func _setup_countdown_label() -> void:
+	_countdown_label = Label.new()
+	_countdown_label.visible = false
+	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_countdown_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_countdown_label.anchor_left = 0.5
+	_countdown_label.anchor_right = 0.5
+	_countdown_label.anchor_top = 0.5
+	_countdown_label.anchor_bottom = 0.5
+	_countdown_label.offset_left = -150.0
+	_countdown_label.offset_top = -50.0
+	_countdown_label.offset_right = 150.0
+	_countdown_label.offset_bottom = 50.0
+	_countdown_label.add_theme_font_size_override("font_size", 80)
+	_countdown_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	_countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ui.add_child(_countdown_label)
+	pass
+
+
+func _start_countdown() -> void:
+	_is_counting_down = true
+	_countdown_remaining = COUNTDOWN_DURATION
+	_countdown_label.visible = true
+	_countdown_label.modulate.a = 0.0
+	_update_countdown_display()
+
+	var tween: Tween = create_tween()
+	tween.tween_property(_countdown_label, "modulate:a", 1.0, 0.15)
+	pass
+
+
+func _countdown_tick(delta: float) -> void:
+	_countdown_remaining -= delta
+	if _countdown_remaining <= 0.0:
+		_on_countdown_ready()
+		return
+
+	var prev_second: int = ceili(_countdown_remaining + delta)
+	var cur_second: int = ceili(_countdown_remaining)
+	if prev_second != cur_second:
+		_update_countdown_display()
+		_pulse_countdown_label()
+		pass
+	pass
+
+
+func _update_countdown_display() -> void:
+	var second: int = ceili(_countdown_remaining)
+	_countdown_label.text = str(second)
+	pass
+
+
+func _pulse_countdown_label() -> void:
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	_countdown_label.scale = Vector2(1.3, 1.3)
+	tween.tween_property(_countdown_label, "scale", Vector2.ONE, 0.3)
+	pass
+
+
+func _on_countdown_ready() -> void:
+	_countdown_label.visible = false
+	_countdown_label.scale = Vector2.ONE
+	_is_counting_down = false
+
+	audio_system.stream_paused = false
+	if video_stream_player.stream != null:
+		video_stream_player.paused = false
+		pass
+
+	if not is_audio_start:
+		var elapsed: int = Time.get_ticks_msec() - _pause_frozen_tick
+		start_time += elapsed
+		pass
+
+	is_gaming = true
+	pass
+
+
+func _restart_game() -> void:
+	audio_system.stop()
+	audio_system.stream_paused = false
+	video_stream_player.stop()
+	video_stream_player.paused = false
+
+	_clear_notes()
+	_reset_judging_stats()
+
+	chart = [ ]
+	time_list = [ ]
+	type_list = [ ]
+	duration_list = [ ]
+	column_list = [ ]
+	current_note_index = 0
+	is_loading_note = true
+	is_audio_start = false
+	master_time = -3000.0
+	Global.master_time = -3000.0
+
+	if is_test == false:
+		load_list()
+		write_in_list()
+		pass
+	else:
+		test()
+		write_in_list()
+		pass
+
+	start_time = Time.get_ticks_msec()
+
+	_hide_pause_panel()
+	is_gaming = true
+	pass
+
+
+func _clear_notes() -> void:
+	var track: Node3D = $SubViewport/Node3D/Track
+	for i in range(Global.COLUMN_NUM):
+		var column_node: Node3D = track.get_node("Column" + str(i + 1))
+		var note_pool: Node3D = column_node.get_node("NotePool")
+		for child in note_pool.get_children():
+			if child is Node3D:
+				child.queue_free()
+				pass
+			pass
+		pass
+	Global.judging_area = [ ]
 	pass
