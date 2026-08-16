@@ -13,5 +13,4 @@ grow_vertical = 2
 script = ExtResource("1_8iowy")
 
 [node name="Background" parent="." unique_id=565770654 instance=ExtResource("2_lk1cu")]
-layout_mode = 0
-anchors_preset = 0
+layout_mode = 1

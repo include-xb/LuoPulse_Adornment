@@ -41,4 +41,4 @@ func _on_note_pressed() -> void:
 
 func _on_setting_pressed() -> void:
 	Global.play_ui_click_audio()
-	$"..".start_scene_by_path("res://Scene/Ui/Menu/SettingMenu.tscn")
+	$"..".start_scene_by_path("res://Scene/Ui/Menu/SettingsMenu.tscn")

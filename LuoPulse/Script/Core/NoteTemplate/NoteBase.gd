@@ -13,6 +13,8 @@ class_name NoteBase
 # 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var gameplay: Node2D = null
 
+var root_node: Control;
+
 # 音符索引
 var index: int = 0
 
@@ -45,7 +47,7 @@ func _process(delta: float) -> void:
 	if gameplay == null:
 		return
 
-	var mt: float = gameplay.master_time
+	var mt: float = root_node.master_time
 
 	# 音符定位: z = speed * (master_time - time) / 1000
 	# 使得在 master_time == time 时, 音符刚好到达 z=0 (判定线)
@@ -110,8 +112,8 @@ func judge(master_time: float) -> void:
 		a = 0.0
 		pass
 
-	if gameplay and gameplay.has_method("show_judgment_feedback"):
-		gameplay.show_judgment_feedback(time_offset, level, column)
+	if root_node and root_node.has_method("show_judgment_feedback"):
+		root_node.show_judgment_feedback(time_offset, level, column)
 		pass
 
 	_finish_judge()
@@ -147,8 +149,8 @@ func _lose(master_time: float) -> void:
 	Global.combo = 0
 	a = 0.0
 
-	if gameplay and gameplay.has_method("show_judgment_feedback"):
-		gameplay.show_judgment_feedback(0, "lost", column)
+	if root_node and root_node.has_method("show_judgment_feedback"):
+		root_node.show_judgment_feedback(0, "lost", column)
 		pass
 
 	_update_accuracy()

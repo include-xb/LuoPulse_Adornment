@@ -16,7 +16,7 @@ extends Control
 
 
 @onready var background: TextureRect = $Background
-@onready var cover: TextureRect = $Cover
+@onready var cover: TextureRect = $Control/Cover
 @onready var left: Button = $Select/Left
 @onready var start: Button = $Select/Start
 @onready var right: Button = $Select/Right
@@ -25,10 +25,10 @@ extends Control
 @onready var progress_bar: ProgressBar = $ProgressBar
 
 
-@onready var title: Label = $VBoxContainer/Title
-@onready var producer: Label = $VBoxContainer/Producer
-@onready var creator: Label = $VBoxContainer/Creator
-@onready var vocalist: Label = $VBoxContainer/Vocalist
+@onready var title: Label = $Control/VBoxContainer/Title
+@onready var producer: Label = $Control/VBoxContainer/Producer
+@onready var creator: Label = $Control/VBoxContainer/Creator
+@onready var vocalist: Label = $Control/VBoxContainer/Vocalist
 
 
 
@@ -141,6 +141,5 @@ func _on_right_pressed() -> void:
 func _on_start_pressed() -> void:
 	audio_stream_player.stop()
 	Global.play_ui_click_audio()
-	# SceneManager.change_scene("res://Scene/Core/Gameplay.tscn")
 	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
 	pass # Replace with function body.

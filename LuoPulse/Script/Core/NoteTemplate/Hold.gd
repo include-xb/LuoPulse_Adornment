@@ -4,6 +4,8 @@ extends MeshInstance3D
 # 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var gameplay: Node2D = null
 
+var root_node: Control
+
 var type: String = "hold"
 
 var index: int = 0
@@ -59,7 +61,7 @@ func _process(delta: float) -> void:
 	if gameplay == null:
 		return
 
-	var mt: float = gameplay.master_time
+	var mt: float = root_node.master_time
 
 	if not is_head_judged:
 		# 头部下落
@@ -183,8 +185,8 @@ func judge_head(master_time: float) -> void:
 		a = 0.0
 		pass
 
-	if gameplay and gameplay.has_method("show_judgment_feedback"):
-		gameplay.show_judgment_feedback(time_offset, level, column)
+	if root_node and root_node.has_method("show_judgment_feedback"):
+		root_node.show_judgment_feedback(time_offset, level, column)
 		pass
 
 	is_head_judged = true
@@ -217,8 +219,8 @@ func _complete_hold() -> void:
 		a = 0.0
 		Global.combo = 0
 
-		if gameplay and gameplay.has_method("show_judgment_feedback"):
-			gameplay.show_judgment_feedback(0, "lost", column)
+		if root_node and root_node.has_method("show_judgment_feedback"):
+			root_node.show_judgment_feedback(0, "lost", column)
 			pass
 		pass
 	else:
@@ -254,8 +256,8 @@ func _lose() -> void:
 	Global.combo = 0
 	a = 0.0
 
-	if gameplay and gameplay.has_method("show_judgment_feedback"):
-		gameplay.show_judgment_feedback(0, "lost", column)
+	if root_node and root_node.has_method("show_judgment_feedback"):
+		root_node.show_judgment_feedback(0, "lost", column)
 		pass
 
 	Global.total_judged += 1

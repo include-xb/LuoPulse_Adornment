@@ -13,7 +13,7 @@
 
 
 
-extends Node2D
+extends Control
 
 @onready var audio_system: AudioStreamPlayer = $"AudioSystem"
 
@@ -681,7 +681,8 @@ func load_note(note_index: int, index: int) -> void:
 		column_list[note_index],
 		index,
 		$SubViewport/Node3D/Track,
-		self,
+		$Node2D,
+		self
 	)
 	pass
 
