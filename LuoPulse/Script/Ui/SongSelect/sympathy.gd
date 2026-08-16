@@ -40,7 +40,6 @@ func _ready() -> void:
 	# cover.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	
 	animation_player.play("unfold")
-	print(Global.sympath_song_path_list)
 	load_song_info()
 	refresh_progress_bar()
 	pass

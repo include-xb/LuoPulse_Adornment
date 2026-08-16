@@ -88,6 +88,21 @@ var album_song_num: int = 0
 # 当前歌曲
 var current_song: String = ""
 
+# 当前歌曲标题
+var current_song_title: String = ""
+
+# 当前歌曲制作人 (P主)
+var current_song_artist: String = ""
+
+# 当前歌曲 BPM
+var current_song_bpm: String = ""
+
+# 笔记返回场景 (home / results)
+var notebook_return_scene: String = "home"
+
+# 笔记返回的歌曲标题
+var notebook_return_song_title: String = ""
+
 # 当前歌曲的索引
 var current_song_index: int = 0
 
@@ -219,6 +234,72 @@ func get_crystal_reward(acc: float) -> int:
 ## ============================================================
 ## LPZ 文件读取
 ## ============================================================
+
+## 一次性从 .lpz 文件中读取所有资源 (cover/audio/chart/video)
+## 相比分别调用 _read_*_from_lpz, 只打开一次 ZIP 文件, 避免重复解压
+## 返回 Dictionary: { "cover": ImageTexture, "audio": AudioStream, "chart": Dictionary, "video": VideoStream }
+func _read_lpz(lpz_path: String) -> Dictionary:
+	var result: Dictionary = {
+		"cover": null,
+		"audio": null,
+		"chart": { },
+		"video": null,
+	}
+
+	var zip := ZIPReader.new()
+	var err := zip.open(lpz_path)
+	if err != OK:
+		push_error("无法打开 .lpz 文件: %s" % lpz_path)
+		return result
+
+	var files: Dictionary = { }
+	for f in zip.get_files():
+		files[f.get_file()] = f
+
+	# 封面
+	if files.has("cover.png"):
+		var img := Image.new()
+		if img.load_png_from_buffer(zip.read_file(files["cover.png"])) == OK:
+			result["cover"] = ImageTexture.create_from_image(img)
+
+	# 音频
+	if files.has("audio.ogg"):
+		var audio_stream := AudioStreamOggVorbis.load_from_buffer(zip.read_file(files["audio.ogg"]))
+		if audio_stream == null:
+			push_error("无法解码音频文件: audio.ogg")
+		else:
+			result["audio"] = audio_stream
+
+	# 谱面
+	if files.has("chart.lp"):
+		var json_str := zip.read_file(files["chart.lp"]).get_string_from_utf8()
+		var json := JSON.new()
+		if json.parse(json_str) == OK:
+			var data: Variant = json.get_data()
+			if data is Dictionary:
+				result["chart"] = data
+
+	# 视频 (VideoStreamTheora 无 load_from_buffer, 需写入临时文件)
+	if files.has("video.ogv"):
+		var temp_dir := OS.get_user_data_dir().path_join("temp")
+		if not DirAccess.dir_exists_absolute(temp_dir):
+			DirAccess.make_dir_recursive_absolute(temp_dir)
+
+		var temp_path := temp_dir.path_join("_video_temp.ogv")
+		var file := FileAccess.open(temp_path, FileAccess.WRITE)
+		if file == null:
+			push_error("无法创建临时视频文件: %s" % temp_path)
+		else:
+			file.store_buffer(zip.read_file(files["video.ogv"]))
+			file.close()
+
+			var video_stream := VideoStreamTheora.new()
+			video_stream.file = temp_path
+			result["video"] = video_stream
+
+	zip.close()
+	return result
+
 
 ## 从 .lpz 文件中读取封面图片，返回 ImageTexture
 func _read_cover_from_lpz(lpz_path: String) -> ImageTexture:

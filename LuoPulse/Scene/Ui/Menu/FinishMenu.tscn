@@ -1,9 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://cpwqk5f3suptd"]
+[gd_scene format=3 uid="uid://cpwqk5f3suptd"]
 
 [ext_resource type="Script" uid="uid://emg8ofqvvmcq" path="res://Script/Ui/Menu/FinishMenu.gd" id="1_8iowy"]
-[ext_resource type="PackedScene" uid="uid://blfr5lunj0qsy" path="res://Scene/Ui/Menu/CardMenu.tscn" id="2_lk1cu"]
+[ext_resource type="PackedScene" uid="uid://c0hgbrfhgb5rl" path="res://Scene/Ui/Widget/Background.tscn" id="2_lk1cu"]
 
-[node name="FinishMenu" type="Control"]
+[node name="FinishMenu" type="Control" unique_id=1595795645]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,5 +12,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_8iowy")
 
-[node name="CardMenu" parent="." instance=ExtResource("2_lk1cu")]
-layout_mode = 1
+[node name="Background" parent="." unique_id=565770654 instance=ExtResource("2_lk1cu")]
+layout_mode = 0
+anchors_preset = 0

@@ -31,6 +31,7 @@ McpRuntime="*uid://732g0yf236a7"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [editor_plugins]
 
@@ -74,7 +75,6 @@ pointing/emulate_touch_from_mouse=true
 
 [rendering]
 
-renderer/rendering_method.mobile="forward_plus"
 textures/vram_compression/import_etc2_astc=true
 viewport/hdr_2d=true
 anti_aliasing/hdr_2d=false
