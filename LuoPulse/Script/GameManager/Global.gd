@@ -52,6 +52,67 @@ const AWARE_TIME: int = 180
 # 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
 const LOST_TIME: int = 240
 
+# INFO: 设置项仅在此处修改，控件将会动态生成
+# 设置项
+# 每个设置项字段:
+# 	key: Global 中的变量名 (读取/写入值)
+# 	config_key: config.json 中的键名 (默认与 key 相同)
+# 	node_type: 控件类型 (HSlider / SpinBox)
+# 	min / max / step: 控件取值范围与步进
+# 	suffix: 显示在数值后的单位
+# "语言": { "key": "language", "node_type": "OptionButton", "options": ["中文", "English", "日本語"] },
+# "用户名": { "key": "user_name", "node_type": "LineEdit" },
+const SETTINGS: Dictionary[String, Dictionary] = {
+	"音频": {
+		"UI音效音量": {
+			"key": "volume_ui",
+			"config_key": "volume_ui",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"suffix": "%",
+		},
+		"音符打击音量": {
+			"key": "volume_note",
+			"config_key": "volume_note",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"suffix": "%",
+		},
+		"歌曲音量": {
+			"key": "volume_song",
+			"config_key": "volume_song",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"suffix": "%",
+		},
+	},
+	"游戏": {
+		"谱面偏移": {
+			"key": "chart_offset",
+			"config_key": "offset",
+			"node_type": "SpinBox",
+			"min": -200,
+			"max": 200,
+			"step": 1,
+			"suffix": "ms",
+		},
+		"音符流速": {
+			"key": "note_flow_speed",
+			"config_key": "speed",
+			"node_type": "SpinBox",
+			"min": 1,
+			"max": 20,
+			"step": 1,
+			"suffix": "",
+		},
+	},
+}
 
 
 ## 变量
@@ -440,4 +501,26 @@ func display_notice(info: String) -> void:
 	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
 	notice.text = "  " + info
 	NOTICE_BOX.add_child(notice)
+	pass
+
+
+## 将当前设置写入 config.json
+## 遍历 SETTINGS, 按 config_key 组装数据, 立即保存
+func save_config() -> void:
+	var data: Dictionary = { "version": config_version }
+
+	for group_key: String in SETTINGS:
+		var group: Dictionary = SETTINGS[group_key]
+		for setting_name: String in group:
+			var setting: Dictionary = group[setting_name]
+			var config_key: String = setting.get("config_key", setting["key"])
+			data[config_key] = get(setting["key"])
+			pass
+		pass
+
+	var path: String = OS.get_user_data_dir().path_join("config.json")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
 	pass
