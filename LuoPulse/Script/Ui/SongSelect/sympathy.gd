@@ -14,30 +14,68 @@
 
 extends Control
 
-
+# 背景
 @onready var background: TextureRect = $Background
+
+# 封面
 @onready var cover: TextureRect = $Cover
+
+# 左切
 @onready var left: Button = $Select/Left
+
+# 开始 (选中)
 @onready var start: Button = $Select/Start
+
+# 右切
 @onready var right: Button = $Select/Right
+
+# 展开/回退 动画
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
+
+# 预览音频
 @onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
+
+# 下方进度条
 @onready var progress_bar: ProgressBar = $ProgressBar
 
+# 水晶数
+@onready var amount: Label = $HBoxContainer/Currency/HBoxContainer/Amount
 
+# 设置菜单
+@onready var setting_panel: PanelContainer = $SettingPanel
+
+# 自动播放按钮
+@onready var autoplay_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton
+
+# PV 播放按钮
+@onready var pv_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
+
+
+
+## 歌曲信息
+# 标题
 @onready var title: Label = $VBoxContainer/Title
-@onready var producer: Label = $VBoxContainer/Producer
-@onready var creator: Label = $VBoxContainer/Creator
-@onready var vocalist: Label = $VBoxContainer/Vocalist
 
+# P 主
+@onready var producer: Label = $VBoxContainer/Producer
+
+# 谱师
+@onready var creator: Label = $VBoxContainer/Creator
+
+# 演唱
+@onready var vocalist: Label = $VBoxContainer/Vocalist
 
 
 func _ready() -> void:
 	Global.game_mode = Global.GameMode.Sympathy
-	
+	setting_panel.visible = false
+	setting_panel.modulate.a = 0.0
 	# 页面背景色彩变化并非线性, 而是 U 形变化
 	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	# cover.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	
+	# 界面数值显示
+	amount.text = str(Global.crystal)
 	
 	animation_player.play("unfold")
 	print(Global.sympath_song_path_list)
@@ -89,14 +127,11 @@ func load_song_info() -> void:
 	if audio_stream_player.stream:
 		audio_stream_player.play()
 		pass
-	
 	pass
 
 
-
-
 # 进度条跟进
-func refresh_progress_bar() -> void:
+func refresh_progress_bar()-> void:
 	progress_bar.value = int(float(Global.current_song_index + 1) / float(Global.sympath_song_num) * 100)
 	pass
 
@@ -145,3 +180,47 @@ func _on_start_pressed() -> void:
 	# SceneManager.change_scene("res://Scene/Core/Gameplay.tscn")
 	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
 	pass # Replace with function body.
+
+
+func _on_setting_pressed() -> void:
+	setting_panel.visible = true
+	setting_panel.modulate.a = 0.0
+	
+	autoplay_button.text = "自动播放     " + ("开" if Global.is_autoplay else "关")
+	pv_button.text = "播放 PV        " + ("开" if Global.is_pvplay else "关")
+
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(setting_panel, "modulate:a", 1.0, 0.3)
+
+	var scale_tween: Tween = create_tween()
+	scale_tween.set_trans(Tween.TRANS_CUBIC)
+	scale_tween.set_ease(Tween.EASE_OUT)
+	setting_panel.pivot_offset = setting_panel.size * 0.5
+	setting_panel.scale = Vector2(0.85, 0.85)
+	scale_tween.tween_property(setting_panel, "scale", Vector2.ONE, 0.3)
+	pass
+
+
+func _on_ok_button_pressed() -> void:
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_IN)
+	tween.tween_property(setting_panel, "modulate:a", 0.0, 0.2)
+	await tween.finished
+	setting_panel.visible = false
+	setting_panel.scale = Vector2.ONE
+	pass
+
+
+func _on_autoplay_button_pressed() -> void:
+	Global.is_autoplay = !Global.is_autoplay
+	autoplay_button.text = "自动播放     " + ("开" if Global.is_autoplay else "关")
+	pass
+
+
+func _on_pv_button_pressed() -> void:
+	Global.is_pvplay = !Global.is_pvplay
+	pv_button.text = "播放 PV        " + ("开" if Global.is_pvplay else "关")
+	pass

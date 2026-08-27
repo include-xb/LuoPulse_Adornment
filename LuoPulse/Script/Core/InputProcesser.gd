@@ -38,7 +38,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _touch_count > 0:
-		_highlight = 1.0
+		_highlight = 0.5
 		_track_material.set_shader_parameter("highlight", _highlight)
 		pass
 	elif _highlight > 0.0:

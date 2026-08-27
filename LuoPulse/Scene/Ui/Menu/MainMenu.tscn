@@ -51,6 +51,9 @@ size_flags_vertical = 3
 [node name="Button" parent="MenuButtons/Sympathy" index="0" unique_id=45460652]
 text = "> 共鸣"
 
+[node name="Separator" parent="MenuButtons/Sympathy" index="1" unique_id=483453183]
+visible = false
+
 [node name="Album" parent="MenuButtons" unique_id=24736938 instance=ExtResource("3_ubtn")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -59,19 +62,30 @@ size_flags_vertical = 3
 disabled = true
 text = "# 断章"
 
+[node name="Separator" parent="MenuButtons/Album" index="1" unique_id=483453183]
+visible = false
+
 [node name="Note" parent="MenuButtons" unique_id=2007988620 instance=ExtResource("3_ubtn")]
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuButtons/Note" index="0" unique_id=45460652]
+disabled = true
 text = "= 笔记"
+
+[node name="Separator" parent="MenuButtons/Note" index="1" unique_id=483453183]
+visible = false
 
 [node name="Setting" parent="MenuButtons" unique_id=476490099 instance=ExtResource("3_ubtn")]
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuButtons/Setting" index="0" unique_id=45460652]
+disabled = true
 text = "* 设置"
+
+[node name="Separator" parent="MenuButtons/Setting" index="1" unique_id=483453183]
+visible = false
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=2040597354]
 layout_mode = 1

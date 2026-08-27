@@ -35,7 +35,7 @@ shader_parameter/edge_threshold = 0.800000038
 shader_parameter/texture_strength = 0.06
 shader_parameter/texture_scale = 180.0
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_l7374"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_18wrx"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
@@ -121,11 +121,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_l7374")
+texture = SubResource("ViewportTexture_18wrx")
 expand_mode = 3
 
 [node name="Combo" type="Label" parent="UI" unique_id=146666133]
-visible = false
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -135,8 +134,10 @@ offset_top = 12.0
 offset_right = 241.0
 offset_bottom = 76.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 50
+theme_override_colors/font_color = Color(0.72464263, 0.72464263, 0.72464246, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 55
 text = "114 COMBO"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -147,10 +148,13 @@ offset_left = 32.0
 offset_top = 12.0
 offset_right = 116.0
 offset_bottom = 96.0
-theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_colors/font_pressed_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_colors/font_hover_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_colors/font_hover_pressed_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_colors/font_color = Color(0.9007046, 0.90070456, 0.90070456, 0.78431374)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 text = "| |"
 
 [node name="PausePanel" type="PanelContainer" parent="UI" unique_id=1601946626]
@@ -183,25 +187,28 @@ theme_override_constants/separation = 10
 [node name="ContinueButton" type="Button" parent="UI/PausePanel/CenterContainer/VBoxContainer/VBoxContainer" unique_id=160578082]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_pressed_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_hover_pressed_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
+theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
 text = "> 继续"
 
 [node name="RetryButton" type="Button" parent="UI/PausePanel/CenterContainer/VBoxContainer/VBoxContainer" unique_id=366171315]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_pressed_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_hover_pressed_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
+theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
 text = "@ 重试"
 
 [node name="ExitButton" type="Button" parent="UI/PausePanel/CenterContainer/VBoxContainer/VBoxContainer" unique_id=1907178115]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_pressed_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_colors/font_hover_pressed_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
+theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
 text = "< 退出"
 
 [node name="NoteLoader" type="Node" parent="." unique_id=380954061]

@@ -14,13 +14,24 @@
 
 extends Control
 
+# 主页背景
 @onready var background: TextureRect = $Background
+
+# 用户名
+@onready var username: Label = $Profile/VBoxContainer/InfoPanel/Username
+
+# 水晶值
+@onready var amount: Label = $Currency/HBoxContainer/Amount
+
 
 
 
 func _ready() -> void:
 	# 主页面背景色彩变化并非线性, 而是 U 形变化
 	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	# 界面上的数值显示
+	username.text = Global.user_name
+	amount.text = str(Global.crystal)
 	pass
 
 

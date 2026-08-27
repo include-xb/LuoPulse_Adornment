@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cyby1mdapaw3i"]
 
-[ext_resource type="Script" uid="uid://dhs52o7d8c1qx" path="res://Script/Ui/SongSelect/sympathy.gd" id="1_sd8b3"]
+[ext_resource type="Script" uid="uid://wkge4va0l215" path="res://Script/Ui/SongSelect/Sympathy.gd" id="1_qx1yg"]
 [ext_resource type="Texture2D" uid="uid://ckkflwkuu1poh" path="res://Asset/Image/最初日.png" id="2_8by2n"]
 [ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_qx1yg"]
 
@@ -97,6 +97,9 @@ _data = {
 &"unfold": SubResource("Animation_lqs8k")
 }
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
+bg_color = Color(0, 0, 0, 0.8745098)
+
 [node name="Sympathy" type="Control" unique_id=1456702183]
 layout_mode = 3
 anchors_preset = 15
@@ -104,7 +107,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_sd8b3")
+script = ExtResource("1_qx1yg")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1136130409]
 material = SubResource("ShaderMaterial_558w5")
@@ -212,6 +215,7 @@ offset_bottom = 488.0
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
+theme_override_font_sizes/font_size = 35
 text = "最初日"
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=502763094]
@@ -222,30 +226,22 @@ theme_override_constants/margin_top = 19
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "作词/作曲/编曲："
 
 [node name="Creator" type="Label" parent="VBoxContainer" unique_id=1615023692]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "制谱："
 
 [node name="Vocalist" type="Label" parent="VBoxContainer" unique_id=166633472]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "演唱："
-
-[node name="Card" type="Button" parent="VBoxContainer" unique_id=1643585828]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 10
-theme_override_font_sizes/font_size = 20
-text = "【资料卡】"
-alignment = 0
 
 [node name="Cover" type="TextureRect" parent="." unique_id=327564411]
 material = SubResource("ShaderMaterial_qx1yg")
@@ -284,7 +280,111 @@ grow_vertical = 0
 step = 0.1
 show_percentage = false
 
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=506894270]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -134.0
+offset_top = 22.0
+offset_bottom = 144.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_right = 20
+
+[node name="Option" type="VBoxContainer" parent="MarginContainer" unique_id=1334690118]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PopCard" type="MarginContainer" parent="MarginContainer/Option" unique_id=2086393991]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="Card" type="Button" parent="MarginContainer/Option/PopCard" unique_id=1643585828]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 10
+disabled = true
+text = "= 笔记"
+alignment = 0
+
+[node name="PopSetting" type="MarginContainer" parent="MarginContainer/Option" unique_id=2051290458]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="Setting" type="Button" parent="MarginContainer/Option/PopSetting" unique_id=956869387]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+text = "* 选项"
+
+[node name="SettingPanel" type="PanelContainer" parent="." unique_id=9111105]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_qx1yg")
+
+[node name="CenterContainer" type="CenterContainer" parent="SettingPanel" unique_id=1129754850]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingPanel/CenterContainer" unique_id=722070349]
+layout_mode = 2
+theme_override_constants/separation = 60
+
+[node name="Label" type="Label" parent="SettingPanel/CenterContainer/VBoxContainer" unique_id=1185414228]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 0.8784314, 0.77254903)
+theme_override_font_sizes/font_size = 60
+text = "选项"
+
+[node name="Body" type="VBoxContainer" parent="SettingPanel/CenterContainer/VBoxContainer" unique_id=119856377]
+layout_mode = 2
+size_flags_vertical = 6
+
+[node name="AutoplayButton" type="Button" parent="SettingPanel/CenterContainer/VBoxContainer/Body" unique_id=200982053]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
+theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+text = "自动播放          开"
+
+[node name="PVButton" type="Button" parent="SettingPanel/CenterContainer/VBoxContainer/Body" unique_id=1420917600]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
+theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+text = "播放 PV        开"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingPanel/CenterContainer/VBoxContainer" unique_id=946676189]
+layout_mode = 2
+size_flags_vertical = 10
+theme_override_constants/separation = 10
+
+[node name="OKButton" type="Button" parent="SettingPanel/CenterContainer/VBoxContainer/VBoxContainer" unique_id=1745716201]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_pressed_color = Color(0.6719176, 0.6110251, 0.5262402, 1)
+theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
+theme_override_colors/font_hover_pressed_color = Color(0.67058825, 0.6117647, 0.5254902, 1)
+text = "> 确定"
+
 [connection signal="pressed" from="HBoxContainer/MarginContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Select/Left" to="." method="_on_left_pressed"]
 [connection signal="pressed" from="Select/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="Select/Right" to="." method="_on_right_pressed"]
+[connection signal="pressed" from="MarginContainer/Option/PopSetting/Setting" to="." method="_on_setting_pressed"]
+[connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton" to="." method="_on_autoplay_button_pressed"]
+[connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/PVButton" to="." method="_on_pv_button_pressed"]
+[connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/VBoxContainer/OKButton" to="." method="_on_ok_button_pressed"]

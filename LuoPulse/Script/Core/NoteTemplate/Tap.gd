@@ -35,6 +35,7 @@ var is_judged: bool = false
 var _was_in_judging_area: bool = false
 
 
+@warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
 	if gameplay == null:
 		return
@@ -85,6 +86,10 @@ func judge(master_time: float) -> void:
 
 	var level: String = "lost"
 
+	if Global.is_autoplay:
+		time_offset = 0
+		pass
+
 	if abs_offset <= Global.HARMONIOUS_TIME:
 		Global.harmonious += 1
 		a = 1.0
@@ -113,6 +118,7 @@ func judge(master_time: float) -> void:
 	pass
 
 
+@warning_ignore("unused_parameter")
 func _lose(master_time: float) -> void:
 	if is_removed or is_judged:
 		return

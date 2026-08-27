@@ -120,8 +120,8 @@ const JUDGMENT_TEXT: Dictionary = {
 }
 
 const JUDGMENT_COLORS: Dictionary = {
-	"harmonious": Color(1.0, 0.85, 0.3, 1.0),
-	"sympathetic": Color(0.5, 0.9, 0.5, 1.0),
+	"harmonious": Color(0.419, 0.792, 0.421, 1.0),
+	"sympathetic": Color(1.0, 0.85, 0.3, 1.0),
 	"aware": Color(0.4, 0.7, 1.0, 1.0),
 	"lost": Color(0.6, 0.6, 0.6, 1.0),
 }
@@ -129,13 +129,13 @@ const JUDGMENT_COLORS: Dictionary = {
 const EARLY_COLOR: Color = Color(0.4, 0.7, 1.0, 1.0)
 const LATE_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
 
-const FEEDBACK_DURATION: float = 0.5
-const FEEDBACK_FLOAT_Y: float = -30.0
-const FEEDBACK_FONT_SIZE: int = 24
-const FEEDBACK_EARLY_LATE_FONT_SIZE: int = 18
+const FEEDBACK_DURATION: float = 0.2
+const FEEDBACK_FLOAT_Y: float = 30.0
+const FEEDBACK_FONT_SIZE: int = 32
+# const FEEDBACK_EARLY_LATE_FONT_SIZE: int = 18
 
 var _judgment_container: Control = null
-var _feedback_labels: Array[Label] = []
+var _feedback_labels: Array[Label] = [ ]
 var _feedback_index: int = 0
 var _max_feedback_labels: int = 16
 
@@ -401,18 +401,19 @@ var default_chart: Array = [
 			"time": 8966,
 			"column": 3
 		}]
-var is_test: bool = false
+var is_test: bool = !true
 
 
 func _ready() -> void:
 	_calculate_track_screen_bounds()
 	_reset_judging_stats()
 	_setup_judgment_feedback()
-
+	
 	audio_system.connect("finished", game_finished)
-
+	
 	_collect_input_processers()
-
+	
+	video_stream_player.visible = true
 	_pause_panel.visible = false
 	_pause_panel.modulate.a = 0.0
 	_setup_countdown_label()
@@ -460,10 +461,10 @@ func _calculate_track_screen_bounds() -> void:
 
 	var vp_w: float = float(_subviewport.size.x)
 	var screen_w: float = get_viewport().get_visible_rect().size.x
-	var scale: float = screen_w / vp_w
+	var _scale: float = screen_w / vp_w
 
-	_track_screen_min = left_vp.x * scale
-	_track_screen_max = right_vp.x * scale
+	_track_screen_min = left_vp.x * _scale
+	_track_screen_max = right_vp.x * _scale
 	pass
 
 
@@ -486,6 +487,7 @@ func test() -> void:
 func _process(delta: float) -> void:
 	if not _is_counting_down:
 		_update_master_time()
+		pass
 
 	if not is_gaming:
 		if _is_counting_down:
@@ -493,11 +495,14 @@ func _process(delta: float) -> void:
 			pass
 		return
 
-	# 音频启动
+	# 音视频启动
 	if is_audio_start == false && master_time >= 0.0:
 		audio_system.play()
-		if video_stream_player.stream != null:
+		if video_stream_player.stream != null && Global.is_pvplay:
 			video_stream_player.play()
+			pass
+		else:
+			video_stream_player.visible = false
 			pass
 		is_audio_start = true
 		pass
@@ -535,7 +540,6 @@ func _process(delta: float) -> void:
 		_combo_label.text = str(Global.combo) + " COMBO"
 	else :
 		_combo_label.visible = false
-
 	pass
 
 
@@ -608,10 +612,10 @@ func _input(event: InputEvent) -> void:
 
 func _get_column_from_x(x: float) -> int:
 	var col_count: int = Global.COLUMN_NUM
-	var range: float = _track_screen_max - _track_screen_min
-	if range <= 0.0:
-		range = get_viewport().get_visible_rect().size.x
-	var normalized: float = (x - _track_screen_min) / range
+	var _range: float = _track_screen_max - _track_screen_min
+	if _range <= 0.0:
+		_range = get_viewport().get_visible_rect().size.x
+	var normalized: float = (x - _track_screen_min) / _range
 	var col: int = int(normalized * float(col_count))
 	if col >= 0 and col < col_count:
 		return col
@@ -804,7 +808,15 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 	var tween: Tween = create_tween()
 	lbl.set_meta("_feedback_tween", tween)
 	tween.set_parallel(true)
-	tween.tween_property(lbl, "position:y", lbl.position.y + FEEDBACK_FLOAT_Y, FEEDBACK_DURATION)
+	if time_offset > 0:
+		tween.tween_property(lbl, "position:y", lbl.position.y + FEEDBACK_FLOAT_Y, FEEDBACK_DURATION)
+		pass
+	elif time_offset < 0:
+		tween.tween_property(lbl, "position:y", lbl.position.y - FEEDBACK_FLOAT_Y, FEEDBACK_DURATION)
+		pass
+	else:
+		lbl.text = "◇ " + jtext
+		pass
 	tween.tween_property(lbl, "modulate:a", 0.0, FEEDBACK_DURATION).set_ease(Tween.EASE_IN).set_delay(0.15)
 	pass
 
@@ -824,7 +836,7 @@ func _get_column_screen_x(column: int) -> float:
 
 func _get_judgment_line_y() -> float:
 	var viewport_height: float = get_viewport().get_visible_rect().size.y
-	return viewport_height * 0.72
+	return viewport_height * 0.78
 
 
 # 游戏结束
@@ -1073,7 +1085,7 @@ func _restart_game() -> void:
 
 func _clear_notes() -> void:
 	var track: Node3D = $SubViewport/Node3D/Track
-	for i in range(Global.COLUMN_NUM):
+	for i: int in range(Global.COLUMN_NUM):
 		var column_node: Node3D = track.get_node("Column" + str(i + 1))
 		var note_pool: Node3D = column_node.get_node("NotePool")
 		for child in note_pool.get_children():

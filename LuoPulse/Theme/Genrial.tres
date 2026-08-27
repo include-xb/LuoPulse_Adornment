@@ -39,12 +39,13 @@ gradient = SubResource("Gradient_d2g8x")
 texture = SubResource("GradientTexture1D_uegkn")
 
 [resource]
-Button/colors/font_color = Color(0, 0, 0, 0.784314)
+Button/colors/font_color = Color(0, 0, 0, 0.78431374)
 Button/colors/font_disabled_color = Color(0, 0, 0, 0.39215687)
-Button/colors/font_focus_color = Color(0, 0, 0, 0.784314)
-Button/colors/font_hover_color = Color(0, 0, 0, 0.784314)
-Button/colors/font_hover_pressed_color = Color(0, 0, 0, 0.784314)
-Button/colors/font_pressed_color = Color(0, 0, 0, 0.784314)
+Button/colors/font_focus_color = Color(0, 0, 0, 0.627451)
+Button/colors/font_hover_color = Color(0, 0, 0, 0.627451)
+Button/colors/font_hover_pressed_color = Color(0, 0, 0, 0.9411765)
+Button/colors/font_pressed_color = Color(0, 0, 0, 0.9411765)
+Button/constants/outline_size = 2
 Button/font_sizes/font_size = 45
 Button/styles/disabled = SubResource("StyleBoxFlat_qx1yg")
 Button/styles/focus = SubResource("StyleBoxFlat_uegkn")
@@ -54,7 +55,7 @@ Button/styles/pressed = SubResource("StyleBoxFlat_t6ycm")
 Label/colors/font_color = Color(0, 0, 0, 1)
 Label/colors/font_outline_color = Color(0, 0, 0, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 0)
-Label/constants/outline_size = 1
+Label/constants/outline_size = 2
 Label/constants/shadow_offset_x = 1
 Label/constants/shadow_offset_y = 1
 Label/constants/shadow_outline_size = 1

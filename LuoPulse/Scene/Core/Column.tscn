@@ -7,9 +7,10 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8ks2l"]
 render_priority = 0
 shader = ExtResource("2_8ks2l")
-shader_parameter/edge_color = Color(0, 0, 0, 0.078)
+shader_parameter/edge_color = Color(0, 0, 0, 0.7529412)
 shader_parameter/edge_width = 0.5
-shader_parameter/track_color = Color(0, 0, 0, 0.47)
+shader_parameter/track_color = Color(0, 0, 0, 0.5647059)
+shader_parameter/highlight = 0.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
 material = SubResource("ShaderMaterial_8ks2l")
@@ -19,13 +20,13 @@ size = Vector2(1, 22)
 render_priority = 0
 shader = ExtResource("3_bhst1")
 shader_parameter/edge_color = Color(0, 0, 0, 0)
-shader_parameter/edge_width_y = 0.5
-shader_parameter/edge_width_x = 0.5
-shader_parameter/original_color = Color(0, 0, 0, 0.39215687)
+shader_parameter/edge_width_y = 0.350000016625
+shader_parameter/edge_width_x = 0.250000011875
+shader_parameter/original_color = Color(0, 0, 0, 0.5882353)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_in2dp"]
 material = SubResource("ShaderMaterial_ogl7y")
-size = Vector2(0.9, 0.2)
+size = Vector2(1.2, 0.4)
 center_offset = Vector3(0, 0.01, 0)
 
 [node name="Column" type="Node3D" unique_id=1704662228]

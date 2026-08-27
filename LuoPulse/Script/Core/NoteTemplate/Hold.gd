@@ -91,7 +91,6 @@ func _process(delta: float) -> void:
 				_explode()
 				pass
 			return
-			pass
 
 		position.z = tail_z / 2.0
 		scale.z = visible_length / _mesh_base_height
@@ -166,6 +165,10 @@ func judge_head(master_time: float) -> void:
 	var abs_offset: int = abs(time_offset)
 
 	var level: String = "lost"
+
+	if Global.is_autoplay:
+		time_offset = 0
+		pass
 
 	if abs_offset <= Global.HARMONIOUS_TIME:
 		a = 1.0

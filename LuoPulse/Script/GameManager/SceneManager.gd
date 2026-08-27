@@ -2,16 +2,16 @@
 
 extends Node
 
-const LAUNCH_SCENE_PATH := "res://Scene/Ui/Launch.tscn"
+const LAUNCH_SCENE_PATH: String = "res://Scene/Ui/Launch.tscn"
 
 @onready var color_rect: ColorRect = $CanvasLayer/ColorRect
 @onready var texture_rect: TextureRect = $CanvasLayer/TextureRect
 
-var _scene_track: Array = []
-var _args: Dictionary = {}
+var _scene_track: Array = [ ]
+var _args: Dictionary = { }
 var _last_animation_name: String = "fade"
 var _launch_scene: Node = null
-var _is_finish = false
+var _is_finish: bool = false
 
 func _ready() -> void:
 	color_rect.self_modulate.a = 0

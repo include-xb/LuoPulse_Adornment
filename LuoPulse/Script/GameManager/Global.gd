@@ -73,6 +73,9 @@ var game_mode: GameMode = GameMode.None
 # 是否自动播放
 var is_autoplay: bool = false
 
+# 是否播放 PV
+var is_pvplay: bool = true
+
 # 共鸣主线歌曲路径列表
 var sympath_song_path_list: Array[String] = [ ]
 
