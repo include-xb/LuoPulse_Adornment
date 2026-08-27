@@ -24,7 +24,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(488, 192)]
+"values": [Vector2(164.5, 2)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -36,7 +36,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(490, 190)]
+"values": [Vector2(152.49896, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -226,10 +226,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 185.5
-offset_top = 42.0
-offset_right = 461.49994
-offset_bottom = 338.0
+offset_left = -138.0
+offset_top = -148.0
+offset_right = 138.0
+offset_bottom = 148.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -265,14 +265,6 @@ size_flags_vertical = 0
 theme_override_font_sizes/font_size = 22
 text = "演唱："
 
-[node name="Card" type="Button" parent="Control/VBoxContainer" unique_id=1643585828]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 10
-theme_override_font_sizes/font_size = 20
-text = "【资料卡】"
-alignment = 0
-
 [node name="Cover" type="TextureRect" parent="Control" unique_id=327564411]
 material = SubResource("ShaderMaterial_qx1yg")
 custom_minimum_size = Vector2(300, 300)
@@ -282,10 +274,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 187.5
-offset_top = 40.0
-offset_right = 487.50208
-offset_bottom = 340.0
+offset_left = -150.00104
+offset_top = -150.0
+offset_right = 150.00104
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_8by2n")
@@ -328,6 +320,18 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="PopCard" type="MarginContainer" parent="MarginContainer/Option" unique_id=545325052]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="Card" type="Button" parent="MarginContainer/Option/PopCard" unique_id=1643585828]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 10
+disabled = true
+text = "= 笔记"
+alignment = 0
+
 [node name="PopSetting" type="MarginContainer" parent="MarginContainer/Option" unique_id=2051290458]
 layout_mode = 2
 size_flags_horizontal = 8
@@ -339,6 +343,7 @@ size_flags_vertical = 3
 text = "* 选项"
 
 [node name="SettingPanel" type="PanelContainer" parent="." unique_id=9111105]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

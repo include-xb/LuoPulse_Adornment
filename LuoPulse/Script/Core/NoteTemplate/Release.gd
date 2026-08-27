@@ -8,6 +8,7 @@ var type: String = "release"
 
 
 # 被触摸 → Lost
+@warning_ignore("unused_parameter")
 func lose(master_time: float) -> void:
 	if is_removed or is_judged:
 		return
@@ -29,6 +30,7 @@ func lose(master_time: float) -> void:
 
 
 # 离开判定区间未被触碰 → 自动通过 (不触发丢失)
+@warning_ignore("unused_parameter")
 func _on_miss(master_time: float) -> void:
 	_pass_through()
 	pass

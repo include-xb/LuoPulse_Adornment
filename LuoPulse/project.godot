@@ -24,7 +24,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Global="*res://Scene/GameManager/Global.tscn"
-McpRuntime="uid://732g0yf236a7"
+McpRuntime="*uid://732g0yf236a7"
 
 [display]
 

@@ -57,6 +57,7 @@ func _ready() -> void:
 	pass
 
 
+@warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
 	if gameplay == null:
 		return
@@ -196,6 +197,7 @@ func judge_head(master_time: float) -> void:
 	pass
 
 
+@warning_ignore("unused_parameter")
 func on_hold_start(master_time: float) -> void:
 	is_holding = true
 	pass

@@ -35,7 +35,7 @@ shader_parameter/edge_threshold = 0.800000038
 shader_parameter/texture_strength = 0.06
 shader_parameter/texture_scale = 180.0
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_18wrx"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_sc0u0"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
@@ -132,7 +132,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_18wrx")
+texture = SubResource("ViewportTexture_sc0u0")
 expand_mode = 3
 
 [node name="Combo" type="Label" parent="UI" unique_id=146666133]
@@ -221,6 +221,20 @@ theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488,
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
 text = "< 退出"
+
+[node name="Autoplay" type="Label" parent="UI" unique_id=528626801]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -53.0
+offset_right = 129.0
+offset_bottom = -15.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.8431839, 0.8431839, 0.84318376, 1)
+text = "autoplay"
 
 [node name="NoteLoader" type="Node" parent="." unique_id=380954061]
 script = ExtResource("2_ovtvy")
