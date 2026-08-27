@@ -16,11 +16,7 @@ extends Control
 
 # 背景
 @onready var background: TextureRect = $Background
-
-# 封面
-@onready var cover: TextureRect = $Cover
-
-# 左切
+@onready var cover: TextureRect = $Control/Cover
 @onready var left: Button = $Select/Left
 
 # 开始 (选中)
@@ -54,16 +50,16 @@ extends Control
 
 ## 歌曲信息
 # 标题
-@onready var title: Label = $VBoxContainer/Title
+@onready var title: Label = $Control/VBoxContainer/Title
 
 # P 主
-@onready var producer: Label = $VBoxContainer/Producer
+@onready var producer: Label = $Control/VBoxContainer/Producer
 
 # 谱师
-@onready var creator: Label = $VBoxContainer/Creator
+@onready var creator: Label = $Control/VBoxContainer/Creator
 
 # 演唱
-@onready var vocalist: Label = $VBoxContainer/Vocalist
+@onready var vocalist: Label = $Control/VBoxContainer/Vocalist
 
 
 func _ready() -> void:
@@ -78,7 +74,6 @@ func _ready() -> void:
 	amount.text = str(Global.crystal)
 	
 	animation_player.play("unfold")
-	print(Global.sympath_song_path_list)
 	load_song_info()
 	refresh_progress_bar()
 	pass
@@ -177,7 +172,6 @@ func _on_right_pressed() -> void:
 func _on_start_pressed() -> void:
 	audio_stream_player.stop()
 	Global.play_ui_click_audio()
-	# SceneManager.change_scene("res://Scene/Core/Gameplay.tscn")
 	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
 	pass # Replace with function body.
 

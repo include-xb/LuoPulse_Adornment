@@ -17,7 +17,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VBoxContainer:position")
+tracks/0/path = NodePath("Control/VBoxContainer:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -29,7 +29,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Cover:position")
+tracks/1/path = NodePath("Control/Cover:position")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -41,7 +41,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("VBoxContainer:modulate")
+tracks/2/path = NodePath("Control/VBoxContainer:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -57,31 +57,31 @@ length = 0.3
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VBoxContainer:position")
+tracks/0/path = NodePath("Control/VBoxContainer:position")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.3),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(488, 192), Vector2(646, 192)]
+"values": [Vector2(164.5, 0), Vector2(321, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Cover:position")
+tracks/1/path = NodePath("Control/Cover:position")
 tracks/1/interp = 2
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.3),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(490, 190), Vector2(330, 192)]
+"values": [Vector2(152.49896, 0), Vector2(0, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("VBoxContainer:modulate")
+tracks/2/path = NodePath("Control/VBoxContainer:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -204,46 +204,76 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 80
 text = ">"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=527410655]
-layout_mode = 0
-offset_left = 488.0
-offset_top = 192.0
-offset_right = 792.00024
-offset_bottom = 488.0
+[node name="Control" type="Control" parent="." unique_id=13272405]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -170.0
+offset_right = 295.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
 
-[node name="Title" type="Label" parent="VBoxContainer" unique_id=1091785862]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=527410655]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 185.5
+offset_top = 42.0
+offset_right = 461.49994
+offset_bottom = 338.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="Control/VBoxContainer" unique_id=1091785862]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 35
 text = "最初日"
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=502763094]
+[node name="MarginContainer" type="MarginContainer" parent="Control/VBoxContainer" unique_id=502763094]
 layout_mode = 2
 theme_override_constants/margin_top = 19
 
-[node name="Producer" type="Label" parent="VBoxContainer" unique_id=386705241]
+[node name="Producer" type="Label" parent="Control/VBoxContainer" unique_id=386705241]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 22
 text = "作词/作曲/编曲："
 
-[node name="Creator" type="Label" parent="VBoxContainer" unique_id=1615023692]
+[node name="Creator" type="Label" parent="Control/VBoxContainer" unique_id=1615023692]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 22
 text = "制谱："
 
-[node name="Vocalist" type="Label" parent="VBoxContainer" unique_id=166633472]
+[node name="Vocalist" type="Label" parent="Control/VBoxContainer" unique_id=166633472]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme_override_font_sizes/font_size = 22
 text = "演唱："
 
-[node name="Cover" type="TextureRect" parent="." unique_id=327564411]
+[node name="Card" type="Button" parent="Control/VBoxContainer" unique_id=1643585828]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 10
+theme_override_font_sizes/font_size = 20
+text = "【资料卡】"
+alignment = 0
+
+[node name="Cover" type="TextureRect" parent="Control" unique_id=327564411]
 material = SubResource("ShaderMaterial_qx1yg")
 custom_minimum_size = Vector2(300, 300)
 layout_mode = 1
@@ -252,10 +282,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -170.0
-offset_right = 150.00134
-offset_bottom = 130.0
+offset_left = 187.5
+offset_top = 40.0
+offset_right = 487.50208
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_8by2n")
@@ -297,18 +327,6 @@ theme_override_constants/margin_right = 20
 [node name="Option" type="VBoxContainer" parent="MarginContainer" unique_id=1334690118]
 layout_mode = 2
 theme_override_constants/separation = 10
-
-[node name="PopCard" type="MarginContainer" parent="MarginContainer/Option" unique_id=2086393991]
-layout_mode = 2
-size_flags_horizontal = 8
-
-[node name="Card" type="Button" parent="MarginContainer/Option/PopCard" unique_id=1643585828]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 10
-disabled = true
-text = "= 笔记"
-alignment = 0
 
 [node name="PopSetting" type="MarginContainer" parent="MarginContainer/Option" unique_id=2051290458]
 layout_mode = 2

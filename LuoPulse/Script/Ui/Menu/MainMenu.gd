@@ -42,7 +42,7 @@ func _on_sympathy_pressed() -> void:
 
 func _on_album_pressed() -> void:
 	Global.play_ui_click_audio()
-	$"..".start_scene_by_path("res://Script/Ui/SongSelect/Album.gd")
+	$"..".start_scene_by_path("res://Scene/Ui/SongSelect/Album.tscn")
 
 
 func _on_note_pressed() -> void:
@@ -52,4 +52,4 @@ func _on_note_pressed() -> void:
 
 func _on_setting_pressed() -> void:
 	Global.play_ui_click_audio()
-	$"..".start_scene_by_path("res://Scene/Ui/Menu/SettingMenu.tscn")
+	$"..".start_scene_by_path("res://Scene/Ui/Menu/SettingsMenu.tscn")

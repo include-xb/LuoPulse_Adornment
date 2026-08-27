@@ -13,7 +13,7 @@
 
 
 
-extends Node2D
+extends Control
 
 @onready var audio_system: AudioStreamPlayer = $"AudioSystem"
 
@@ -403,6 +403,14 @@ var default_chart: Array = [
 		}]
 var is_test: bool = !true
 
+# 桌面键盘按键映射 (开发调试用)
+const KEY_COLUMN_MAP: Dictionary = {
+	KEY_D: 0,
+	KEY_F: 1,
+	KEY_J: 2,
+	KEY_K: 3,
+}
+
 
 func _ready() -> void:
 	_calculate_track_screen_bounds()
@@ -623,14 +631,8 @@ func _get_column_from_x(x: float) -> int:
 
 
 func _get_column_from_key(event: InputEventKey) -> int:
-	var key_map: Dictionary = {
-		KEY_D: 0,
-		KEY_F: 1,
-		KEY_J: 2,
-		KEY_K: 3,
-	}
-	if key_map.has(event.keycode):
-		return key_map[event.keycode]
+	if KEY_COLUMN_MAP.has(event.keycode):
+		return KEY_COLUMN_MAP[event.keycode]
 	return -1
 
 
@@ -665,7 +667,6 @@ func load_note_process() -> void:
 	var batch_time: float = note_time
 	while current_note_index < total_notes and float(time_list[current_note_index]) == batch_time:
 		load_note(current_note_index, current_note_index)
-		print("正在加载第 %d 个音符" % current_note_index)
 		current_note_index += 1
 		pass
 
@@ -684,7 +685,8 @@ func load_note(note_index: int, index: int) -> void:
 		column_list[note_index],
 		index,
 		$SubViewport/Node3D/Track,
-		self,
+		$Node2D,
+		self
 	)
 	pass
 
@@ -692,16 +694,13 @@ func load_note(note_index: int, index: int) -> void:
 # 从当前选择的曲包中加载谱面数据
 func load_list() -> void:
 	var path: String = Global.sympath_song_path_list[Global.current_song_index]
-	var img: ImageTexture = Global._read_cover_from_lpz(path)
-	var audio_stream: AudioStream = Global._read_audio_from_lpz(path)
-	var chart_raw: Dictionary = Global._read_chart_from_lpz(path)
-	var video_stream: VideoStream = Global._read_video_from_lpz(path)
+	var lpz: Dictionary = Global._read_lpz(path)
 
-	background.texture = img
-	audio_system.stream = audio_stream
-	audio_length = int(audio_stream.get_length() * 1000)
-	chart = chart_raw.get("HitObjects")
-	video_stream_player.stream = video_stream
+	background.texture = lpz["cover"]
+	audio_system.stream = lpz["audio"]
+	audio_length = int(lpz["audio"].get_length() * 1000)
+	chart = lpz["chart"].get("HitObjects")
+	video_stream_player.stream = lpz["video"]
 	pass
 
 

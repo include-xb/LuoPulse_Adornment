@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://c0hgbrfhgb5rl"]
+
+[node name="Background" type="PanelContainer" unique_id=565770654]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_group_ = true
+
+[node name="HLine" type="Node2D" parent="." unique_id=1450589972]
+position = Vector2(0, 23)
+metadata/_edit_group_ = true
+
+[node name="Line1" type="Line2D" parent="HLine" unique_id=419124886]
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line2" type="Line2D" parent="HLine" unique_id=2088550214]
+position = Vector2(0, 100)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line3" type="Line2D" parent="HLine" unique_id=553890902]
+position = Vector2(0, 200)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line4" type="Line2D" parent="HLine" unique_id=1422332477]
+position = Vector2(0, 300)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line5" type="Line2D" parent="HLine" unique_id=1624322666]
+position = Vector2(0, 400)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line6" type="Line2D" parent="HLine" unique_id=856157200]
+position = Vector2(0, 500)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line7" type="Line2D" parent="HLine" unique_id=582017827]
+position = Vector2(0, 600)
+points = PackedVector2Array(0, 1, 1152, 1)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="VLine" type="Node2D" parent="." unique_id=440014030]
+position = Vector2(23, 0)
+metadata/_edit_group_ = true
+
+[node name="Line1" type="Line2D" parent="VLine" unique_id=587740983]
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line2" type="Line2D" parent="VLine" unique_id=294892432]
+position = Vector2(100, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line3" type="Line2D" parent="VLine" unique_id=598274385]
+position = Vector2(200, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line4" type="Line2D" parent="VLine" unique_id=809595073]
+position = Vector2(300, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line5" type="Line2D" parent="VLine" unique_id=1594093425]
+position = Vector2(400, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line6" type="Line2D" parent="VLine" unique_id=9924274]
+position = Vector2(500, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line7" type="Line2D" parent="VLine" unique_id=1998607812]
+position = Vector2(600, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line8" type="Line2D" parent="VLine" unique_id=305896156]
+position = Vector2(700, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line9" type="Line2D" parent="VLine" unique_id=1563647866]
+position = Vector2(800, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line10" type="Line2D" parent="VLine" unique_id=2008218503]
+position = Vector2(900, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line11" type="Line2D" parent="VLine" unique_id=1459383950]
+position = Vector2(1000, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Line12" type="Line2D" parent="VLine" unique_id=1424357229]
+position = Vector2(1100, 0)
+points = PackedVector2Array(1, 0, 1, 648)
+width = 1.0
+default_color = Color(0.905882, 0.886275, 0.792157, 1)
+
+[node name="Background" type="Control" parent="." unique_id=585051077]
+layout_mode = 2

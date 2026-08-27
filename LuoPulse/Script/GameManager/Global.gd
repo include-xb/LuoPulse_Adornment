@@ -52,6 +52,67 @@ const AWARE_TIME: int = 180
 # 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
 const LOST_TIME: int = 240
 
+# INFO: 设置项仅在此处修改，控件将会动态生成
+# 设置项
+# 每个设置项字段:
+# 	key: Global 中的变量名 (读取/写入值)
+# 	config_key: config.json 中的键名 (默认与 key 相同)
+# 	node_type: 控件类型 (HSlider / SpinBox)
+# 	min / max / step: 控件取值范围与步进
+# 	suffix: 显示在数值后的单位
+# "语言": { "key": "language", "node_type": "OptionButton", "options": ["中文", "English", "日本語"] },
+# "用户名": { "key": "user_name", "node_type": "LineEdit" },
+const SETTINGS: Dictionary[String, Dictionary] = {
+	"音频": {
+		"UI音效音量": {
+			"key": "volume_ui",
+			"config_key": "volume_ui",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"suffix": "%",
+		},
+		"音符打击音量": {
+			"key": "volume_note",
+			"config_key": "volume_note",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"suffix": "%",
+		},
+		"歌曲音量": {
+			"key": "volume_song",
+			"config_key": "volume_song",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"suffix": "%",
+		},
+	},
+	"游戏": {
+		"谱面偏移": {
+			"key": "chart_offset",
+			"config_key": "offset",
+			"node_type": "SpinBox",
+			"min": -200,
+			"max": 200,
+			"step": 1,
+			"suffix": "ms",
+		},
+		"音符流速": {
+			"key": "note_flow_speed",
+			"config_key": "speed",
+			"node_type": "SpinBox",
+			"min": 1,
+			"max": 20,
+			"step": 1,
+			"suffix": "",
+		},
+	},
+}
 
 
 ## 变量
@@ -90,6 +151,21 @@ var album_song_num: int = 0
 
 # 当前歌曲
 var current_song: String = ""
+
+# 当前歌曲标题
+var current_song_title: String = ""
+
+# 当前歌曲制作人 (P主)
+var current_song_artist: String = ""
+
+# 当前歌曲 BPM
+var current_song_bpm: String = ""
+
+# 笔记返回场景 (home / results)
+var notebook_return_scene: String = "home"
+
+# 笔记返回的歌曲标题
+var notebook_return_song_title: String = ""
 
 # 当前歌曲的索引
 var current_song_index: int = 0
@@ -222,6 +298,72 @@ func get_crystal_reward(acc: float) -> int:
 ## ============================================================
 ## LPZ 文件读取
 ## ============================================================
+
+## 一次性从 .lpz 文件中读取所有资源 (cover/audio/chart/video)
+## 相比分别调用 _read_*_from_lpz, 只打开一次 ZIP 文件, 避免重复解压
+## 返回 Dictionary: { "cover": ImageTexture, "audio": AudioStream, "chart": Dictionary, "video": VideoStream }
+func _read_lpz(lpz_path: String) -> Dictionary:
+	var result: Dictionary = {
+		"cover": null,
+		"audio": null,
+		"chart": { },
+		"video": null,
+	}
+
+	var zip := ZIPReader.new()
+	var err := zip.open(lpz_path)
+	if err != OK:
+		push_error("无法打开 .lpz 文件: %s" % lpz_path)
+		return result
+
+	var files: Dictionary = { }
+	for f in zip.get_files():
+		files[f.get_file()] = f
+
+	# 封面
+	if files.has("cover.png"):
+		var img := Image.new()
+		if img.load_png_from_buffer(zip.read_file(files["cover.png"])) == OK:
+			result["cover"] = ImageTexture.create_from_image(img)
+
+	# 音频
+	if files.has("audio.ogg"):
+		var audio_stream := AudioStreamOggVorbis.load_from_buffer(zip.read_file(files["audio.ogg"]))
+		if audio_stream == null:
+			push_error("无法解码音频文件: audio.ogg")
+		else:
+			result["audio"] = audio_stream
+
+	# 谱面
+	if files.has("chart.lp"):
+		var json_str := zip.read_file(files["chart.lp"]).get_string_from_utf8()
+		var json := JSON.new()
+		if json.parse(json_str) == OK:
+			var data: Variant = json.get_data()
+			if data is Dictionary:
+				result["chart"] = data
+
+	# 视频 (VideoStreamTheora 无 load_from_buffer, 需写入临时文件)
+	if files.has("video.ogv"):
+		var temp_dir := OS.get_user_data_dir().path_join("temp")
+		if not DirAccess.dir_exists_absolute(temp_dir):
+			DirAccess.make_dir_recursive_absolute(temp_dir)
+
+		var temp_path := temp_dir.path_join("_video_temp.ogv")
+		var file := FileAccess.open(temp_path, FileAccess.WRITE)
+		if file == null:
+			push_error("无法创建临时视频文件: %s" % temp_path)
+		else:
+			file.store_buffer(zip.read_file(files["video.ogv"]))
+			file.close()
+
+			var video_stream := VideoStreamTheora.new()
+			video_stream.file = temp_path
+			result["video"] = video_stream
+
+	zip.close()
+	return result
+
 
 ## 从 .lpz 文件中读取封面图片，返回 ImageTexture
 func _read_cover_from_lpz(lpz_path: String) -> ImageTexture:
@@ -362,4 +504,26 @@ func display_notice(info: String) -> void:
 	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
 	notice.text = "  " + info
 	NOTICE_BOX.add_child(notice)
+	pass
+
+
+## 将当前设置写入 config.json
+## 遍历 SETTINGS, 按 config_key 组装数据, 立即保存
+func save_config() -> void:
+	var data: Dictionary = { "version": config_version }
+
+	for group_key: String in SETTINGS:
+		var group: Dictionary = SETTINGS[group_key]
+		for setting_name: String in group:
+			var setting: Dictionary = group[setting_name]
+			var config_key: String = setting.get("config_key", setting["key"])
+			data[config_key] = get(setting["key"])
+			pass
+		pass
+
+	var path: String = OS.get_user_data_dir().path_join("config.json")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
 	pass

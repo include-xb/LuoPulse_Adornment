@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://ugbjmikkunw0"]
+
+[ext_resource type="Script" uid="uid://df35kyc648f2q" path="res://Script/Ui/Menu/SettingsMenu.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c0hgbrfhgb5rl" path="res://Scene/Ui/Widget/Background.tscn" id="2_bg"]
+[ext_resource type="PackedScene" uid="uid://bifeqp1xtt7v3" path="res://Scene/Ui/Widget/UnderlineButton.tscn" id="3_0nfho"]
+
+[node name="SettingsMenu" type="Control" unique_id=980781933]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" parent="." unique_id=1921912864 instance=ExtResource("2_bg")]
+layout_mode = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1731647274]
+custom_minimum_size = Vector2(0, 123)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 56.0
+grow_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer" unique_id=86355049]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+
+[node name="Back" type="Button" parent="HBoxContainer/MarginContainer" unique_id=145690368]
+layout_mode = 2
+text = "< 返回"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1044826898]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = 90.0
+offset_right = -60.0
+offset_bottom = -67.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer" unique_id=788741798]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer" unique_id=535986619]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="UnderlineButton" parent="." unique_id=1010812019 instance=ExtResource("3_0nfho")]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -90.0
+offset_top = -64.0
+offset_right = 90.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Button" parent="UnderlineButton" index="0" unique_id=45460652]
+theme_override_font_sizes/font_size = 35
+text = "! 关于"
+
+[connection signal="pressed" from="HBoxContainer/MarginContainer/Back" to="." method="_on_back_pressed"]
+
+[editable path="UnderlineButton"]

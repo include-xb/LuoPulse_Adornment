@@ -27,7 +27,7 @@ var note_template: MeshInstance3D = null
 ## index: 音符在轨道上的索引 (从 0 开始)
 ## track: 轨道父节点
 ## gameplay: Gameplay 节点引用
-func load_note(type: String, time: int, duration: int, column: int, index: int, track: Node3D, gameplay: Node2D):
+func load_note(type: String, time: int, duration: int, column: int, index: int, track: Node3D, gameplay: Node2D, root_node: Control):
 
 	if not note_type.has(type):
 		push_error("未知的音符类型: %s" % type)
@@ -38,6 +38,7 @@ func load_note(type: String, time: int, duration: int, column: int, index: int, 
 
 	# 注入 gameplay 引用
 	note_template.set("gameplay", gameplay)
+	note_template.set("root_node", root_node)
 
 	# 设置音符属性
 	note_template.index = index

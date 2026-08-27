@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b1p1t8lxckh4e"]
+
+[ext_resource type="Script" uid="uid://585pvauog3j1" path="res://Script/Ui/Widget/SettingsGroup.gd" id="1_66j5d"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_rt3um"]
+color = Color(0, 0, 0, 0.78431374)
+thickness = 2
+
+[node name="SettingsGroup" type="VBoxContainer" unique_id=486346425]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_66j5d")
+
+[node name="HSeparator" type="HSeparator" parent="." unique_id=1580772650]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_rt3um")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1470491737]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=185735691]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=2108659231]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0.78431374)
+theme_override_font_sizes/font_size = 24
+text = "GroupName"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=915042366]
+layout_mode = 2
+theme_override_constants/separation = 12
