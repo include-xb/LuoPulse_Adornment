@@ -98,7 +98,7 @@ _data = {
 }
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
-bg_color = Color(0, 0, 0, 0.8745098)
+bg_color = Color(0, 0, 0, 0.92156863)
 
 [node name="Sympathy" type="Control" unique_id=1456702183]
 layout_mode = 3

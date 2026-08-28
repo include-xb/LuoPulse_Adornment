@@ -24,7 +24,7 @@ func lose(master_time: float) -> void:
 		pass
 
 	_update_accuracy()
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
 	explode()
 	pass
 
@@ -48,6 +48,6 @@ func _pass_through() -> void:
 	if is_removed:
 		return
 	is_removed = true
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
 	explode()
 	pass

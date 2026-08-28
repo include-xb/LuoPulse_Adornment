@@ -56,4 +56,7 @@ func load_note(type: String, time: int, duration: int, column: int, index: int, 
 
 	# 将音符添加到对应轨道的 NotePool 节点下
 	track.get_node("Column" + str(column) + "/NotePool").add_child(note_template)
+
+	# 将音符添加到 rendering_area 中
+	Global.rendering_area.append(note_template)
 	pass

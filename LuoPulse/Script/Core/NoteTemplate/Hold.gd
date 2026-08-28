@@ -127,7 +127,7 @@ func _process(delta: float) -> void:
 	else:
 		# 头部已判定, 从判定区间移除 (不再接受新的判定)
 		if _was_in_judging_area:
-			_remove_from_judging()
+			_remove_from_judging_and_rendering()
 			_was_in_judging_area = false
 			pass
 		pass
@@ -248,7 +248,7 @@ func _complete_hold() -> void:
 	Global.total_judged += 1
 	var n: int = Global.total_judged
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
 	pass
 
 
@@ -269,15 +269,19 @@ func _lose() -> void:
 	var n: int = Global.total_judged
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
 
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
 	_explode()
 	pass
 
 
-func _remove_from_judging() -> void:
+func _remove_from_judging_and_rendering() -> void:
 	var idx: int = Global.judging_area.find(self)
 	if idx >= 0:
 		Global.judging_area.remove_at(idx)
+		pass
+	idx = Global.rendering_area.find(self)
+	if idx >= 0:
+		Global.rendering_area.remove_at(idx)
 		pass
 	pass
 
@@ -289,7 +293,8 @@ func explode() -> void:
 
 func _explode() -> void:
 	is_removed = true
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
+	_set_autoplay_hold(false)
 	queue_free()
 	pass
 
@@ -299,11 +304,22 @@ func autoplay(master_time: float) -> void:
 	if not is_head_judged and master_time >= float(time):
 		judge_head(master_time)
 		is_holding = true
+		_set_autoplay_hold(true)
 		pass
 	if is_head_judged and not is_holding and master_time >= float(time):
 		is_holding = true
+		_set_autoplay_hold(true)
 		pass
 	if is_holding and master_time >= float(time) + float(duration):
 		is_holding = false
+		_set_autoplay_hold(false)
+		pass
+	pass
+
+
+# 自动播放 hold 的轨道持续高亮转发
+func _set_autoplay_hold(is_active: bool) -> void:
+	if root_node and root_node.has_method("set_track_autoplay_hold"):
+		root_node.set_track_autoplay_hold(column, is_active)
 		pass
 	pass

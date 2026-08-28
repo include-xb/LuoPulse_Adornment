@@ -37,6 +37,17 @@ extends Control
 
 @onready var _pause_panel: PanelContainer = $"UI/PausePanel"
 
+# autoplay 标签
+@onready var autoplay: Label = $UI/MarginContainer/HBoxContainer/Autoplay
+
+# username 标签
+@onready var username: Label = $UI/MarginContainer/HBoxContainer/Username
+
+# 音符流速大小标签 (-20 ~ 20)
+@onready var speed_label: Label = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedLabel
+
+# 音符流速大小滑动条
+@onready var speed_scroll_bar: HScrollBar = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedScrollBar
 
 
 # 解析完成的谱面数据
@@ -425,8 +436,10 @@ func _ready() -> void:
 	_pause_panel.visible = false
 	_pause_panel.modulate.a = 0.0
 	_setup_countdown_label()
-
-
+	
+	autoplay.visible = Global.is_autoplay
+	username.text = Global.user_name
+	
 	if is_test == false:
 		# 从当前选择的曲包中加载谱面数据
 		load_list()
@@ -480,6 +493,24 @@ func get_input_processor(column: int) -> Node3D:
 	if column >= 0 and column < input_processers.size():
 		return input_processers[column]
 	return null
+
+
+# 自动播放时的轨道点击反馈 (column 为 1-based 音符列)
+func flash_track_feedback(column: int) -> void:
+	var processor: Node3D = get_input_processor(column - 1)
+	if processor and processor.has_method("flash_track"):
+		processor.flash_track()
+		pass
+	pass
+
+
+# 自动播放 hold: 设置轨道按住状态 (column 为 1-based 音符列)
+func set_track_autoplay_hold(column: int, is_active: bool) -> void:
+	var processor: Node3D = get_input_processor(column - 1)
+	if processor and processor.has_method("set_autoplay_hold"):
+		processor.set_autoplay_hold(is_active)
+		pass
+	pass
 
 
 # 测试画面
@@ -563,6 +594,19 @@ func _compute_master_time() -> float:
 	return float(Time.get_ticks_msec() - start_time) - float(Global.start_duration)
 
 
+# 设置音符流速更改后，重新计算实际音符流速
+func reset_speed() -> void:
+	Global.note_speed = 19.0 * Global.note_flow_speed / 40.0 + 10.5
+	if Global.rendering_area.size() == 0:
+		return
+	for note: MeshInstance3D in Global.rendering_area:
+		if note.type != "hold":
+			continue
+		note._hold_length = Global.note_speed * float(note.duration) / 1000.0
+		pass
+	pass
+
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		if _is_counting_down:
@@ -585,7 +629,7 @@ func _input(event: InputEvent) -> void:
 		var btn_rect: Rect2 = _pause_button.get_global_rect()
 		if btn_rect.has_point(event.position):
 			return
-
+		
 		var col: int = _get_column_from_x(event.position.x)
 		if col >= 0:
 			if event.pressed:
@@ -597,6 +641,7 @@ func _input(event: InputEvent) -> void:
 					var released_col: int = active_touches[event.index]
 					active_touches.erase(event.index)
 					_on_column_touch_released(released_col, input_time)
+					pass
 			pass
 		pass
 
@@ -614,7 +659,6 @@ func _input(event: InputEvent) -> void:
 			_on_column_touch_released(col, input_time)
 			pass
 		pass
-
 	pass
 
 
@@ -820,7 +864,6 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 	pass
 
 
-
 func _get_column_screen_x(column: int) -> float:
 	var col_count: int = Global.COLUMN_NUM
 	var viewport_width: float = get_viewport().get_visible_rect().size.x
@@ -935,7 +978,10 @@ func _show_pause_panel() -> void:
 	_is_pause_panel_visible = true
 	_pause_panel.visible = true
 	_pause_panel.modulate.a = 0.0
-
+	
+	speed_label.text = str(Global.note_flow_speed)
+	speed_scroll_bar.value = Global.note_flow_speed
+	
 	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_OUT)
@@ -979,7 +1025,7 @@ func _setup_countdown_label() -> void:
 	_countdown_label.offset_right = 150.0
 	_countdown_label.offset_bottom = 50.0
 	_countdown_label.add_theme_font_size_override("font_size", 80)
-	_countdown_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	_countdown_label.add_theme_color_override("font_color", Color(0.784, 0.784, 0.784, 1.0))
 	_countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(_countdown_label)
 	pass
@@ -1094,4 +1140,18 @@ func _clear_notes() -> void:
 			pass
 		pass
 	Global.judging_area = [ ]
+
+	# 重置各轨道的自动播放 hold 状态, 避免残留高亮
+	for processor: Node3D in input_processers:
+		if processor and processor.has_method("set_autoplay_hold"):
+			processor.set_autoplay_hold(false)
+			pass
+		pass
+	pass
+
+
+func _on_speed_scroll_bar_value_changed(value: float) -> void:
+	Global.note_flow_speed = int(value)
+	reset_speed()
+	speed_label.text = str(value)
 	pass

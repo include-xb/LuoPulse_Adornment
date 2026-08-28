@@ -19,6 +19,9 @@ const HIGHLIGHT_FADE: float = 8.0
 # 当前触摸计数 (支持多点触控)
 var _touch_count: int = 0
 
+# 自动播放 hold 是否处于按住状态 (用于持续高亮)
+var is_autoplay_holding: bool = false
+
 # 是否正在长按 (hold)
 var is_holding: bool = false
 
@@ -37,7 +40,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if _touch_count > 0:
+	if _touch_count > 0 or is_autoplay_holding:
 		_highlight = 0.5
 		_track_material.set_shader_parameter("highlight", _highlight)
 		pass
@@ -81,6 +84,23 @@ func on_touch_released(master_time: float) -> void:
 		is_holding = false
 		current_hold_note = null
 		pass
+	pass
+
+
+# 自动播放时的轨道点击反馈 (仅触发高亮, 不参与判定)
+func flash_track() -> void:
+	_highlight = 1.0
+	_track_material.set_shader_parameter("highlight", _highlight)
+	pass
+
+
+# 自动播放 hold: 设置按住状态 (按住期间持续高亮, 松开后恢复衰减)
+func set_autoplay_hold(is_active: bool) -> void:
+	is_autoplay_holding = is_active
+	if is_active:
+		_highlight = 1.0
+		pass
+	_track_material.set_shader_parameter("highlight", _highlight)
 	pass
 
 
@@ -154,7 +174,6 @@ func press_judge(master_time: float) -> void:
 				pass
 			pass
 		pass
-
 	pass
 
 

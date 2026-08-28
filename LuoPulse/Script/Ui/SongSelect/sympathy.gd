@@ -47,7 +47,6 @@ extends Control
 @onready var pv_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
 
 
-
 ## 歌曲信息
 # 标题
 @onready var title: Label = $Control/VBoxContainer/Title

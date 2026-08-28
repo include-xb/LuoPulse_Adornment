@@ -93,6 +93,7 @@ func judge(master_time: float) -> void:
 
 	var level: String = "lost"
 	
+	# 自动播放
 	if Global.is_autoplay:
 		time_offset = 0
 		pass
@@ -139,8 +140,17 @@ func _on_miss(master_time: float) -> void:
 
 # 自动播放命中处理 (子类可覆写)
 func _autoplay(master_time: float) -> void:
-	if master_time >= float(time) and not is_judged:
+	if master_time >= float(time) - 10.0 and not is_judged:
 		judge(master_time)
+		_flash_track_feedback()
+		pass
+	pass
+
+
+# 自动播放时的轨道点击反馈
+func _flash_track_feedback() -> void:
+	if root_node and root_node.has_method("flash_track_feedback"):
+		root_node.flash_track_feedback(column)
 		pass
 	pass
 
@@ -160,7 +170,7 @@ func _lose(master_time: float) -> void:
 		pass
 
 	_update_accuracy()
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
 	explode()
 	pass
 
@@ -170,7 +180,7 @@ func _finish_judge() -> void:
 	is_removed = true
 	Global.combo += 1
 	_update_accuracy()
-	_remove_from_judging()
+	_remove_from_judging_and_rendering()
 	explode()
 	pass
 
@@ -182,12 +192,17 @@ func _update_accuracy() -> void:
 	pass
 
 
-func _remove_from_judging() -> void:
+func _remove_from_judging_and_rendering() -> void:
 	var idx: int = Global.judging_area.find(self)
 	if idx >= 0:
 		Global.judging_area.remove_at(idx)
 		pass
+	idx = Global.rendering_area.find(self)
+	if idx >= 0:
+		Global.rendering_area.remove_at(idx)
+		pass
 	pass
+
 
 
 # 碎裂效果

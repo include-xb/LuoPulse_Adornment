@@ -194,6 +194,9 @@ var master_time: float = -3000.0
 # 处在判定区间中的音符
 var judging_area: Array = [ ]
 
+# 被绘制到屏幕上的音符
+var rendering_area: Array = [ ]
+
 
 # 开始前的延时，这个时间也反应着同一时间内场景中音符最大数量。
 # 相当于当前时间，到当前时间+start_duration这段时间内的音符会被加载到场景中

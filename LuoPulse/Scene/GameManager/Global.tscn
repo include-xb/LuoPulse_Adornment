@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://mk6wr6n82tmu" path="res://Script/GameManager/Global.gd" id="1_i4ohj"]
 [ext_resource type="PackedScene" uid="uid://db7s130jodufv" path="res://Scene/Ui/Widget/Notice.tscn" id="2_yjbyn"]
-[ext_resource type="AudioStream" uid="uid://dxckjhlmsse1i" path="res://Asset/Audio/leave.wav" id="3_gydpq"]
+[ext_resource type="AudioStream" uid="uid://7exxcrifkxjb" path="res://Asset/Audio/leave.wav" id="3_gydpq"]
 
 [node name="Global" type="Control" unique_id=224931585]
 layout_mode = 3
