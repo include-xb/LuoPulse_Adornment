@@ -78,6 +78,15 @@ func _ready() -> void:
 	pass
 
 
+# 每次重新进入场景树时刷新水晶显示
+# SceneManager 通过 remove_child / add_child 复用场景节点, _ready 只在首次进入时执行一次
+func _enter_tree() -> void:
+	if not is_node_ready():
+		return
+	amount.text = str(Global.crystal)
+	pass
+
+
 # 按钮的禁用与恢复
 @warning_ignore("unused_parameter")
 func _process(delta: float) -> void:

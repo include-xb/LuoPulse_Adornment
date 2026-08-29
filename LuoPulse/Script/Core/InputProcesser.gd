@@ -13,7 +13,7 @@ extends Node3D
 var _track_material: ShaderMaterial = null
 
 # 触屏高亮强度 (shader uniform)
-var _highlight: float = 0.0
+var _highlight: float = 1.5
 const HIGHLIGHT_FADE: float = 8.0
 
 # 当前触摸计数 (支持多点触控)
@@ -41,7 +41,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _touch_count > 0 or is_autoplay_holding:
-		_highlight = 0.5
+		_highlight = 1.5
 		_track_material.set_shader_parameter("highlight", _highlight)
 		pass
 	elif _highlight > 0.0:
@@ -60,7 +60,7 @@ func on_touch_pressed(master_time: float) -> void:
 	_touch_time = master_time
 	_touch_count += 1
 
-	_highlight = 1.0
+	_highlight = 1.5
 	_track_material.set_shader_parameter("highlight", _highlight)
 
 	if _touch_count > 1:
@@ -89,7 +89,7 @@ func on_touch_released(master_time: float) -> void:
 
 # 自动播放时的轨道点击反馈 (仅触发高亮, 不参与判定)
 func flash_track() -> void:
-	_highlight = 1.0
+	_highlight = 1.5
 	_track_material.set_shader_parameter("highlight", _highlight)
 	pass
 
@@ -98,7 +98,7 @@ func flash_track() -> void:
 func set_autoplay_hold(is_active: bool) -> void:
 	is_autoplay_holding = is_active
 	if is_active:
-		_highlight = 1.0
+		# _highlight = 0.8
 		pass
 	_track_material.set_shader_parameter("highlight", _highlight)
 	pass

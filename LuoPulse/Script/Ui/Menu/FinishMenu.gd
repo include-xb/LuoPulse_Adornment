@@ -95,6 +95,8 @@ func _build_results_ui() -> void:
 		"水晶 +" + str(crystal_earned),
 		FONT_SIZE_NORMAL
 	)
+	Global.crystal += crystal_earned
+	Global.save_user_data()
 	crystal_label.add_theme_color_override("font_color", Color.GOLDENROD)
 	vbox.add_child(crystal_label)
 

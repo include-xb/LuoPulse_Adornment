@@ -530,3 +530,20 @@ func save_config() -> void:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
 	pass
+
+
+## 将用户数据写入 user.json
+func save_user_data() -> void:
+	var data: Dictionary = {
+		"username": user_name,
+		"main_line_unlocked": main_line_unlocked,
+		"crystal": crystal,
+		"story_fragments_unlocked": story_fragments_unlocked,
+	}
+	var path: String = OS.get_user_data_dir().path_join("user.json")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
+		pass
+	pass

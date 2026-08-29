@@ -12,7 +12,6 @@
 ## 		- CardMenu 资料卡界面
 
 
-
 extends Control
 
 @onready var audio_system: AudioStreamPlayer = $"AudioSystem"
@@ -600,6 +599,8 @@ func reset_speed() -> void:
 	if Global.rendering_area.size() == 0:
 		return
 	for note: MeshInstance3D in Global.rendering_area:
+		if not is_instance_valid(note):
+			continue
 		if note.type != "hold":
 			continue
 		note._hold_length = Global.note_speed * float(note.duration) / 1000.0
@@ -729,7 +730,6 @@ func load_note(note_index: int, index: int) -> void:
 		column_list[note_index],
 		index,
 		$SubViewport/Node3D/Track,
-		$Node2D,
 		self
 	)
 	pass
@@ -776,6 +776,7 @@ func _reset_judging_stats() -> void:
 	Global.accuracy = 0.0
 	Global.max_combo = 0
 	Global.judging_area = [ ]
+	Global.rendering_area = [ ]
 	_feedback_index = 0
 	pass
 
@@ -905,7 +906,6 @@ func game_finished() -> void:
 		"crystal_earned": crystal_earned,
 	}
 
-	Global.crystal += crystal_earned
 	Global.current_unlocked_song_index = maxi(Global.current_unlocked_song_index, Global.current_song_index + 1)
 
 	# 同步本地计数
@@ -1140,6 +1140,7 @@ func _clear_notes() -> void:
 			pass
 		pass
 	Global.judging_area = [ ]
+	Global.rendering_area = [ ]
 
 	# 重置各轨道的自动播放 hold 状态, 避免残留高亮
 	for processor: Node3D in input_processers:

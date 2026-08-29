@@ -50,8 +50,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_i27d6")
 
-[node name="Node2D" type="Node2D" parent="." unique_id=216624958]
-
 [node name="SubViewport" type="SubViewport" parent="." unique_id=731722823]
 transparent_bg = true
 msaa_3d = 2

@@ -11,8 +11,6 @@ class_name NoteBase
 
 
 # 对 Gameplay 节点的引用 (由 NoteLoader 注入)
-var gameplay: Node2D = null
-
 var root_node: Control;
 
 # 音符索引
@@ -45,8 +43,8 @@ var _was_in_judging_area: bool = false
 
 @warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
-	if gameplay == null:
-		return
+	#if gameplay == null:
+		#return
 
 	var mt: float = root_node.master_time
 
@@ -89,14 +87,15 @@ func judge(master_time: float) -> void:
 		return
 
 	var time_offset: int = int(master_time - float(time))
-	var abs_offset: int = abs(time_offset)
 
 	var level: String = "lost"
-	
+
 	# 自动播放
 	if Global.is_autoplay:
 		time_offset = 0
 		pass
+
+	var abs_offset: int = abs(time_offset)
 
 	if abs_offset <= Global.HARMONIOUS_TIME:
 		Global.harmonious += 1

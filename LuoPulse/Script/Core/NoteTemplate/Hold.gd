@@ -2,8 +2,6 @@ extends MeshInstance3D
 
 
 # 对 Gameplay 节点的引用 (由 NoteLoader 注入)
-var gameplay: Node2D = null
-
 var root_node: Control
 
 var type: String = "hold"
@@ -49,6 +47,8 @@ var _hold_length: float = 0.0
 # 预计算的 mesh 原始高度
 var _mesh_base_height: float = 0.0
 
+# 从 root_node 获取的 master_time
+var mt: float = 0.0
 
 func _ready() -> void:
 	_mesh_base_height = get_mesh().size.y
@@ -59,10 +59,8 @@ func _ready() -> void:
 
 @warning_ignore("unused_parameter")
 func _process(delta: float) -> void:
-	if gameplay == null:
-		return
-
-	var mt: float = root_node.master_time
+	# 获取 master_time 时间
+	mt = root_node.master_time
 
 	if not is_head_judged:
 		# 头部下落
@@ -103,7 +101,7 @@ func _process(delta: float) -> void:
 	if Global.is_autoplay:
 		autoplay(mt)
 		pass
-
+	
 	# 判定区间管理 (仅在头部未判定时)
 	if not is_head_judged:
 		var time_offset: float = mt - float(time)
@@ -133,13 +131,13 @@ func _process(delta: float) -> void:
 		pass
 
 	# hold 完成后自动移除
-	if is_hold_interrupted:
-		if mt >= float(time) + float(duration) + 1500.0:
-			if not is_removed:
-				_explode()
-				pass
+	# 提前松开: 继续下落 1500ms, 滚出屏幕后再移除
+	if is_hold_interrupted and mt >= float(time) + float(duration) + 1500.0:
+		if not is_removed:
+			_explode()
 			pass
 		pass
+	# 完全按住
 	elif is_head_judged and mt >= float(time) + float(duration) + float(Global.END_JUDGE_TIME):
 		if not is_hold_completed:
 			_complete_hold()
@@ -148,7 +146,10 @@ func _process(delta: float) -> void:
 			_explode()
 			pass
 		pass
-
+	# 始终未被点击: 半透明后继续下落 1500ms, 滚出屏幕后再移除
+	elif is_removed and not is_head_judged and mt >= float(time) + float(duration) + 1500.0:
+		_explode()
+		pass
 	pass
 
 
@@ -165,13 +166,14 @@ func judge_head(master_time: float) -> void:
 		return
 
 	var time_offset: int = int(master_time - float(time))
-	var abs_offset: int = abs(time_offset)
 
 	var level: String = "lost"
 
 	if Global.is_autoplay:
 		time_offset = 0
 		pass
+
+	var abs_offset: int = abs(time_offset)
 
 	if abs_offset <= Global.HARMONIOUS_TIME:
 		a = 1.0
@@ -187,6 +189,8 @@ func judge_head(master_time: float) -> void:
 		pass
 	else:
 		a = 0.0
+		# 更改透明度
+		_set_alpha(0.2)
 		pass
 
 	if root_node and root_node.has_method("show_judgment_feedback"):
@@ -223,7 +227,9 @@ func _complete_hold() -> void:
 		Global.lost += 1
 		a = 0.0
 		Global.combo = 0
-
+		
+		_set_alpha(0.2)
+		
 		if root_node and root_node.has_method("show_judgment_feedback"):
 			root_node.show_judgment_feedback(0, "lost", column)
 			pass
@@ -260,6 +266,8 @@ func _lose() -> void:
 	Global.lost += 1
 	Global.combo = 0
 	a = 0.0
+	
+	_set_alpha(0.2)
 
 	if root_node and root_node.has_method("show_judgment_feedback"):
 		root_node.show_judgment_feedback(0, "lost", column)
@@ -270,7 +278,7 @@ func _lose() -> void:
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
 
 	_remove_from_judging_and_rendering()
-	_explode()
+	# 不立即释放: 半透明后继续下落, 滚出屏幕后在 _process 中移除
 	pass
 
 
@@ -283,6 +291,15 @@ func _remove_from_judging_and_rendering() -> void:
 	if idx >= 0:
 		Global.rendering_area.remove_at(idx)
 		pass
+	pass
+
+
+## 设置 hold 透明度 (0.0 ~ 1.0)
+## 通过 shader 的 color 参数控制 alpha, 保留 RGB 不变
+func _set_alpha(alpha: float) -> void:
+	var c: Color = material_override.get_shader_parameter("color")
+	c.a = alpha
+	material_override.set_shader_parameter("color", c)
 	pass
 
 

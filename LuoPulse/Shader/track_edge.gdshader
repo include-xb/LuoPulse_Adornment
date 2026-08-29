@@ -9,7 +9,7 @@ uniform float edge_width : hint_range(0.0, 0.5) = 0.5;
 // 轨道本体颜色（含透明度）
 uniform vec4 track_color : source_color = vec4(0.0, 0.0, 0.0, 0.47);
 // 触屏高亮强度 (0.0 ~ 1.0)
-uniform float highlight : hint_range(0.0, 1.0) = 0.0;
+uniform float highlight : hint_range(0.0, 2.0) = 0.0;
 
 // ============ 主函数 ============
 void fragment() {
@@ -23,7 +23,7 @@ void fragment() {
 	vec4 color = mix(track_color, edge_color, edge_mask);
 
 	// 触屏高亮：叠加亮色
-	color = mix(color, color + vec4(0.5, 0.5, 0.5, 0.25), highlight);
+	color = mix(color, color + vec4(0.1, 0.1, 0.1, 0.1), highlight);
 
 	ALBEDO = color.rgb;
 	ALPHA = color.a;
