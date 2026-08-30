@@ -3,10 +3,15 @@
 [ext_resource type="Script" uid="uid://wkge4va0l215" path="res://Script/Ui/SongSelect/Sympathy.gd" id="1_qx1yg"]
 [ext_resource type="Texture2D" uid="uid://ckkflwkuu1poh" path="res://Asset/Image/最初日.png" id="2_8by2n"]
 [ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_qx1yg"]
+[ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="4_lqs8k"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_558w5"]
 shader = ExtResource("2_qx1yg")
 shader_parameter/gray_scale = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
+shader = ExtResource("4_lqs8k")
+shader_parameter/blur_amount = 2.2000001045
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qx1yg"]
 shader = ExtResource("2_qx1yg")
@@ -119,6 +124,15 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_8by2n")
 
+[node name="Blur" type="ColorRect" parent="." unique_id=1273726504]
+material = SubResource("ShaderMaterial_s4y3q")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="Chapter" type="Label" parent="." unique_id=422246838]
 layout_mode = 1
 anchors_preset = 5
@@ -195,12 +209,25 @@ text = "<"
 [node name="Start" type="Button" parent="Select" unique_id=2104645452]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9007046, 0.90070456, 0.90070456, 0.78431374)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 75
 text = "@"
 
 [node name="Right" type="Button" parent="Select" unique_id=1609907361]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9007046, 0.90070456, 0.90070456, 0.78431374)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.15686275)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 80
 text = ">"
 
@@ -288,6 +315,7 @@ stretch_mode = 6
 libraries/ = SubResource("AnimationLibrary_ohs4k")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=781416472]
+volume_db = -12.0
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1321983800]
 custom_minimum_size = Vector2(15, 0)

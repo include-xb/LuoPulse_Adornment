@@ -24,9 +24,12 @@ extends Control
 
 @onready var video_stream_player: VideoStreamPlayer = $UI/VideoStreamPlayer
 
-@onready var _subviewport: SubViewport = $SubViewport
+@onready var _subviewport: SubViewport = $UI/TextureRect/SubViewport
 
-@onready var _camera: Camera3D = $SubViewport/Node3D/Camera3D
+@onready var _camera: Camera3D = $UI/TextureRect/SubViewport/Node3D/Camera3D
+
+# 轨道部分
+@onready var _track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
 
 @onready var _ui: Control = $UI
 
@@ -46,7 +49,14 @@ extends Control
 @onready var speed_label: Label = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedLabel
 
 # 音符流速大小滑动条
-@onready var speed_scroll_bar: HScrollBar = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedScrollBar
+@onready var speed_scroll_bar: HSlider = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedScrollBar
+
+# 第一个音符到达判定线倒计时标签
+@onready var tick: Label = $UI/Tick
+
+# 结束按钮
+@onready var finish_button: Button = $UI/FinishButton
+
 
 
 # 解析完成的谱面数据
@@ -119,6 +129,12 @@ var active_touches: Dictionary = {}
 # 轨道在屏幕空间的 X 范围 (通过摄像机投影计算)
 var _track_screen_min: float = 0.0
 var _track_screen_max: float = 0.0
+
+# 第一个音符到达判定线时间
+var first_note_time: int = 0
+
+# 最后一个音符到达判定线时间
+var last_note_time: int = 0
 
 # ---- 判定视觉反馈 ----
 
@@ -427,13 +443,15 @@ func _ready() -> void:
 	_reset_judging_stats()
 	_setup_judgment_feedback()
 	
-	audio_system.connect("finished", game_finished)
+	# audio_system.connect("finished", game_finished)
 	
 	_collect_input_processers()
 	
-	video_stream_player.visible = true
-	_pause_panel.visible = false
-	_pause_panel.modulate.a = 0.0
+	video_stream_player	.visible = true
+	tick				.visible = false
+	finish_button		.visible = false
+	_pause_panel		.visible = false
+	_pause_panel.modulate.a 	 = 0.0
 	_setup_countdown_label()
 	
 	autoplay.visible = Global.is_autoplay
@@ -446,8 +464,16 @@ func _ready() -> void:
 		write_in_list()
 		pass
 	else:
+		# 测试功能
 		test()
 		write_in_list()
+		pass
+	# 获取头尾音符时间
+	get_first_last_note_time()
+	
+	# 第一个音符到达判定线所需时间超过 2500ms 即显示
+	if first_note_time >= 2500:
+		tick.visible = true
 		pass
 
 	# 记录程序起始时间 (仅用于预加载段的计时)
@@ -456,9 +482,9 @@ func _ready() -> void:
 
 
 func _collect_input_processers() -> void:
-	var track: Node3D = $SubViewport/Node3D/Track
+	# var track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
 	for i in range(Global.COLUMN_NUM):
-		var column_node: Node3D = track.get_node("Column" + str(i + 1))
+		var column_node: Node3D = _track.get_node("Column" + str(i + 1))
 		input_processers.append(column_node)
 		pass
 	pass
@@ -549,6 +575,14 @@ func _process(delta: float) -> void:
 	if is_loading_note:
 		load_note_process()
 		pass
+	
+	# 首个音符倒计时
+	if tick.visible:
+		tick.text = "%.2fs" % ((master_time - first_note_time) / 1000)
+		if master_time >= first_note_time:
+			tick.visible = false
+			pass
+		pass
 
 	# 背景色彩变化
 	var current_progress: float = clampf(master_time / float(audio_length), 0.0, 1.0)
@@ -562,9 +596,10 @@ func _process(delta: float) -> void:
 		(1.0 - current_progress) * 0.6
 	)
 
-	# 结束游戏
-	if master_time >= audio_length && is_gaming:
-		game_finished()
+	# 结束游戏 # NOTICE 修改为手动结束游戏
+	if master_time >= last_note_time + 1000 && is_gaming:
+		show_finish_btn()
+		# game_finished()
 		pass
 
 	# 追踪最大连击数
@@ -583,7 +618,8 @@ func _process(delta: float) -> void:
 
 func _update_master_time() -> void:
 	master_time = _compute_master_time()
-	Global.master_time = master_time
+	# NOTICE: 为什么已经将 master_time 传入 Global 了, 还需要引用 root_node 获取 master_time
+	Global.master_time = master_time 
 	pass
 
 
@@ -729,7 +765,7 @@ func load_note(note_index: int, index: int) -> void:
 		duration_list[note_index],
 		column_list[note_index],
 		index,
-		$SubViewport/Node3D/Track,
+		_track,
 		self
 	)
 	pass
@@ -763,6 +799,13 @@ func write_in_list() -> void:
 		duration_list.append(duration)
 		pass
 
+	pass
+
+
+# 获取头尾音符时间
+func get_first_last_note_time() -> void:
+	first_note_time = time_list[0]
+	last_note_time = time_list[-1]
 	pass
 
 
@@ -882,8 +925,15 @@ func _get_judgment_line_y() -> float:
 	return viewport_height * 0.78
 
 
-# 游戏结束
-func game_finished() -> void:
+# 显示结束按钮
+func show_finish_btn() -> void:
+	finish_button.visible = true
+	pass
+
+
+# 结束
+func _on_finish_button_pressed() -> void:
+	Global.play_ui_click_audio()
 	if not is_gaming:
 		return
 	is_gaming = false
@@ -922,6 +972,7 @@ func game_finished() -> void:
 
 
 func _on_pause_button_pressed() -> void:
+	Global.play_ui_click_audio()
 	if _is_pause_panel_visible or not is_gaming or _is_counting_down:
 		return
 

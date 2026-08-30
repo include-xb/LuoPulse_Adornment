@@ -61,6 +61,13 @@ extends Control
 @onready var vocalist: Label = $Control/VBoxContainer/Vocalist
 
 
+# ---- 预览音频淡入淡出 ----
+const AUDIO_FADE_IN_TIME: float = 1.0
+const AUDIO_FADE_OUT_TIME: float = 0.5
+const AUDIO_SILENCE_DB: float = -80.0
+var _audio_fade_tween: Tween = null
+
+
 func _ready() -> void:
 	Global.game_mode = Global.GameMode.Sympathy
 	setting_panel.visible = false
@@ -128,14 +135,49 @@ func load_song_info() -> void:
 	var song_audio_stream: AudioStream = Global._read_audio_from_lpz(song_package_path)
 	audio_stream_player.stream = song_audio_stream
 	if audio_stream_player.stream:
-		audio_stream_player.play()
+		var start_pointer: float = float(general.get("Preview", 0)) / 1000
+		audio_stream_player.play(start_pointer)
+		_fade_in_audio()
 		pass
 	pass
-
 
 # 进度条跟进
 func refresh_progress_bar()-> void:
 	progress_bar.value = int(float(Global.current_song_index + 1) / float(Global.sympath_song_num) * 100)
+	pass
+
+# 淡入音频
+func _fade_in_audio() -> void:
+	_kill_audio_fade()
+	audio_stream_player.volume_db = AUDIO_SILENCE_DB
+	_audio_fade_tween = create_tween()
+	_audio_fade_tween.tween_property(
+		audio_stream_player, 
+		"volume_db", 
+		0.0, 
+		AUDIO_FADE_IN_TIME	# 三次插值曲线
+	).set_trans(Tween.TRANS_QUART)
+	pass
+
+# 淡出音频
+func _fade_out_audio() -> void:
+	_kill_audio_fade()
+	_audio_fade_tween = create_tween()
+	_audio_fade_tween.tween_property(
+		audio_stream_player, 
+		"volume_db", 
+		AUDIO_SILENCE_DB, 
+		AUDIO_FADE_OUT_TIME
+	)
+	_audio_fade_tween.tween_callback(audio_stream_player.stop)
+	pass
+
+
+func _kill_audio_fade() -> void:
+	if _audio_fade_tween and _audio_fade_tween.is_valid():
+		_audio_fade_tween.kill()
+		pass
+	_audio_fade_tween = null
 	pass
 
 
@@ -150,9 +192,9 @@ func _on_back_pressed() -> void:
 
 # 向左切歌
 func _on_left_pressed() -> void:
-	audio_stream_player.stop()
+	_fade_out_audio()
 	Global.play_ui_click_audio()
-	Global.current_song_index -= 1# if Global.current_song_index > 0 else 0
+	Global.current_song_index -= 1 # if Global.current_song_index > 0 else 0
 	refresh_progress_bar()
 	
 	animation_player.play_backwards("unfold")
@@ -164,9 +206,9 @@ func _on_left_pressed() -> void:
 
 # 向右切歌
 func _on_right_pressed() -> void:
-	audio_stream_player.stop()
+	_fade_out_audio()
 	Global.play_ui_click_audio()
-	Global.current_song_index += 1# if Global.current_song_index < Global.sympath_song_num - 1 else 0
+	Global.current_song_index += 1 # if Global.current_song_index < Global.sympath_song_num - 1 else 0
 	refresh_progress_bar()
 	
 	animation_player.play_backwards("unfold")
@@ -185,6 +227,7 @@ func _on_start_pressed() -> void:
 
 
 func _on_setting_pressed() -> void:
+	Global.play_ui_click_audio()
 	setting_panel.visible = true
 	setting_panel.modulate.a = 0.0
 	
@@ -206,6 +249,7 @@ func _on_setting_pressed() -> void:
 
 
 func _on_ok_button_pressed() -> void:
+	Global.play_ui_click_audio()
 	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_IN)
@@ -217,12 +261,14 @@ func _on_ok_button_pressed() -> void:
 
 
 func _on_autoplay_button_pressed() -> void:
+	Global.play_ui_click_audio()
 	Global.is_autoplay = !Global.is_autoplay
 	autoplay_button.text = "自动播放     " + ("开" if Global.is_autoplay else "关")
 	pass
 
 
 func _on_pv_button_pressed() -> void:
+	Global.play_ui_click_audio()
 	Global.is_pvplay = !Global.is_pvplay
 	pv_button.text = "播放 PV        " + ("开" if Global.is_pvplay else "关")
 	pass

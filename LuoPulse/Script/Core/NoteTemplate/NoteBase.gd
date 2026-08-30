@@ -206,5 +206,10 @@ func _remove_from_judging_and_rendering() -> void:
 
 # 碎裂效果
 func explode() -> void:
+	var particle: GPUParticles3D = get_node("../../GPUParticles3D")
+	particle.emitting = false
+	particle.position.z = self.position.z
+	particle.one_shot = true
+	particle.emitting = true
 	queue_free()
 	pass

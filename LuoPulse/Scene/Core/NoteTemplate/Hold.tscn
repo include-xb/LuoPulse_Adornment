@@ -9,7 +9,10 @@ render_priority = 0
 shader = ExtResource("1_hold")
 shader_parameter/color = Color(0.5647059, 0.6901961, 0.4392157, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bhst1"]
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
+material = SubResource("StandardMaterial3D_bhst1")
 size = Vector2(0.8, 0.2)
 
 [node name="Hold" type="MeshInstance3D" unique_id=1919900854]

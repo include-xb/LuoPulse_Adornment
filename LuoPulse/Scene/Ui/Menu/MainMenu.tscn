@@ -59,6 +59,11 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Sympathy" index="0" unique_id=45460652]
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
+theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 text = "> 共鸣"
 
 [node name="Separator" parent="MenuContainer/MenuButtons/Sympathy" index="1" unique_id=483453183]
@@ -69,6 +74,11 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Album" index="0" unique_id=45460652]
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
+theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 disabled = true
 text = "# 断章"
 
@@ -80,6 +90,11 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Note" index="0" unique_id=45460652]
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
+theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 disabled = true
 text = "= 笔记"
 
@@ -91,6 +106,11 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Setting" index="0" unique_id=45460652]
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
+theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 text = "* 设置"
 
 [node name="Separator" parent="MenuContainer/MenuButtons/Setting" index="1" unique_id=483453183]
@@ -134,13 +154,12 @@ alignment = 2
 
 [node name="Diamond" type="Label" parent="Currency/HBoxContainer" unique_id=813408224]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
 theme_override_font_sizes/font_size = 40
 text = "◇"
 
 [node name="Amount" type="Label" parent="Currency/HBoxContainer" unique_id=1332006374]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
+theme_override_constants/shadow_outline_size = 0
 theme_override_font_sizes/font_size = 38
 text = "114514"
 
@@ -148,8 +167,8 @@ text = "114514"
 layout_mode = 1
 offset_right = 190.0
 offset_bottom = 276.0
-theme_override_constants/margin_left = 80
-theme_override_constants/margin_top = 60
+theme_override_constants/margin_left = 70
+theme_override_constants/margin_top = 50
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Profile" unique_id=1058110005]
 layout_mode = 2
@@ -185,6 +204,7 @@ size_flags_vertical = 3
 
 [node name="Username" type="Label" parent="Profile/VBoxContainer/InfoPanel" unique_id=94460193]
 layout_mode = 2
+theme_override_constants/shadow_outline_size = 0
 theme_override_font_sizes/font_size = 40
 text = "小小白"
 horizontal_alignment = 1
@@ -196,6 +216,7 @@ alignment = 1
 
 [node name="Level" type="Label" parent="Profile/VBoxContainer/InfoPanel/HBoxContainer" unique_id=363813794]
 layout_mode = 2
+theme_override_constants/shadow_outline_size = 0
 text = "共鸣%"
 
 [node name="value" type="Label" parent="Profile/VBoxContainer/InfoPanel/HBoxContainer" unique_id=483545035]

@@ -8,15 +8,8 @@
 [ext_resource type="Theme" uid="uid://kb7wugiy2jme" path="res://Theme/Genrial.tres" id="3_i27d6"]
 [ext_resource type="Shader" uid="uid://d1dnw1f0qxiy" path="res://Shader/dark_manager.gdshader" id="5_j17h8"]
 [ext_resource type="VideoStream" uid="uid://cld83q83c3sub" path="res://Asset/Test/video.ogv" id="6_qalqs"]
+[ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="7_46tx6"]
 [ext_resource type="AudioStream" uid="uid://cryyhdkor01jm" path="res://Asset/Test/audio.ogg" id="9_46tx6"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
-transparency = 1
-albedo_color = Color(1, 1, 1, 0.3137255)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
-material = SubResource("StandardMaterial3D_fdpuf")
-size = Vector2(4, 22)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_j17h8"]
 shader = ExtResource("2_j17h8")
@@ -35,8 +28,20 @@ shader_parameter/edge_threshold = 0.800000038
 shader_parameter/texture_strength = 0.06
 shader_parameter/texture_scale = 180.0
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
+shader = ExtResource("7_46tx6")
+shader_parameter/blur_amount = 0.0
+
 [sub_resource type="ViewportTexture" id="ViewportTexture_sc0u0"]
-viewport_path = NodePath("SubViewport")
+viewport_path = NodePath("UI/TextureRect/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.3137255)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
+material = SubResource("StandardMaterial3D_fdpuf")
+size = Vector2(4, 22)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.92156863)
@@ -49,41 +54,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_i27d6")
-
-[node name="SubViewport" type="SubViewport" parent="." unique_id=731722823]
-transparent_bg = true
-msaa_3d = 2
-screen_space_aa = 1
-size = Vector2i(1024, 1024)
-
-[node name="Node3D" type="Node3D" parent="SubViewport" unique_id=153500028]
-
-[node name="Camera3D" type="Camera3D" parent="SubViewport/Node3D" unique_id=882379652]
-transform = Transform3D(1, 0, 0, 0, 0.5973439, 0.80198526, 0, -0.80198526, 0.5973439, 0, 3.242978, 0.6158583)
-current = true
-
-[node name="Panel" type="MeshInstance3D" parent="SubViewport/Node3D" unique_id=345256402]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
-visible = false
-mesh = SubResource("PlaneMesh_s4y3q")
-
-[node name="Track" type="Node3D" parent="SubViewport/Node3D" unique_id=1747796275]
-
-[node name="Column1" parent="SubViewport/Node3D/Track" unique_id=1829621600 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
-column = 1
-
-[node name="Column2" parent="SubViewport/Node3D/Track" unique_id=792229827 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
-column = 2
-
-[node name="Column3" parent="SubViewport/Node3D/Track" unique_id=1047817573 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
-column = 3
-
-[node name="Column4" parent="SubViewport/Node3D/Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
-column = 4
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1
@@ -123,6 +93,15 @@ grow_horizontal = 2
 theme = ExtResource("3_i27d6")
 show_percentage = false
 
+[node name="Blur" type="ColorRect" parent="UI" unique_id=843432478]
+material = SubResource("ShaderMaterial_s4y3q")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="TextureRect" type="TextureRect" parent="UI" unique_id=1108125530]
 layout_mode = 1
 anchors_preset = 15
@@ -132,6 +111,41 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("ViewportTexture_sc0u0")
 expand_mode = 3
+
+[node name="SubViewport" type="SubViewport" parent="UI/TextureRect" unique_id=731722823]
+transparent_bg = true
+msaa_3d = 2
+screen_space_aa = 1
+size = Vector2i(1024, 1024)
+
+[node name="Node3D" type="Node3D" parent="UI/TextureRect/SubViewport" unique_id=153500028]
+
+[node name="Camera3D" type="Camera3D" parent="UI/TextureRect/SubViewport/Node3D" unique_id=882379652]
+transform = Transform3D(1, 0, 0, 0, 0.5973439, 0.80198526, 0, -0.80198526, 0.5973439, 0, 3.242978, 0.6158583)
+current = true
+
+[node name="Panel" type="MeshInstance3D" parent="UI/TextureRect/SubViewport/Node3D" unique_id=345256402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+visible = false
+mesh = SubResource("PlaneMesh_s4y3q")
+
+[node name="Track" type="Node3D" parent="UI/TextureRect/SubViewport/Node3D" unique_id=1747796275]
+
+[node name="Column1" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=1829621600 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
+column = 1
+
+[node name="Column2" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=792229827 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
+column = 2
+
+[node name="Column3" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=1047817573 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
+column = 3
+
+[node name="Column4" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
+column = 4
 
 [node name="Combo" type="Label" parent="UI" unique_id=146666133]
 layout_mode = 1
@@ -146,10 +160,51 @@ grow_horizontal = 2
 theme_override_colors/font_color = Color(0.72464263, 0.72464263, 0.72464246, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 55
+theme_override_font_sizes/font_size = 57
 text = "114 COMBO"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Tick" type="Label" parent="UI" unique_id=129892156]
+visible = false
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -59.5
+offset_top = 510.0
+offset_right = 59.5
+offset_bottom = -142.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.72464263, 0.72464263, 0.72464246, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 40
+text = "- 3.00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FinishButton" type="Button" parent="UI" unique_id=297416739]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -240.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.9007046, 0.90070456, 0.90070456, 0.78431374)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 50
+text = ">>> 结束"
 
 [node name="PauseButton" type="Button" parent="UI" unique_id=1928355887]
 layout_mode = 0
@@ -194,12 +249,14 @@ vertical_alignment = 2
 [node name="Username" type="Label" parent="UI/MarginContainer/HBoxContainer" unique_id=624626979]
 layout_mode = 2
 size_flags_horizontal = 10
+size_flags_vertical = 8
 theme_override_colors/font_color = Color(0.84313726, 0.84313726, 0.84313726, 1)
 text = "小白"
 horizontal_alignment = 1
 vertical_alignment = 2
 
 [node name="PausePanel" type="PanelContainer" parent="UI" unique_id=1601946626]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -251,13 +308,12 @@ text = "10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SpeedScrollBar" type="HScrollBar" parent="UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer" unique_id=1542604617]
+[node name="SpeedScrollBar" type="HSlider" parent="UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer" unique_id=1919443311]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
 min_value = -20.0
 max_value = 20.0
-step = 1.0
 
 [node name="Buttons" type="HBoxContainer" parent="UI/PausePanel/CenterContainer/VBoxContainer" unique_id=200422821]
 layout_mode = 2
@@ -297,13 +353,14 @@ script = ExtResource("2_ovtvy")
 [node name="AudioSystem" type="AudioStreamPlayer" parent="." unique_id=1667507616]
 stream = ExtResource("9_46tx6")
 
+[connection signal="pressed" from="UI/FinishButton" to="." method="_on_finish_button_pressed"]
 [connection signal="pressed" from="UI/PauseButton" to="." method="_on_pause_button_pressed"]
 [connection signal="value_changed" from="UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedScrollBar" to="." method="_on_speed_scroll_bar_value_changed"]
 [connection signal="pressed" from="UI/PausePanel/CenterContainer/VBoxContainer/Buttons/ExitButton" to="." method="_on_exit_button_pressed"]
 [connection signal="pressed" from="UI/PausePanel/CenterContainer/VBoxContainer/Buttons/RetryButton" to="." method="_on_retry_button_pressed"]
 [connection signal="pressed" from="UI/PausePanel/CenterContainer/VBoxContainer/Buttons/ContinueButton" to="." method="_on_continue_button_pressed"]
 
-[editable path="SubViewport/Node3D/Track/Column1"]
-[editable path="SubViewport/Node3D/Track/Column2"]
-[editable path="SubViewport/Node3D/Track/Column3"]
-[editable path="SubViewport/Node3D/Track/Column4"]
+[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column1"]
+[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column2"]
+[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column3"]
+[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column4"]

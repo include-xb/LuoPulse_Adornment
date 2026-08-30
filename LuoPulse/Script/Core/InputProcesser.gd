@@ -9,6 +9,11 @@ extends Node3D
 
 @onready var single_track: MeshInstance3D = $SingleTrack
 
+# 粒子效果
+@onready var gpu_particles_3d: GPUParticles3D = $GPUParticles3D
+
+
+
 # 轨道材质副本 (每列独立, 用于触屏高亮)
 var _track_material: ShaderMaterial = null
 

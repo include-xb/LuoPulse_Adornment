@@ -50,6 +50,7 @@ var _mesh_base_height: float = 0.0
 # 从 root_node 获取的 master_time
 var mt: float = 0.0
 
+
 func _ready() -> void:
 	_mesh_base_height = get_mesh().size.y
 	# 预计算 hold 全长 (世界单位)
@@ -61,7 +62,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# 获取 master_time 时间
 	mt = root_node.master_time
-
+	
+	if is_holding:
+		pass
+	
 	if not is_head_judged:
 		# 头部下落
 		var head_z: float = Global.note_speed * (mt - float(time)) / 1000.0
@@ -83,7 +87,7 @@ func _process(delta: float) -> void:
 
 		var visible_length: float = -tail_z
 
-		if visible_length <= 0.0:
+		if visible_length <= _hold_length * 0.1:
 			# hold 完全消耗, 进行结算
 			if not is_hold_completed:
 				_complete_hold()
@@ -150,6 +154,7 @@ func _process(delta: float) -> void:
 	elif is_removed and not is_head_judged and mt >= float(time) + float(duration) + 1500.0:
 		_explode()
 		pass
+	
 	pass
 
 

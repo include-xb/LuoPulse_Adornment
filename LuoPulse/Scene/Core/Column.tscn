@@ -29,6 +29,61 @@ material = SubResource("ShaderMaterial_ogl7y")
 size = Vector2(1.2, 0.4)
 center_offset = Vector3(0, 0.01, 0)
 
+[sub_resource type="Curve" id="Curve_bhst1"]
+_limits = [-200.0, 200.0, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_uegkn"]
+curve = SubResource("Curve_bhst1")
+
+[sub_resource type="Curve" id="Curve_m7grc"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.92999995, 0), -3.6307392, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_os6cd"]
+curve = SubResource("Curve_m7grc")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sbk8k"]
+emission_shape = 3
+emission_box_extents = Vector3(0.1, 0, 0.1)
+spread = 180.0
+flatness = 1.0
+initial_velocity_min = 2.0
+initial_velocity_max = 3.0
+gravity = Vector3(0, -0.1, 0)
+linear_accel_min = 1.9999977
+linear_accel_max = 2.9999976
+linear_accel_curve = SubResource("CurveTexture_uegkn")
+radial_accel_min = 3.9999976
+radial_accel_max = 4.9999976
+damping_min = 0.05
+damping_max = 0.1
+scale_min = 0.049999997
+scale_max = 0.099999994
+scale_curve = SubResource("CurveTexture_os6cd")
+
+[sub_resource type="Gradient" id="Gradient_46tx6"]
+offsets = PackedFloat32Array(0, 0.14179105, 1)
+colors = PackedColorArray(0.4, 0.8, 1, 1, 0.4, 0.8, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_u0bcu"]
+gradient = SubResource("Gradient_46tx6")
+fill = 2
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.8233618, 0.21367522)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2yv3u"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+shading_mode = 0
+albedo_color = Color(0.4, 0.8, 1, 1)
+albedo_texture = SubResource("GradientTexture2D_u0bcu")
+
+[sub_resource type="QuadMesh" id="QuadMesh_fndbt"]
+material = SubResource("StandardMaterial3D_2yv3u")
+
 [node name="Column" type="Node3D" unique_id=1704662228]
 script = ExtResource("1_ogl7y")
 
@@ -40,3 +95,13 @@ mesh = SubResource("PlaneMesh_s4y3q")
 
 [node name="Judging" type="MeshInstance3D" parent="." unique_id=185629654]
 mesh = SubResource("PlaneMesh_in2dp")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=869510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.022740126, 0.15707707, 0.084050596)
+emitting = false
+amount = 30
+lifetime = 0.18000000000000002
+transform_align = 1
+transform_align_channel_filter = 1
+process_material = SubResource("ParticleProcessMaterial_sbk8k")
+draw_pass_1 = SubResource("QuadMesh_fndbt")
