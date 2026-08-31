@@ -15,11 +15,10 @@
 extends Control
 
 
-# 用于淡入淡出文字
+## 用于淡入淡出文字
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 
 
-# 1. 加载配置文件
 func _ready() -> void:
 	load_config()
 	_setup_animations()
@@ -143,15 +142,16 @@ func _load_game_config() -> void:
 	# _write_json_file(config_path, data)
 
 	# 赋值到 Global
-	Global.config_version = data["version"]
-	Global.volume_song = data["volume_song"]
-	Global.volume_note = data["volume_note"]
-	Global.volume_ui = data["volume_ui"]
-	Global.chart_offset = data["offset"]
-	Global.note_flow_speed = data["speed"]
+	Global.config_version 	= data["version"]
+	Global.volume_song 		= data["volume_song"]
+	Global.volume_note 		= data["volume_note"]
+	Global.volume_ui 		= data["volume_ui"]
+	Global.chart_offset 	= data["offset"]
+	Global.note_flow_speed 	= data["speed"]
 	pass
 
 
+## 设置动画
 func _setup_animations() -> void:
 	var lib: AnimationLibrary = AnimationLibrary.new()
 
@@ -230,6 +230,7 @@ func _write_json_file(path: String, data: Dictionary) -> void:
 	pass
 
 
+## 加载共鸣曲目
 func load_sympathy_song() -> void:
 	_copy_lpz_to_customized_playlist()
 	_record_sympath_song_paths()

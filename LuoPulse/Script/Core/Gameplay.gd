@@ -14,130 +14,148 @@
 
 extends Control
 
+
+## 重要播放器, 播放音频
 @onready var audio_system: AudioStreamPlayer = $"AudioSystem"
 
+## 谱面音符加载器
 @onready var note_loader: NoteLoader = $"NoteLoader"
 
+## 进度条
 @onready var progress_bar: ProgressBar = $"UI/ProgressBar"
 
+## 背景图
 @onready var background: TextureRect = $UI/Background
 
+## PV 播放器
 @onready var video_stream_player: VideoStreamPlayer = $UI/VideoStreamPlayer
 
+## 3D 视图窗口
 @onready var _subviewport: SubViewport = $UI/TextureRect/SubViewport
 
+## 3D 场景中的摄像机
 @onready var _camera: Camera3D = $UI/TextureRect/SubViewport/Node3D/Camera3D
 
-# 轨道部分
+## 轨道部分
 @onready var _track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
 
+## UI 节点
 @onready var _ui: Control = $UI
 
+## 连击数标签
 @onready var _combo_label: Label = $UI/Combo
 
+## 暂停按钮
 @onready var _pause_button: Button = $"UI/PauseButton"
 
+## 暂停界面
 @onready var _pause_panel: PanelContainer = $"UI/PausePanel"
 
-# autoplay 标签
+## autoplay 标签
 @onready var autoplay: Label = $UI/MarginContainer/HBoxContainer/Autoplay
 
-# username 标签
+## username 标签
 @onready var username: Label = $UI/MarginContainer/HBoxContainer/Username
 
-# 音符流速大小标签 (-20 ~ 20)
+## 音符流速大小标签 (-20 ~ 20)
 @onready var speed_label: Label = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedLabel
 
-# 音符流速大小滑动条
+## 音符流速大小滑动条
 @onready var speed_scroll_bar: HSlider = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedScrollBar
 
-# 第一个音符到达判定线倒计时标签
+## 第一个音符到达判定线倒计时标签
 @onready var tick: Label = $UI/Tick
 
-# 结束按钮
+## 结束按钮
 @onready var finish_button: Button = $UI/FinishButton
 
 
-
-# 解析完成的谱面数据
+## 解析完成的谱面数据
 var chart: Array = [ ]
 
-# 主时间 (ms), 基于音频播放位置, 是判定和音符定位的唯一时钟源
+## 主时间 (ms), 基于音频播放位置, 是判定和音符定位的唯一时钟源
 var master_time: float = -3000.0
 
-# 开始计时的时间, 与 Time.get_ticks_msec() 相减得到运行时间
+## 开始计时的时间, 与 Time.get_ticks_msec() 相减得到运行时间
 var start_time: int = 0
 
-# 总音符数
+## 总音符数
 var total_notes: int = 0
 
-# 当前加载的音符索引
+## 当前加载的音符索引
 var current_note_index: int = 0
 
-# 音符时间列表
-var time_list: Array = []
+## 音符时间列表
+var time_list: Array = [ ]
 
-# 音符类型列表
-var type_list: Array = []
+## 音符类型列表
+var type_list: Array = [ ]
 
-# 音符持续时间列表
-var duration_list: Array = []
+## 音符持续时间列表
+var duration_list: Array = [ ]
 
-# 音符所在列列表
-var column_list: Array = []
+## 音符所在列列表
+var column_list: Array = [ ]
 
-# 是否正在加载
+## 是否正在加载
 var is_loading_note: bool = true
 
-# 音频是否开始播放
+## 音频是否开始播放
 var is_audio_start: bool = false
 
-# 音频总时长 (毫秒)
+## 音频总时长 (毫秒)
 var audio_length: int = 0
 
 # 四类判定等级
+## 和一
 var harmonious: int = 0
+## 共鸣
 var sympathetic: int = 0
+## 觉醒
 var aware: int = 0
+## 丢失
 var lost: int = 0
 
-# 是否正在游戏
+## 是否正在游戏
 var is_gaming: bool = true
 
-# 暂停时记录的音频播放位置 (秒)
+## 暂停时记录的音频播放位置 (秒)
 var _pause_playback_position: float = 0.0
 
-# 暂停时记录的 tick (用于补偿非音频阶段的暂停时间)
+## 暂停时记录的 tick (用于补偿非音频阶段的暂停时间)
 var _pause_frozen_tick: int = 0
 
-# 暂停面板是否正在显示
+## 暂停面板是否正在显示
 var _is_pause_panel_visible: bool = false
 
-# 倒计时状态
+## 倒计时状态
 var _is_counting_down: bool = false
 var _countdown_remaining: float = 0.0
 const COUNTDOWN_DURATION: float = 3.0
 
+## 显示倒计时的标签
 var _countdown_label: Label = null
 
-# 各列的 InputProcesser 引用
-var input_processers: Array = []
+## 各列的 InputProcesser 引用
+var input_processers: Array = [ ]
 
-# 触屏状态追踪 (touch_index -> column)
-var active_touches: Dictionary = {}
+## 触屏状态追踪 (touch_index -> column)
+var active_touches: Dictionary = { }
 
-# 轨道在屏幕空间的 X 范围 (通过摄像机投影计算)
+## 轨道在屏幕空间的 X 范围 (通过摄像机投影计算)
 var _track_screen_min: float = 0.0
 var _track_screen_max: float = 0.0
 
-# 第一个音符到达判定线时间
+## 第一个音符到达判定线时间
 var first_note_time: int = 0
 
-# 最后一个音符到达判定线时间
+## 最后一个音符到达判定线时间
 var last_note_time: int = 0
 
-# ---- 判定视觉反馈 ----
+## 多押提示
+var mulit_tap: bool = false
 
+## ---- 判定视觉反馈 ----
 const JUDGMENT_TEXT: Dictionary = {
 	"harmonious": "和一",
 	"sympathetic": "共鸣",
@@ -145,6 +163,7 @@ const JUDGMENT_TEXT: Dictionary = {
 	"lost": "丢失",
 }
 
+## 不同判定反馈词颜色
 const JUDGMENT_COLORS: Dictionary = {
 	"harmonious": Color(0.419, 0.792, 0.421, 1.0),
 	"sympathetic": Color(1.0, 0.85, 0.3, 1.0),
@@ -152,20 +171,38 @@ const JUDGMENT_COLORS: Dictionary = {
 	"lost": Color(0.6, 0.6, 0.6, 1.0),
 }
 
+## 过早点击反馈词颜色
 const EARLY_COLOR: Color = Color(0.4, 0.7, 1.0, 1.0)
+## 过晚点击反馈词颜色
 const LATE_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
 
+## 显示反馈词时长
 const FEEDBACK_DURATION: float = 0.2
+## 显示反馈词的 Y 轴偏移
 const FEEDBACK_FLOAT_Y: float = 30.0
+## 显示反馈词的字体大小
 const FEEDBACK_FONT_SIZE: int = 32
-# const FEEDBACK_EARLY_LATE_FONT_SIZE: int = 18
 
+## 桌面键盘按键映射 (开发调试用)
+const KEY_COLUMN_MAP: Dictionary = {
+	KEY_D: 0,
+	KEY_F: 1,
+	KEY_J: 2,
+	KEY_K: 3,
+}
+
+## 用于展示反馈信息标签
 var _judgment_container: Control = null
+## 反馈信息标签对象池
 var _feedback_labels: Array[Label] = [ ]
+## 反馈信息标签索引, 用于在对象池中循环复用标签的索引
 var _feedback_index: int = 0
-var _max_feedback_labels: int = 16
+## 最多可以同时显示的反馈信息标签数量
+var _max_feedback_labels: int = 8
 
-# 用于测试
+
+# ---------- 测试场景 ----------
+## 用于测试
 var default_chart: Array = [
 		{
 			"type": "tap",
@@ -427,34 +464,33 @@ var default_chart: Array = [
 			"time": 8966,
 			"column": 3
 		}]
+## 是否处于测试模式, 若为 true, 则可以直接运行 Gameplay 场景
 var is_test: bool = !true
 
-# 桌面键盘按键映射 (开发调试用)
-const KEY_COLUMN_MAP: Dictionary = {
-	KEY_D: 0,
-	KEY_F: 1,
-	KEY_J: 2,
-	KEY_K: 3,
-}
+## 测试画面
+func test() -> void:
+	var audio_stream: AudioStream = audio_system.stream
+	audio_length = int(audio_stream.get_length() * 1000)
+	print("audio_stream: " + str(audio_system.stream == null))
+	chart = default_chart
+	total_notes = len(chart)
+	pass
 
 
+# ---------- 节点重载函数 ----------
 func _ready() -> void:
 	_calculate_track_screen_bounds()
 	_reset_judging_stats()
 	_setup_judgment_feedback()
-	
-	# audio_system.connect("finished", game_finished)
-	
 	_collect_input_processers()
-	
+	_setup_countdown_label()
+
 	video_stream_player	.visible = true
 	tick				.visible = false
 	finish_button		.visible = false
 	_pause_panel		.visible = false
-	_pause_panel.modulate.a 	 = 0.0
-	_setup_countdown_label()
-	
-	autoplay.visible = Global.is_autoplay
+	autoplay			.visible = Global.is_autoplay
+	_pause_panel.modulate.a = 0.0
 	username.text = Global.user_name
 	
 	if is_test == false:
@@ -471,80 +507,13 @@ func _ready() -> void:
 	# 获取头尾音符时间
 	get_first_last_note_time()
 	
-	# 第一个音符到达判定线所需时间超过 2500ms 即显示
+	# 若第一个音符到达判定线所需时间超过 2500ms, 则显示
 	if first_note_time >= 2500:
 		tick.visible = true
 		pass
 
 	# 记录程序起始时间 (仅用于预加载段的计时)
 	start_time = Time.get_ticks_msec()
-	pass
-
-
-func _collect_input_processers() -> void:
-	# var track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
-	for i in range(Global.COLUMN_NUM):
-		var column_node: Node3D = _track.get_node("Column" + str(i + 1))
-		input_processers.append(column_node)
-		pass
-	pass
-
-
-func _calculate_track_screen_bounds() -> void:
-	var col_count: int = Global.COLUMN_NUM
-	var half_width: float = float(col_count) / 2.0
-
-	var left_point: Vector3 = Vector3(-half_width, 0.0, 0.0)
-	var right_point: Vector3 = Vector3(half_width, 0.0, 0.0)
-
-	var left_vp: Vector2 = _camera.unproject_position(left_point)
-	var right_vp: Vector2 = _camera.unproject_position(right_point)
-
-	if is_inf(left_vp.x) or is_inf(right_vp.x):
-		_track_screen_min = 0.0
-		_track_screen_max = get_viewport().get_visible_rect().size.x
-		return
-
-	var vp_w: float = float(_subviewport.size.x)
-	var screen_w: float = get_viewport().get_visible_rect().size.x
-	var _scale: float = screen_w / vp_w
-
-	_track_screen_min = left_vp.x * _scale
-	_track_screen_max = right_vp.x * _scale
-	pass
-
-
-func get_input_processor(column: int) -> Node3D:
-	if column >= 0 and column < input_processers.size():
-		return input_processers[column]
-	return null
-
-
-# 自动播放时的轨道点击反馈 (column 为 1-based 音符列)
-func flash_track_feedback(column: int) -> void:
-	var processor: Node3D = get_input_processor(column - 1)
-	if processor and processor.has_method("flash_track"):
-		processor.flash_track()
-		pass
-	pass
-
-
-# 自动播放 hold: 设置轨道按住状态 (column 为 1-based 音符列)
-func set_track_autoplay_hold(column: int, is_active: bool) -> void:
-	var processor: Node3D = get_input_processor(column - 1)
-	if processor and processor.has_method("set_autoplay_hold"):
-		processor.set_autoplay_hold(is_active)
-		pass
-	pass
-
-
-# 测试画面
-func test() -> void:
-	var audio_stream: AudioStream = audio_system.stream
-	audio_length = int(audio_stream.get_length() * 1000)
-	print("audio_stream: " + str(audio_system.stream == null))
-	chart = default_chart
-	total_notes = len(chart)
 	pass
 
 
@@ -599,7 +568,6 @@ func _process(delta: float) -> void:
 	# 结束游戏 # NOTICE 修改为手动结束游戏
 	if master_time >= last_note_time + 1000 && is_gaming:
 		show_finish_btn()
-		# game_finished()
 		pass
 
 	# 追踪最大连击数
@@ -613,34 +581,6 @@ func _process(delta: float) -> void:
 		_combo_label.text = str(Global.combo) + " COMBO"
 	else :
 		_combo_label.visible = false
-	pass
-
-
-func _update_master_time() -> void:
-	master_time = _compute_master_time()
-	# NOTICE: 为什么已经将 master_time 传入 Global 了, 还需要引用 root_node 获取 master_time
-	Global.master_time = master_time 
-	pass
-
-
-func _compute_master_time() -> float:
-	if is_audio_start:
-		return audio_system.get_playback_position() * 1000.0 + float(Global.chart_offset)
-	return float(Time.get_ticks_msec() - start_time) - float(Global.start_duration)
-
-
-# 设置音符流速更改后，重新计算实际音符流速
-func reset_speed() -> void:
-	Global.note_speed = 19.0 * Global.note_flow_speed / 40.0 + 10.5
-	if Global.rendering_area.size() == 0:
-		return
-	for note: MeshInstance3D in Global.rendering_area:
-		if not is_instance_valid(note):
-			continue
-		if note.type != "hold":
-			continue
-		note._hold_length = Global.note_speed * float(note.duration) / 1000.0
-		pass
 	pass
 
 
@@ -662,6 +602,7 @@ func _input(event: InputEvent) -> void:
 	# 获取当前时刻的主时间 (解决 _input 比 _process 先执行的延迟问题)
 	var input_time: float = _compute_master_time()
 
+	# 触屏事件处理
 	if event is InputEventScreenTouch:
 		var btn_rect: Rect2 = _pause_button.get_global_rect()
 		if btn_rect.has_point(event.position):
@@ -679,6 +620,7 @@ func _input(event: InputEvent) -> void:
 					active_touches.erase(event.index)
 					_on_column_touch_released(released_col, input_time)
 					pass
+				pass
 			pass
 		pass
 
@@ -699,6 +641,85 @@ func _input(event: InputEvent) -> void:
 	pass
 
 
+# ---------- 工具函数 ----------
+## 通过轨道编号获取相应的轨道 Column
+func get_input_processor(column: int) -> Node3D:
+	if column >= 0 and column < input_processers.size():
+		return input_processers[column]
+	return null
+
+
+# ---------- 自动播放 ----------
+## 自动播放时的轨道点击反馈 (column 为 1-based 音符列)
+func flash_track_feedback(column: int) -> void:
+	var processor: Node3D = get_input_processor(column - 1)
+	if processor and processor.has_method("flash_track"):
+		processor.flash_track()
+		pass
+	pass
+
+
+## 自动播放 hold: 设置轨道按住状态 (column 为 1-based 音符列)
+func set_track_autoplay_hold(column: int, is_active: bool) -> void:
+	var processor: Node3D = get_input_processor(column - 1)
+	if processor and processor.has_method("set_autoplay_hold"):
+		processor.set_autoplay_hold(is_active)
+		pass
+	pass
+
+
+# ---------- 计时器 ----------
+## 更新主时间, 同步到 Global
+func _update_master_time() -> void:
+	master_time = _compute_master_time()
+	# NOTICE: 为什么已经将 master_time 传入 Global 了, 还需要引用 root_node 获取 master_time
+	Global.master_time = master_time 
+	pass
+
+
+## 计算主时间
+func _compute_master_time() -> float:
+	if is_audio_start:
+		return audio_system.get_playback_position() * 1000.0 + float(Global.chart_offset)
+	return float(Time.get_ticks_msec() - start_time) - float(Global.start_duration)
+
+
+# ---------- 捕捉轨道点击 ----------
+## 获取每个轨道的 Column 引用
+func _collect_input_processers() -> void:
+	for i in range(Global.COLUMN_NUM):
+		var column_node: Node3D = _track.get_node("Column" + str(i + 1))
+		input_processers.append(column_node)
+		pass
+	pass
+
+
+## 计算轨道在屏幕上的边界
+func _calculate_track_screen_bounds() -> void:
+	var col_count: int = Global.COLUMN_NUM
+	var half_width: float = float(col_count) / 2.0
+
+	var left_point: Vector3 = Vector3(-half_width, 0.0, 0.0)
+	var right_point: Vector3 = Vector3(half_width, 0.0, 0.0)
+
+	var left_vp: Vector2 = _camera.unproject_position(left_point)
+	var right_vp: Vector2 = _camera.unproject_position(right_point)
+
+	if is_inf(left_vp.x) or is_inf(right_vp.x):
+		_track_screen_min = 0.0
+		_track_screen_max = get_viewport().get_visible_rect().size.x
+		return
+
+	var vp_w: float = float(_subviewport.size.x)
+	var screen_w: float = get_viewport().get_visible_rect().size.x
+	var _scale: float = screen_w / vp_w
+
+	_track_screen_min = left_vp.x * _scale
+	_track_screen_max = right_vp.x * _scale
+	pass
+
+
+## 根据点击位置的 X 坐标获取被点击的轨道编号
 func _get_column_from_x(x: float) -> int:
 	var col_count: int = Global.COLUMN_NUM
 	var _range: float = _track_screen_max - _track_screen_min
@@ -711,12 +732,33 @@ func _get_column_from_x(x: float) -> int:
 	return -1
 
 
+## 根据键盘按键获取被点击的轨道编号
 func _get_column_from_key(event: InputEventKey) -> int:
 	if KEY_COLUMN_MAP.has(event.keycode):
 		return KEY_COLUMN_MAP[event.keycode]
 	return -1
 
 
+## 这个函数在干嘛?
+func _get_column_screen_x(column: int) -> float:
+	var col_count: int = Global.COLUMN_NUM
+	var viewport_width: float = get_viewport().get_visible_rect().size.x
+	var track_width: float = _track_screen_max - _track_screen_min
+	if track_width <= 0.0:
+		track_width = viewport_width * 0.5
+		_track_screen_min = (viewport_width - track_width) * 0.5
+		pass
+	var col_norm: float = (float(column) - 0.5) / float(col_count)
+	return _track_screen_min + col_norm * track_width
+
+
+## 获取判定线在屏幕上的 Y 坐标
+func _get_judgment_line_y() -> float:
+	var viewport_height: float = get_viewport().get_visible_rect().size.y
+	return viewport_height * 0.78
+
+
+## 触屏事件: 按下
 func _on_column_touch_pressed(column: int, input_time: float) -> void:
 	var processor: Node3D = get_input_processor(column)
 	if processor and processor.has_method("on_touch_pressed"):
@@ -725,6 +767,7 @@ func _on_column_touch_pressed(column: int, input_time: float) -> void:
 	pass
 
 
+## 触屏事件: 释放
 func _on_column_touch_released(column: int, input_time: float) -> void:
 	var processor: Node3D = get_input_processor(column)
 	if processor and processor.has_method("on_touch_released"):
@@ -733,8 +776,10 @@ func _on_column_touch_released(column: int, input_time: float) -> void:
 	pass
 
 
-# 加载音符总过程
+# ---------- 音符加载 ----------
+## 加载音符总过程
 func load_note_process() -> void:
+	# 结束加载
 	if current_note_index >= total_notes:
 		is_loading_note = false
 		return
@@ -745,33 +790,31 @@ func load_note_process() -> void:
 	if master_time < load_deadline:
 		return
 
+	# 相同时间的音符, 一并加载
 	var batch_time: float = note_time
+
+	# 统计同时间音符数量, 决定是否为多压 (避免"向后看"漏掉组内最后一个音符)
+	var batch_count: int = 0
+	var probe: int = current_note_index
+	while probe < total_notes and float(time_list[probe]) == batch_time:
+		batch_count += 1
+		probe += 1
+		pass
+	var is_multi: bool = batch_count >= 2
+
 	while current_note_index < total_notes and float(time_list[current_note_index]) == batch_time:
-		load_note(current_note_index, current_note_index)
+		load_note(current_note_index, current_note_index, is_multi)
 		current_note_index += 1
 		pass
 
+	# 结束加载
 	if current_note_index >= total_notes:
 		is_loading_note = false
 		pass
 	pass
 
 
-# 重新封装 load_note 方法，方便外部调用
-func load_note(note_index: int, index: int) -> void:
-	note_loader.load_note(
-		type_list[note_index],
-		time_list[note_index],
-		duration_list[note_index],
-		column_list[note_index],
-		index,
-		_track,
-		self
-	)
-	pass
-
-
-# 从当前选择的曲包中加载谱面数据
+## 从当前选择的曲包中加载谱面数据
 func load_list() -> void:
 	var path: String = Global.sympath_song_path_list[Global.current_song_index]
 	var lpz: Dictionary = Global._read_lpz(path)
@@ -784,7 +827,7 @@ func load_list() -> void:
 	pass
 
 
-# 将谱面数据写入到各数组中
+## 将谱面数据写入到各数组中
 func write_in_list() -> void:
 	total_notes = len(chart)
 	for i: Dictionary in chart:
@@ -792,23 +835,22 @@ func write_in_list() -> void:
 		var type: String = i.get("type")
 		var column: int = i.get("column")
 		var duration: int = i.get("duration", 0)
-
 		time_list.append(time)
 		type_list.append(type)
 		column_list.append(column)
 		duration_list.append(duration)
 		pass
-
 	pass
 
 
-# 获取头尾音符时间
+## 获取头尾音符时间
 func get_first_last_note_time() -> void:
 	first_note_time = time_list[0]
 	last_note_time = time_list[-1]
 	pass
 
 
+## 重置各类判定数据
 func _reset_judging_stats() -> void:
 	Global.harmonious = 0
 	Global.sympathetic = 0
@@ -824,6 +866,23 @@ func _reset_judging_stats() -> void:
 	pass
 
 
+## 重新封装 load_note 方法，方便外部调用
+func load_note(note_index: int, index: int, is_mulit_tap: bool = false) -> void:
+	note_loader.load_note(
+		type_list[note_index],
+		time_list[note_index],
+		duration_list[note_index],
+		column_list[note_index],
+		index,
+		_track,
+		self, 
+		is_mulit_tap
+	)
+	pass
+
+
+# ---------- 判定反馈 ----------
+## 初始化判定反馈
 func _setup_judgment_feedback() -> void:
 	_judgment_container = Control.new()
 	_judgment_container.anchor_left = 0.0
@@ -833,6 +892,7 @@ func _setup_judgment_feedback() -> void:
 	_judgment_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ui.add_child(_judgment_container)
 
+	# 初始化反馈信息标签
 	for _i in range(_max_feedback_labels):
 		var lbl: Label = Label.new()
 		lbl.add_theme_font_size_override("font_size", FEEDBACK_FONT_SIZE)
@@ -847,6 +907,7 @@ func _setup_judgment_feedback() -> void:
 	pass
 
 
+## 展示判定反馈信息标签
 func show_judgment_feedback(time_offset: int, judgment_level: String, column: int) -> void:
 	var lbl: Label = _feedback_labels[_feedback_index]
 	_feedback_index = (_feedback_index + 1) % _max_feedback_labels
@@ -908,30 +969,14 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 	pass
 
 
-func _get_column_screen_x(column: int) -> float:
-	var col_count: int = Global.COLUMN_NUM
-	var viewport_width: float = get_viewport().get_visible_rect().size.x
-	var track_width: float = _track_screen_max - _track_screen_min
-	if track_width <= 0.0:
-		track_width = viewport_width * 0.5
-		_track_screen_min = (viewport_width - track_width) * 0.5
-		pass
-	var col_norm: float = (float(column) - 0.5) / float(col_count)
-	return _track_screen_min + col_norm * track_width
-
-
-func _get_judgment_line_y() -> float:
-	var viewport_height: float = get_viewport().get_visible_rect().size.y
-	return viewport_height * 0.78
-
-
-# 显示结束按钮
+# ---------- 结束游戏 ----------
+## 显示结束按钮
 func show_finish_btn() -> void:
 	finish_button.visible = true
 	pass
 
 
-# 结束
+## 结束
 func _on_finish_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	if not is_gaming:
@@ -971,58 +1016,8 @@ func _on_finish_button_pressed() -> void:
 	pass
 
 
-func _on_pause_button_pressed() -> void:
-	Global.play_ui_click_audio()
-	if _is_pause_panel_visible or not is_gaming or _is_counting_down:
-		return
-
-	var pause_time: float = _compute_master_time()
-	for col in active_touches.values():
-		_on_column_touch_released(col, pause_time)
-	active_touches.clear()
-
-	is_gaming = false
-	_pause_playback_position = audio_system.get_playback_position()
-	_pause_frozen_tick = Time.get_ticks_msec()
-	audio_system.stream_paused = true
-	if video_stream_player.stream != null:
-		video_stream_player.paused = true
-		pass
-	_show_pause_panel()
-	pass
-
-
-func _on_continue_button_pressed() -> void:
-	if not _is_pause_panel_visible:
-		return
-
-	_hide_pause_panel()
-	_start_countdown()
-	pass
-
-
-func _on_retry_button_pressed() -> void:
-	if not _is_pause_panel_visible:
-		return
-
-	_restart_game()
-	pass
-
-
-func _on_exit_button_pressed() -> void:
-	if not _is_pause_panel_visible:
-		return
-
-	audio_system.stop()
-	video_stream_player.stop()
-	is_gaming = false
-	var scene_manager: Node = get_parent()
-	if scene_manager and scene_manager.has_method("back_to_previous_scene"):
-		scene_manager.back_to_previous_scene()
-		pass
-	pass
-
-
+# ---------- 暂停菜单 ----------
+## 展示暂停菜单
 func _show_pause_panel() -> void:
 	if _is_pause_panel_visible:
 		return
@@ -1047,6 +1042,7 @@ func _show_pause_panel() -> void:
 	pass
 
 
+## 隐藏暂停菜单
 func _hide_pause_panel() -> void:
 	if not _is_pause_panel_visible:
 		return
@@ -1062,6 +1058,62 @@ func _hide_pause_panel() -> void:
 	pass
 
 
+## 按下暂停按钮
+func _on_pause_button_pressed() -> void:
+	Global.play_ui_click_audio()
+	if _is_pause_panel_visible or not is_gaming or _is_counting_down:
+		return
+
+	var pause_time: float = _compute_master_time()
+	for col in active_touches.values():
+		_on_column_touch_released(col, pause_time)
+	active_touches.clear()
+
+	is_gaming = false
+	_pause_playback_position = audio_system.get_playback_position()
+	_pause_frozen_tick = Time.get_ticks_msec()
+	audio_system.stream_paused = true
+	if video_stream_player.stream != null:
+		video_stream_player.paused = true
+		pass
+	_show_pause_panel()
+	pass
+
+
+## 按下继续按钮
+func _on_continue_button_pressed() -> void:
+	if not _is_pause_panel_visible:
+		return
+	_hide_pause_panel()
+	_start_countdown()
+	pass
+
+
+## 按下重试按钮
+func _on_retry_button_pressed() -> void:
+	if not _is_pause_panel_visible:
+		return
+	_restart_game()
+	pass
+
+
+## 按下退出按钮
+func _on_exit_button_pressed() -> void:
+	if not _is_pause_panel_visible:
+		return
+
+	audio_system.stop()
+	video_stream_player.stop()
+	is_gaming = false
+	var scene_manager: Node = get_parent()
+	if scene_manager and scene_manager.has_method("back_to_previous_scene"):
+		scene_manager.back_to_previous_scene()
+		pass
+	pass
+
+
+# ---------- 继续游戏 倒计时 ----------
+## 设置暂停后继续的倒计时标签
 func _setup_countdown_label() -> void:
 	_countdown_label = Label.new()
 	_countdown_label.visible = false
@@ -1082,6 +1134,7 @@ func _setup_countdown_label() -> void:
 	pass
 
 
+## 启动继续按钮按后的倒计时
 func _start_countdown() -> void:
 	_is_counting_down = true
 	_countdown_remaining = COUNTDOWN_DURATION
@@ -1094,6 +1147,7 @@ func _start_countdown() -> void:
 	pass
 
 
+## 继续按钮按后的倒计时
 func _countdown_tick(delta: float) -> void:
 	_countdown_remaining -= delta
 	if _countdown_remaining <= 0.0:
@@ -1109,12 +1163,14 @@ func _countdown_tick(delta: float) -> void:
 	pass
 
 
+## 更新继续按钮按后的倒计时时间
 func _update_countdown_display() -> void:
 	var second: int = ceili(_countdown_remaining)
 	_countdown_label.text = str(second)
 	pass
 
 
+## 按下继续按钮按后的倒计时标签闪烁 (缩放)
 func _pulse_countdown_label() -> void:
 	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_BACK)
@@ -1124,6 +1180,7 @@ func _pulse_countdown_label() -> void:
 	pass
 
 
+## 按下继续按钮按后的倒计时结束
 func _on_countdown_ready() -> void:
 	_countdown_label.visible = false
 	_countdown_label.scale = Vector2.ONE
@@ -1143,6 +1200,8 @@ func _on_countdown_ready() -> void:
 	pass
 
 
+# ---------- 重新开始 ----------
+## 重新开始游戏
 func _restart_game() -> void:
 	audio_system.stop()
 	audio_system.stream_paused = false
@@ -1179,8 +1238,9 @@ func _restart_game() -> void:
 	pass
 
 
+## 清除场景中现有的音符
 func _clear_notes() -> void:
-	var track: Node3D = $SubViewport/Node3D/Track
+	var track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
 	for i: int in range(Global.COLUMN_NUM):
 		var column_node: Node3D = track.get_node("Column" + str(i + 1))
 		var note_pool: Node3D = column_node.get_node("NotePool")
@@ -1201,9 +1261,25 @@ func _clear_notes() -> void:
 		pass
 	pass
 
-
+# ---------- 更改音符流速 ----------
+## 当音符流速滑动条被滑动时, 重新设置音符流速, 更新现有音符的位置
 func _on_speed_scroll_bar_value_changed(value: float) -> void:
 	Global.note_flow_speed = int(value)
 	reset_speed()
 	speed_label.text = str(value)
+	pass
+
+
+## 设置音符流速更改后，重新计算实际音符流速
+func reset_speed() -> void:
+	Global.note_speed = 19.0 * Global.note_flow_speed / 40.0 + 10.5
+	if Global.rendering_area.size() == 0:
+		return
+	for note: MeshInstance3D in Global.rendering_area:
+		if not is_instance_valid(note):
+			continue
+		if note.type != "hold":
+			continue
+		note._hold_length = Global.note_speed * float(note.duration) / 1000.0
+		pass
 	pass

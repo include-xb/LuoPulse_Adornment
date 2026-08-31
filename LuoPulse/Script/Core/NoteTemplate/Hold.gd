@@ -1,60 +1,72 @@
 extends MeshInstance3D
 
 
-# 对 Gameplay 节点的引用 (由 NoteLoader 注入)
+## 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var root_node: Control
 
 var type: String = "hold"
 
 var index: int = 0
 
-# 从谱面加载所得的音符到达判定线的时间 (毫秒)
+## 从谱面加载所得的音符到达判定线的时间 (毫秒)
 var time: int = 0
 
-# 持续时间 (毫秒)
+## 持续时间 (毫秒)
 var duration: int = 0
 
-# 轨道 (1-based)
+## 轨道 (1-based)
 var column: int = 0
 
-# 头部是否已被判定
+## 头部是否已被判定
 var is_head_judged: bool = false
 
-# 是否已被彻底移除
+## 是否已被彻底移除
 var is_removed: bool = false
 
-# 是否正在被摁住
+## 是否正在被摁住
 var is_holding: bool = false
 
-# hold 是否已结算 (计分完成)
+## hold 是否已结算 (计分完成)
 var is_hold_completed: bool = false
 
-# hold 是否被提前中断 (玩家松手)
+## hold 是否被提前中断 (玩家松手)
 var is_hold_interrupted: bool = false
 
-# 中断时的可见长度 (用于中断后向后滚动的视觉效果)
+## 中断时的可见长度 (用于中断后向后滚动的视觉效果)
 var _interrupted_visible_length: float = 0.0
 
-# 头部判定时的准度值
+## 头部判定时的准度值
 var a: float = 0.0
 
-# 判定区间状态跟踪
+## 判定区间状态跟踪
 var _was_in_judging_area: bool = false
 
-# 预计算的 hold 基础长度
+## 预计算的 hold 基础长度
 var _hold_length: float = 0.0
 
-# 预计算的 mesh 原始高度
+## 预计算的 mesh 原始高度
 var _mesh_base_height: float = 0.0
 
-# 从 root_node 获取的 master_time
+## 从 root_node 获取的 master_time
 var mt: float = 0.0
+
+## 是否为多押
+var is_mulit_tap: bool = false
+
+## 多押提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
+const MULTI_TAP_BRIGHTEN: float = 0.6
 
 
 func _ready() -> void:
 	_mesh_base_height = get_mesh().size.y
 	# 预计算 hold 全长 (世界单位)
 	_hold_length = Global.note_speed * float(duration) / 1000.0
+
+	if is_mulit_tap:
+		var c: Color = self.material_override.get_shader_parameter("color")
+		self.material_override.set_shader_parameter("color", c.lightened(MULTI_TAP_BRIGHTEN))
+		pass
+
 	pass
 
 

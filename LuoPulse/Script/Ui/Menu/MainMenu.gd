@@ -14,16 +14,14 @@
 
 extends Control
 
-# 主页背景
+## 主页背景
 @onready var background: TextureRect = $Background
 
-# 用户名
+## 用户名
 @onready var username: Label = $Profile/VBoxContainer/InfoPanel/Username
 
-# 水晶值
+## 水晶值
 @onready var amount: Label = $Currency/HBoxContainer/Amount
-
-
 
 
 func _ready() -> void:
@@ -35,8 +33,8 @@ func _ready() -> void:
 	pass
 
 
-# 每次重新进入场景树时刷新显示
-# SceneManager 通过 remove_child / add_child 复用场景节点, _ready 只在首次进入时执行一次
+## 每次重新进入场景树时刷新显示
+## SceneManager 通过 remove_child / add_child 复用场景节点, _ready 只在首次进入时执行一次
 func _enter_tree() -> void:
 	if not is_node_ready():
 		return

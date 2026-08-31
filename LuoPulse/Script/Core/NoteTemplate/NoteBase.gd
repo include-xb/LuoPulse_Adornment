@@ -10,35 +10,60 @@ extends MeshInstance3D
 class_name NoteBase
 
 
-# 对 Gameplay 节点的引用 (由 NoteLoader 注入)
+## 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var root_node: Control;
 
-# 音符索引
+## 音符索引
 var index: int = 0
 
-# 音符到达判定线的时间 (毫秒)
+## 音符到达判定线的时间 (毫秒)
 var time: int = 0
 
-# 音符持续时间 (毫秒)
+## 音符持续时间 (毫秒)
 var duration: int = 0
 
-# 音符所在列数 (1-based)
+## 音符所在列数 (1-based)
 var column: int = 0
 
-# 音符准度 (该音符的单次准度值)
+## 音符准度 (该音符的单次准度值)
 var a: float = 0.0
 
-# 音符是否已经被添加到判定区间
+## 音符是否已经被添加到判定区间
 var is_added: bool = false
 
-# 音符是否已经被移除 (已判定/已丢失)
+## 音符是否已经被移除 (已判定/已丢失)
 var is_removed: bool = false
 
-# 音符是否已判定 (valid hit)
+## 音符是否已判定 (valid hit)
 var is_judged: bool = false
 
-# 上次判定区间状态
+## 上次判定区间状态
 var _was_in_judging_area: bool = false
+
+## 是否为多压
+var is_mulit_tap: bool = false
+
+## 多压提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
+const MULTI_TAP_BRIGHTEN: float = 0.6
+
+
+func _ready() -> void:
+	if is_mulit_tap:
+		_apply_multi_tap_color()
+		pass
+	pass
+
+
+# 多压提示: 复制材质后在原色基础上调亮, 避免同类型音符共享材质导致互相污染 (调试用)
+func _apply_multi_tap_color() -> void:
+	var src: ShaderMaterial = get_active_material(0)
+	if src == null:
+		return
+	var copied: ShaderMaterial = src.duplicate()
+	material_override = copied
+	var base_color: Color = copied.get_shader_parameter("original_color")
+	copied.set_shader_parameter("original_color", base_color.lightened(MULTI_TAP_BRIGHTEN))
+	pass
 
 
 @warning_ignore("unused_parameter")

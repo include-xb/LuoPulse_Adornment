@@ -14,57 +14,68 @@
 
 extends Control
 
-# 背景
+## 背景
 @onready var background: TextureRect = $Background
+
+## 曲绘封面
 @onready var cover: TextureRect = $Control/Cover
+
+## 左切
 @onready var left: Button = $Select/Left
 
-# 开始 (选中)
+## 开始 (选中)
 @onready var start: Button = $Select/Start
 
-# 右切
+## 右切
 @onready var right: Button = $Select/Right
 
-# 展开/回退 动画
+## 展开/回退 动画
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 
-# 预览音频
+## 预览音频
 @onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
 
-# 下方进度条
+## 下方进度条
 @onready var progress_bar: ProgressBar = $ProgressBar
 
-# 水晶数
+## 显示水晶数的标签
 @onready var amount: Label = $HBoxContainer/Currency/HBoxContainer/Amount
 
-# 设置菜单
+## 设置菜单
 @onready var setting_panel: PanelContainer = $SettingPanel
 
-# 自动播放按钮
+## 自动播放按钮
 @onready var autoplay_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton
 
-# PV 播放按钮
+## PV 播放按钮
 @onready var pv_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
 
 
 ## 歌曲信息
-# 标题
+## 标题
 @onready var title: Label = $Control/VBoxContainer/Title
 
-# P 主
+## P 主
 @onready var producer: Label = $Control/VBoxContainer/Producer
 
-# 谱师
+## 谱师
 @onready var creator: Label = $Control/VBoxContainer/Creator
 
-# 演唱
+## 演唱
 @onready var vocalist: Label = $Control/VBoxContainer/Vocalist
 
 
 # ---- 预览音频淡入淡出 ----
+## 音频淡入时间
 const AUDIO_FADE_IN_TIME: float = 1.0
+
+## 音频淡出时间
 const AUDIO_FADE_OUT_TIME: float = 0.5
+
+## 最小音量
 const AUDIO_SILENCE_DB: float = -80.0
+
+## 用于音频淡入淡出
 var _audio_fade_tween: Tween = null
 
 
@@ -113,7 +124,7 @@ func _process(delta: float) -> void:
 	pass
 
 
-# 加载曲包中的内容
+## 加载曲包中的内容
 func load_song_info() -> void:
 	audio_stream_player.stream_paused = true
 	var song_package_path: String = Global.sympath_song_path_list[Global.current_song_index]
@@ -141,12 +152,14 @@ func load_song_info() -> void:
 		pass
 	pass
 
-# 进度条跟进
+
+## 进度条跟进
 func refresh_progress_bar()-> void:
 	progress_bar.value = int(float(Global.current_song_index + 1) / float(Global.sympath_song_num) * 100)
 	pass
 
-# 淡入音频
+
+## 淡入音频
 func _fade_in_audio() -> void:
 	_kill_audio_fade()
 	audio_stream_player.volume_db = AUDIO_SILENCE_DB
@@ -155,11 +168,12 @@ func _fade_in_audio() -> void:
 		audio_stream_player, 
 		"volume_db", 
 		0.0, 
-		AUDIO_FADE_IN_TIME	# 三次插值曲线
-	).set_trans(Tween.TRANS_QUART)
+		AUDIO_FADE_IN_TIME
+	).set_trans(Tween.TRANS_QUART) # 三次插值曲线
 	pass
 
-# 淡出音频
+
+## 淡出音频
 func _fade_out_audio() -> void:
 	_kill_audio_fade()
 	_audio_fade_tween = create_tween()
@@ -173,6 +187,7 @@ func _fade_out_audio() -> void:
 	pass
 
 
+## 停止当前淡入淡出动画, 为了播放新的淡入淡出动画
 func _kill_audio_fade() -> void:
 	if _audio_fade_tween and _audio_fade_tween.is_valid():
 		_audio_fade_tween.kill()
@@ -187,7 +202,7 @@ func _on_back_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.game_mode = Global.GameMode.None
 	$"..".back_to_previous_scene()
-	pass # Replace with function body.
+	pass
 
 
 # 向左切歌
@@ -201,7 +216,7 @@ func _on_left_pressed() -> void:
 	await animation_player.animation_finished
 	load_song_info()
 	animation_player.play("unfold")
-	pass # Replace with function body.
+	pass
 
 
 # 向右切歌
@@ -215,7 +230,7 @@ func _on_right_pressed() -> void:
 	await animation_player.animation_finished
 	load_song_info()
 	animation_player.play("unfold")
-	pass # Replace with function body.
+	pass
 
 
 # 开始
@@ -223,9 +238,10 @@ func _on_start_pressed() -> void:
 	audio_stream_player.stop()
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
-	pass # Replace with function body.
+	pass
 
 
+# 设置
 func _on_setting_pressed() -> void:
 	Global.play_ui_click_audio()
 	setting_panel.visible = true
@@ -248,6 +264,7 @@ func _on_setting_pressed() -> void:
 	pass
 
 
+# 设置界面的确认按钮
 func _on_ok_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	var tween: Tween = create_tween()
@@ -260,6 +277,7 @@ func _on_ok_button_pressed() -> void:
 	pass
 
 
+# 是否自动播放
 func _on_autoplay_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.is_autoplay = !Global.is_autoplay
@@ -267,6 +285,7 @@ func _on_autoplay_button_pressed() -> void:
 	pass
 
 
+# 是否播放 PV
 func _on_pv_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.is_pvplay = !Global.is_pvplay

@@ -187,6 +187,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="FinishButton" type="Button" parent="UI" unique_id=297416739]
+visible = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0

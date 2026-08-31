@@ -5,63 +5,63 @@ extends Control
 @onready var ui_click: AudioStreamPlayer = $UiClick
 
 
-## 常量
+# 常量
 
-# 版本号
+## 版本号
 const VERSION: String = "0.0.1"
 
-# 通知消息展示时间
+## 通知消息展示时间
 const NOTICE_LIFETIME: int = 3
 
-# 通知消息组件
+## 通知消息组件
 const NOTICE_PACKED_SCENE: PackedScene = preload("res://Scene/Ui/Widget/Notice.tscn")
 
-# 轨道数
+## 轨道数
 const COLUMN_NUM: int = 4
 
-# 轨道1对应键盘按键
+## 轨道1对应键盘按键
 const KEY_1: String = "D"
 
-# 轨道2对应键盘按键
+## 轨道2对应键盘按键
 const KEY_2: String = "F"
 
-# 轨道3对应键盘按键
+## 轨道3对应键盘按键
 const KEY_3: String = "J"
 
-# 轨道4对应键盘按键
+## 轨道4对应键盘按键
 const KEY_4: String = "K"
 
-# 按键列表
+## 按键列表
 const KEY_LIST: Array[String] = [ KEY_1, KEY_2, KEY_3, KEY_4 ]
 
-# 开始判定时间 (单位: 毫秒)
+## 开始判定时间 (单位: 毫秒)
 const START_JUDGE_TIME: int = -240
 
-# 结束判定时间 (单位: 毫秒)
+## 结束判定时间 (单位: 毫秒)
 const END_JUDGE_TIME: int = 240
 
-# 和一 (Harmonious) 判定区间: [-60, 60]
+## 和一 (Harmonious) 判定区间: [-60, 60]
 const HARMONIOUS_TIME: int = 60
 
-# 共鸣 (Sympathetic) 判定区间: [-120, -60) and (60, 120]
+## 共鸣 (Sympathetic) 判定区间: [-120, -60) and (60, 120]
 const SYMPATHETIC_TIME: int = 120
 
-# 觉醒 (Aware) 判定区间: [-180, -120) and (120, 180]
+## 觉醒 (Aware) 判定区间: [-180, -120) and (120, 180]
 const AWARE_TIME: int = 180
 
-# 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
+## 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
 const LOST_TIME: int = 240
 
-# INFO: 设置项仅在此处修改，控件将会动态生成
-# 设置项
-# 每个设置项字段:
-# 	key: Global 中的变量名 (读取/写入值)
-# 	config_key: config.json 中的键名 (默认与 key 相同)
-# 	node_type: 控件类型 (HSlider / SpinBox)
-# 	min / max / step: 控件取值范围与步进
-# 	suffix: 显示在数值后的单位
-# "语言": { "key": "language", "node_type": "OptionButton", "options": ["中文", "English", "日本語"] },
-# "用户名": { "key": "user_name", "node_type": "LineEdit" },
+## INFO: 设置项仅在此处修改，控件将会动态生成
+## 设置项
+## 每个设置项字段:
+## 	key: Global 中的变量名 (读取/写入值)
+## 	config_key: config.json 中的键名 (默认与 key 相同)
+## 	node_type: 控件类型 (HSlider / SpinBox)
+## 	min / max / step: 控件取值范围与步进
+## 	suffix: 显示在数值后的单位
+## "语言": { "key": "language", "node_type": "OptionButton", "options": ["中文", "English", "日本語"] },
+## "用户名": { "key": "user_name", "node_type": "LineEdit" },
 const SETTINGS: Dictionary[String, Dictionary] = {
 	"音频": {
 		"UI音效音量": {
@@ -115,15 +115,15 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 }
 
 
-## 变量
+# 变量
 
-# 音符速度, 这个速度是下落的实际速度准值
+## 音符速度, 这个速度是下落的实际速度准值
 var note_speed: float = 10.0
 
-# 用户名
+## 用户名
 var user_name: String = ""
 
-# 游戏模式
+## 游戏模式
 enum GameMode {
 	None,
 	Album,
@@ -131,113 +131,117 @@ enum GameMode {
 } 
 var game_mode: GameMode = GameMode.None
 
-# 是否自动播放
+## 是否自动播放
 var is_autoplay: bool = false
 
-# 是否播放 PV
+## 是否播放 PV
 var is_pvplay: bool = true
 
-# 共鸣主线歌曲路径列表
+## 共鸣主线歌曲路径列表
 var sympath_song_path_list: Array[String] = [ ]
 
-# 共鸣主线歌曲数
+## 共鸣主线歌曲数
 var sympath_song_num: int = 17
 
-# 专辑主线歌曲路径列表
+## 专辑主线歌曲路径列表
 var album_song_path_list: Array[String] = [ ]
 
-# 专辑主线歌曲数
+## 专辑主线歌曲数
 var album_song_num: int = 0
 
-# 当前歌曲
+## 当前歌曲
 var current_song: String = ""
 
-# 当前歌曲标题
+## 当前歌曲标题
 var current_song_title: String = ""
 
-# 当前歌曲制作人 (P主)
+## 当前歌曲制作人 (P主)
 var current_song_artist: String = ""
 
-# 当前歌曲 BPM
+## 当前歌曲 BPM
 var current_song_bpm: String = ""
 
-# 笔记返回场景 (home / results)
+## 笔记返回场景 (home / results)
 var notebook_return_scene: String = "home"
 
-# 笔记返回的歌曲标题
+## 笔记返回的歌曲标题
 var notebook_return_song_title: String = ""
 
-# 当前歌曲的索引
+## 当前歌曲的索引
 var current_song_index: int = 0
 
-# 最后一次解锁的歌曲索引
+## 最后一次解锁的歌曲索引
 var current_unlocked_song_index: int = 0
 
 # 四类判定等级
+## 和一
 var harmonious: int = 0
+## 共鸣
 var sympathetic: int = 0
+## 觉醒
 var aware: int = 0
+## 丢失
 var lost: int = 0
 
-# 已判定音符总数 (用于计算准度)
+## 已判定音符总数 (用于计算准度)
 var total_judged: int = 0
 
-# 连击数
+## 连击数
 var combo: int = 0
 
-# 准度
+## 准度
 var accuracy: float = 0.0
 
-# 当前主时间 (由 Gameplay 每帧更新, 基于音频播放位置)
+## 当前主时间 (由 Gameplay 每帧更新, 基于音频播放位置)
 var master_time: float = -3000.0
 
-# 处在判定区间中的音符
+## 处在判定区间中的音符
 var judging_area: Array = [ ]
 
-# 被绘制到屏幕上的音符
+## 被绘制到屏幕上的音符
 var rendering_area: Array = [ ]
 
 
-# 开始前的延时，这个时间也反应着同一时间内场景中音符最大数量。
-# 相当于当前时间，到当前时间+start_duration这段时间内的音符会被加载到场景中
+## 开始前的延时，这个时间也反应着同一时间内场景中音符最大数量。
+## 相当于当前时间，到当前时间 + start_duration这段时间内的音符会被加载到场景中
 var start_duration: int = 3000
 
 
 # ---- 用户数据 (user.json) ----
 
-# 已解锁的共鸣曲目数
+## 已解锁的共鸣曲目数
 var main_line_unlocked: int = 1
 
-# 水晶数
+## 水晶数
 var crystal: int = 0
 
-# 已获得的彩蛋碎片 ID
+## 已获得的彩蛋碎片 ID
 var story_fragments_unlocked: Array = []
 
 
 # ---- 游戏配置 (config.json) ----
 
-# 游戏配置版本号
+## 游戏配置版本号
 var config_version: String = "0.0.0.1"
 
-# 歌曲播放音量
+## 歌曲播放音量
 var volume_song: int = 90
 
-# 音符打击音量
+## 音符打击音量
 var volume_note: int = 70
 
-# UI 音量
+## UI 音量
 var volume_ui: int = 60
 
-# 谱面偏移
+## 谱面偏移
 var chart_offset: int = 0
 
-# 音符流速，这个速度是将音符实际速度映射到 1-20 的区间， 方便玩家调节
+## 音符流速，这个速度是将音符实际速度映射到 1-20 的区间， 方便玩家调节
 var note_flow_speed: int = 10
 
 
 
-# 最后一场游戏的结果数据
+## 最后一场游戏的结果数据
 var gameplay_result: Dictionary = {
 	"accuracy": 0.0,
 	"grade": "",
@@ -250,17 +254,18 @@ var gameplay_result: Dictionary = {
 	"total_notes": 0,
 	"crystal_earned": 0,
 }
-# 当前最大连击 (由 Gameplay 每帧更新)
+## 当前最大连击 (由 Gameplay 每帧更新)
 var max_combo: int = 0
 
 
-
+## 计算获取当前主线的界面灰度
 func get_current_gray_scale() -> float:
 	var progress: float = float(current_unlocked_song_index) / float(sympath_song_num)
 	var gray_scale: float = 1.0 - progress
 	return gray_scale
 
 
+## ui 点击音效
 func play_ui_click_audio() -> void:
 	ui_click.play()
 	pass
@@ -298,9 +303,9 @@ func get_crystal_reward(acc: float) -> int:
 	return int(round(result))
 
 
-## ============================================================
-## LPZ 文件读取
-## ============================================================
+# ============================================================
+# LPZ 文件读取
+# ============================================================
 
 ## 一次性从 .lpz 文件中读取所有资源 (cover/audio/chart/video)
 ## 相比分别调用 _read_*_from_lpz, 只打开一次 ZIP 文件, 避免重复解压
@@ -502,7 +507,7 @@ func _read_video_from_lpz(lpz_path: String) -> VideoStream:
 	return video_stream
 
 
-
+## 弹出消息
 func display_notice(info: String) -> void:
 	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
 	notice.text = "  " + info

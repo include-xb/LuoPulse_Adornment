@@ -27,7 +27,16 @@ var note_template: MeshInstance3D = null
 ## index: 音符在轨道上的索引 (从 0 开始)
 ## track: 轨道父节点
 ## root_node: Gameplay 节点引用
-func load_note(type: String, time: int, duration: int, column: int, index: int, track: Node3D, root_node: Control):
+func load_note(
+	type: String, 
+	time: int, 
+	duration: int, 
+	column: int, 
+	index: int, 
+	track: Node3D, 
+	root_node: Control,
+	is_mulit_tap: bool
+	):
 
 	if not note_type.has(type):
 		push_error("未知的音符类型: %s" % type)
@@ -52,6 +61,10 @@ func load_note(type: String, time: int, duration: int, column: int, index: int, 
 
 	if type == "hold":
 		# hold 音符的 scale 和 position 偏移在 Hold.gd 的 _physics_process 中处理
+		pass
+	
+	if is_mulit_tap:
+		note_template.set("is_mulit_tap", true)
 		pass
 
 	# 将音符添加到对应轨道的 NotePool 节点下

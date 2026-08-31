@@ -59,7 +59,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Sympathy" index="0" unique_id=45460652]
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0.13803378, 0.13803375, 0.13803375, 1)
 theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
 theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
@@ -74,7 +74,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Album" index="0" unique_id=45460652]
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0.13803378, 0.13803375, 0.13803375, 1)
 theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
 theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
@@ -90,7 +90,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Note" index="0" unique_id=45460652]
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0.13803378, 0.13803375, 0.13803375, 1)
 theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
 theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
@@ -106,7 +106,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Setting" index="0" unique_id=45460652]
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0.13803378, 0.13803375, 0.13803375, 1)
 theme_override_colors/font_focus_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
 theme_override_colors/font_pressed_color = Color(0.19793716, 0.19793725, 0.19793722, 1)
 theme_override_colors/font_hover_color = Color(0.2824075, 0.28240746, 0.28240755, 1)
