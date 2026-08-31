@@ -70,7 +70,7 @@ extends Control
 const AUDIO_FADE_IN_TIME: float = 1.0
 
 ## 音频淡出时间
-const AUDIO_FADE_OUT_TIME: float = 0.5
+const AUDIO_FADE_OUT_TIME: float = 1.0
 
 ## 最小音量
 const AUDIO_SILENCE_DB: float = -80.0
@@ -182,7 +182,7 @@ func _fade_out_audio() -> void:
 		"volume_db", 
 		AUDIO_SILENCE_DB, 
 		AUDIO_FADE_OUT_TIME
-	)
+	).set_trans(Tween.TRANS_QUART) # 三次插值曲线
 	_audio_fade_tween.tween_callback(audio_stream_player.stop)
 	pass
 
@@ -235,7 +235,8 @@ func _on_right_pressed() -> void:
 
 # 开始
 func _on_start_pressed() -> void:
-	audio_stream_player.stop()
+	# audio_stream_player.stop()
+	_fade_out_audio()
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
 	pass

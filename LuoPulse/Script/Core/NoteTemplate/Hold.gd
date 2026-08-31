@@ -35,6 +35,9 @@ var is_hold_interrupted: bool = false
 ## 中断时的可见长度 (用于中断后向后滚动的视觉效果)
 var _interrupted_visible_length: float = 0.0
 
+## 松手时刻 (毫秒), 用于提前松手后从松手时刻起算下落距离, 保证松手瞬间位置连续
+var _release_time: float = 0.0
+
 ## 头部判定时的准度值
 var a: float = 0.0
 
@@ -55,6 +58,9 @@ var is_mulit_tap: bool = false
 
 ## 多押提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
 const MULTI_TAP_BRIGHTEN: float = 0.6
+
+## 尾部松手容差 (毫秒): 允许玩家提前这么长时间松手, 仍按完全按完结算
+const HOLD_RELEASE_TOLERANCE: float = 40.0
 
 
 func _ready() -> void:
@@ -86,7 +92,8 @@ func _process(delta: float) -> void:
 		pass
 	elif is_hold_interrupted:
 		# 提前松手: body 整体向后滚动, 不再保持在判定线
-		var head_z: float = Global.note_speed * (mt - float(time)) / 1000.0
+		# 从松手时刻起算下落距离 (而非从头部到达时刻), 保证松手瞬间位置连续, 不会突然向后跳变
+		var head_z: float = Global.note_speed * (mt - _release_time) / 1000.0
 		position.z = head_z - _interrupted_visible_length / 2.0
 		if _mesh_base_height > 0.0:
 			scale.z = _interrupted_visible_length / _mesh_base_height
@@ -99,12 +106,14 @@ func _process(delta: float) -> void:
 
 		var visible_length: float = -tail_z
 
-		if visible_length <= _hold_length * 0.1:
-			# hold 完全消耗, 进行结算
+		# 完全按住: 按满 100% 才结算移除 (不能提前, 否则松手前就被移除, 无法半透明下落)
+		# 尾部容差只在 on_released 中判断 (提前 HOLD_RELEASE_TOLERANCE 内松手仍算完成)
+		if mt >= float(time) + float(duration):
 			if not is_hold_completed:
 				_complete_hold()
 				pass
 			if not is_removed:
+				# 完全按完
 				_explode()
 				pass
 			return
@@ -153,8 +162,8 @@ func _process(delta: float) -> void:
 			_explode()
 			pass
 		pass
-	# 完全按住
-	elif is_head_judged and mt >= float(time) + float(duration) + float(Global.END_JUDGE_TIME):
+	# 完全按住 (排除提前松手, 提前松手只由上方 is_hold_interrupted 分支处理)
+	elif is_head_judged and not is_hold_interrupted and mt >= float(time) + float(duration) + float(Global.END_JUDGE_TIME):
 		if not is_hold_completed:
 			_complete_hold()
 			pass
@@ -205,10 +214,11 @@ func judge_head(master_time: float) -> void:
 		level = "aware"
 		pass
 	else:
+		# 头部判定 Lost: 等同 miss, 半透明后继续下落
 		a = 0.0
-		# 更改透明度
-		_set_alpha(0.2)
-		pass
+		_lose()
+		return
+	pass
 
 	if root_node and root_node.has_method("show_judgment_feedback"):
 		root_node.show_judgment_feedback(time_offset, level, column)
@@ -226,10 +236,19 @@ func on_hold_start(master_time: float) -> void:
 
 func on_released(master_time: float) -> void:
 	if not is_hold_completed:
-		is_hold_interrupted = true
-		var tail_z: float = Global.note_speed * (master_time - float(time) - float(duration)) / 1000.0
-		_interrupted_visible_length = maxf(0.0, -tail_z)
-		_complete_hold()
+		if master_time >= float(time) + float(duration) - HOLD_RELEASE_TOLERANCE:
+			# 已按满 (含尾部容差): 正常结算, 不判中断
+			_complete_hold()
+			pass
+		else:
+			# 未按满: 半透明后继续下落
+			_set_alpha(0.2)
+			is_hold_interrupted = true
+			_release_time = master_time
+			var tail_z: float = Global.note_speed * (master_time - float(time) - float(duration)) / 1000.0
+			_interrupted_visible_length = maxf(0.0, -tail_z)
+			_complete_hold()
+			pass
 		pass
 	is_holding = false
 	# 释放后不再追踪该 hold
