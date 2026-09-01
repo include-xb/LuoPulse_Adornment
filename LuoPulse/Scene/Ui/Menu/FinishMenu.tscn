@@ -1,7 +1,17 @@
 [gd_scene format=3 uid="uid://cpwqk5f3suptd"]
 
 [ext_resource type="Script" uid="uid://emg8ofqvvmcq" path="res://Script/Ui/Menu/FinishMenu.gd" id="1_8iowy"]
-[ext_resource type="PackedScene" uid="uid://c0hgbrfhgb5rl" path="res://Scene/Ui/Widget/Background.tscn" id="2_lk1cu"]
+[ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="2_f4cmf"]
+[ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_t01hv"]
+[ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="3_t01hv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_46tx6"]
+shader = ExtResource("2_t01hv")
+shader_parameter/gray_scale = 0.1200000057
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ncgm8"]
+shader = ExtResource("3_t01hv")
+shader_parameter/blur_amount = 2.2
 
 [node name="FinishMenu" type="Control" unique_id=1595795645]
 layout_mode = 3
@@ -12,5 +22,181 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_8iowy")
 
-[node name="Background" parent="." unique_id=565770654 instance=ExtResource("2_lk1cu")]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1911982318]
+material = SubResource("ShaderMaterial_46tx6")
 layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_f4cmf")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1735808130]
+material = SubResource("ShaderMaterial_ncgm8")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResultsBox" type="VBoxContainer" parent="." unique_id=1519586395]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -260.5
+offset_right = 300.0
+offset_bottom = 258.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GradeLabel" type="Label" parent="ResultsBox" unique_id=1763793407]
+layout_mode = 2
+size_flags_vertical = 2
+theme_override_colors/font_color = Color(0.85490197, 0.64705884, 0.1254902, 1)
+theme_override_font_sizes/font_size = 60
+text = "∞ Infinity"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ResultsBox" unique_id=205027273]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 80
+
+[node name="JudgingGrid" type="GridContainer" parent="ResultsBox/HBoxContainer" unique_id=1859118343]
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_constants/h_separation = 35
+theme_override_constants/v_separation = 0
+columns = 2
+
+[node name="HarmoniousLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1018154610]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.41960785, 0.7921569, 0.41960785, 1)
+text = "和一"
+horizontal_alignment = 1
+
+[node name="HarmoniousCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=968048052]
+layout_mode = 2
+text = "1719"
+
+[node name="SympatheticLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=473807588]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.7019608, 1, 1)
+text = "共鸣"
+horizontal_alignment = 1
+
+[node name="SympatheticCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=303988676]
+layout_mode = 2
+text = "0"
+
+[node name="AwareLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=720148533]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8509804, 0.3019608, 1)
+text = "觉醒"
+horizontal_alignment = 1
+
+[node name="AwareCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1910606805]
+layout_mode = 2
+text = "0"
+
+[node name="LostLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1937840601]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "丢失"
+horizontal_alignment = 1
+
+[node name="LostCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1006047289]
+layout_mode = 2
+text = "0"
+
+[node name="DataGrid" type="GridContainer" parent="ResultsBox/HBoxContainer" unique_id=573109509]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/h_separation = 35
+theme_override_constants/v_separation = 0
+columns = 2
+
+[node name="AccLabel" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=780129692]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.41960785, 0.7921569, 0.41960785, 1)
+text = "准度"
+horizontal_alignment = 1
+
+[node name="AccCount" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=355431759]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "0.00%"
+
+[node name="ComboLabel" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=1122667581]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.4, 0.7019608, 1, 1)
+text = "最大连击"
+horizontal_alignment = 1
+
+[node name="ComboCount" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=1166815287]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "0"
+
+[node name="NotesLabel" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=231464605]
+self_modulate = Color(1, 1, 1, 0.39215687)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.8509804, 0.3019608, 1)
+text = "总音符"
+horizontal_alignment = 1
+
+[node name="NotesCount" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=1392902209]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "0"
+
+[node name="MarginContainer" type="MarginContainer" parent="ResultsBox" unique_id=124924685]
+layout_mode = 2
+theme_override_constants/margin_top = 45
+
+[node name="Crystal" type="HBoxContainer" parent="ResultsBox" unique_id=1183157762]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CrystalLabel" type="Label" parent="ResultsBox/Crystal" unique_id=160534824]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
+text = "◇ "
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CrystalCount" type="Label" parent="ResultsBox/Crystal" unique_id=1614481000]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
+text = "+14"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="ResultsBox" unique_id=56507457]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_vertical = 8
+text = ">>> 继续"
+
+[connection signal="pressed" from="ResultsBox/ContinueButton" to="." method="_on_continue_pressed"]

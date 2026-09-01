@@ -1,130 +1,53 @@
+## FinishMenu 结算页面
+##
+## 节点结构定义在 FinishMenu.tscn 中, 本脚本只负责把 Global.gameplay_result 的数据填入对应节点
+
 extends Control
 
 
-const FONT_SIZE_LARGE: int = 48
-const FONT_SIZE_NORMAL: int = 28
-const FONT_SIZE_SMALL: int = 22
-const LABEL_COLOR: Color = Color("#5A554F")
-
-var _built: bool = false
+@onready var grade_label: Label = $ResultsBox/GradeLabel
+@onready var acc_label: Label = $ResultsBox/HBoxContainer/DataGrid/AccCount
+@onready var harmonious_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/HarmoniousCount
+@onready var sympathetic_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/SympatheticCount
+@onready var aware_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/AwareCount
+@onready var lost_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/LostCount
+@onready var combo_label: Label = $ResultsBox/HBoxContainer/DataGrid/ComboCount
+@onready var notes_label: Label = $ResultsBox/HBoxContainer/DataGrid/NotesCount
+@onready var crystal_label: Label = $ResultsBox/Crystal/CrystalCount
 
 
 func _ready() -> void:
-	_build_results_ui()
+	_show_results()
 	pass
 
 
-func _build_results_ui() -> void:
-	if _built:
-		return
-	_built = true
-
+## 将 Global.gameplay_result 的数据填入结算界面, 并发放水晶奖励
+func _show_results() -> void:
 	var result: Dictionary = Global.gameplay_result
 
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.anchor_left = 0.5
-	vbox.anchor_right = 0.5
-	vbox.anchor_top = 0.15
-	vbox.anchor_bottom = 0.85
-	vbox.offset_left = -300.0
-	vbox.offset_right = 300.0
-	vbox.add_theme_constant_override("separation", 12)
-	add_child(vbox)
-
-	# 评级
-	var grade_label: Label = Label.new()
-	var grade_color: Color = result.get("grade_color", Color.GRAY)
+	# 评级 (颜色随评级动态变化)
 	grade_label.text = result.get("grade", "-")
-	grade_label.add_theme_font_size_override("font_size", FONT_SIZE_LARGE)
-	grade_label.add_theme_color_override("font_color", grade_color)
-	grade_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(grade_label)
+	grade_label.add_theme_color_override("font_color", result.get("grade_color", Color.GRAY))
 
 	# 准度
-	var acc_label: Label = _make_label(
-		"准度: %.2f%%" % (result.get("accuracy", 0.0) * 100.0),
-		FONT_SIZE_NORMAL
-	)
-	vbox.add_child(acc_label)
-
-	vbox.add_child(_make_spacer(8))
+	acc_label.text = "%.2f%%" % (result.get("accuracy", 0.0) * 100.0)
 
 	# 各判定等级计数
-	var judging_grid: GridContainer = GridContainer.new()
-	judging_grid.columns = 2
-	judging_grid.add_theme_constant_override("h_separation", 40)
-	judging_grid.add_theme_constant_override("v_separation", 6)
-	vbox.add_child(judging_grid)
+	harmonious_count.text = str(result.get("harmonious", 0))
+	sympathetic_count.text = str(result.get("sympathetic", 0))
+	aware_count.text = str(result.get("aware", 0))
+	lost_count.text = str(result.get("lost", 0))
 
-	var h: int = result.get("harmonious", 0)
-	var s: int = result.get("sympathetic", 0)
-	var a: int = result.get("aware", 0)
-	var l: int = result.get("lost", 0)
-	var total: int = result.get("total_notes", 0)
-
-	judging_grid.add_child(_make_label("和一", FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label(str(h), FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label("共鸣", FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label(str(s), FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label("觉醒", FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label(str(a), FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label("丢失", FONT_SIZE_SMALL))
-	judging_grid.add_child(_make_label(str(l), FONT_SIZE_SMALL))
-
-	vbox.add_child(_make_spacer(8))
-
-	# 最大连击
-	var combo_label: Label = _make_label(
-		"最大连击: " + str(result.get("max_combo", 0)),
-		FONT_SIZE_NORMAL
-	)
-	vbox.add_child(combo_label)
-
-	# 总音符
-	var notes_label: Label = _make_label(
-		"总音符: " + str(total),
-		FONT_SIZE_NORMAL
-	)
-	vbox.add_child(notes_label)
-
-	vbox.add_child(_make_spacer(16))
+	# 最大连击与总音符
+	combo_label.text = str(result.get("max_combo", 0))
+	notes_label.text = str(result.get("total_notes", 0))
 
 	# 水晶奖励
 	var crystal_earned: int = result.get("crystal_earned", 0)
-	var crystal_label: Label = _make_label(
-		"水晶 +" + str(crystal_earned),
-		FONT_SIZE_NORMAL
-	)
+	crystal_label.text = "+" + str(crystal_earned)
 	Global.crystal += crystal_earned
 	Global.save_user_data()
-	crystal_label.add_theme_color_override("font_color", Color.GOLDENROD)
-	vbox.add_child(crystal_label)
-
-	vbox.add_child(_make_spacer(24))
-
-	# 继续按钮
-	var continue_btn: Button = Button.new()
-	continue_btn.text = "继续"
-	continue_btn.add_theme_font_size_override("font_size", FONT_SIZE_NORMAL)
-	continue_btn.custom_minimum_size = Vector2(200, 50)
-	continue_btn.pressed.connect(_on_continue_pressed)
-	vbox.add_child(continue_btn)
 	pass
-
-
-func _make_label(text: String, font_size: int) -> Label:
-	var lbl: Label = Label.new()
-	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", font_size)
-	lbl.add_theme_color_override("font_color", LABEL_COLOR)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	return lbl
-
-
-func _make_spacer(height: int) -> Control:
-	var sp: Control = Control.new()
-	sp.custom_minimum_size = Vector2(0, height)
-	return sp
 
 
 func _on_continue_pressed() -> void:

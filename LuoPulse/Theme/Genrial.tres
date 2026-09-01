@@ -47,7 +47,7 @@ gradient = SubResource("Gradient_d2g8x")
 texture = SubResource("GradientTexture1D_uegkn")
 
 [resource]
-Button/colors/font_color = Color(0.9019608, 0.9019608, 0.9019608, 0.78431374)
+Button/colors/font_color = Color(1, 1, 1, 0.78431374)
 Button/colors/font_disabled_color = Color(0, 0, 0, 0.15686275)
 Button/colors/font_focus_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_color = Color(1, 1, 1, 1)
@@ -63,14 +63,15 @@ Button/styles/normal = SubResource("StyleBoxFlat_qqgdb")
 Button/styles/pressed = SubResource("StyleBoxFlat_t6ycm")
 HSlider/styles/grabber_area = SubResource("StyleBoxTexture_s4y3q")
 HSlider/styles/grabber_area_highlight = SubResource("StyleBoxTexture_m0ddv")
-Label/colors/font_color = Color(0.30446267, 0.30446208, 0.30446187, 0.78431374)
+Label/colors/font_color = Color(1, 1, 1, 0.78431374)
 Label/colors/font_outline_color = Color(0, 0, 0, 1)
 Label/colors/font_shadow_color = Color(0, 0, 0, 1)
 Label/constants/outline_size = 2
 Label/constants/shadow_offset_x = 1
 Label/constants/shadow_offset_y = 1
 Label/constants/shadow_outline_size = 1
-Label/font_sizes/font_size = 30
+Label/font_sizes/font_size = 45
+LineEdit/font_sizes/font_size = 25
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_d2g8x")
 ProgressBar/styles/background = SubResource("StyleBoxFlat_b2up6")
 ProgressBar/styles/fill = SubResource("StyleBoxTexture_lqs8k")

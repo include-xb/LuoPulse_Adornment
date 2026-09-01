@@ -56,6 +56,9 @@ var mt: float = 0.0
 ## 是否为多押
 var is_mulit_tap: bool = false
 
+## 剩余未按住部分设置透明度 (0 - 1) .f
+const REST_ALPHA: float = 0.6
+
 ## 多押提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
 const MULTI_TAP_BRIGHTEN: float = 0.6
 
@@ -242,7 +245,7 @@ func on_released(master_time: float) -> void:
 			pass
 		else:
 			# 未按满: 半透明后继续下落
-			_set_alpha(0.2)
+			_set_alpha(REST_ALPHA)
 			is_hold_interrupted = true
 			_release_time = master_time
 			var tail_z: float = Global.note_speed * (master_time - float(time) - float(duration)) / 1000.0
@@ -303,7 +306,7 @@ func _lose() -> void:
 	Global.combo = 0
 	a = 0.0
 	
-	_set_alpha(0.2)
+	_set_alpha(REST_ALPHA)
 
 	if root_node and root_node.has_method("show_judgment_feedback"):
 		root_node.show_judgment_feedback(0, "lost", column)

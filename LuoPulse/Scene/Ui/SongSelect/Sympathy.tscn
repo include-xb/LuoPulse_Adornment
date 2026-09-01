@@ -176,13 +176,11 @@ alignment = 2
 
 [node name="Diamond" type="Label" parent="HBoxContainer/Currency/HBoxContainer" unique_id=357431331]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
 theme_override_font_sizes/font_size = 40
 text = "◇"
 
 [node name="Amount" type="Label" parent="HBoxContainer/Currency/HBoxContainer" unique_id=1634015711]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.25, 0.25, 0.25, 0.75)
 theme_override_font_sizes/font_size = 38
 text = "114514"
 
@@ -209,25 +207,12 @@ text = "<"
 [node name="Start" type="Button" parent="Select" unique_id=2104645452]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9007046, 0.90070456, 0.90070456, 0.78431374)
-theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 75
 text = "@"
 
 [node name="Right" type="Button" parent="Select" unique_id=1609907361]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.9007046, 0.90070456, 0.90070456, 0.78431374)
-theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
-theme_override_colors/font_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
-theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.15686275)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 80
 text = ">"
 

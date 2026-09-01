@@ -141,6 +141,13 @@ func judge(master_time: float) -> void:
 		Global.lost += 1
 		a = 0.0
 		pass
+	
+	if level == "lost":
+		Global.combo = 0
+		pass
+	else:
+		Global.combo += 1
+		pass
 
 	if root_node and root_node.has_method("show_judgment_feedback"):
 		root_node.show_judgment_feedback(time_offset, level, column)
@@ -202,7 +209,6 @@ func _lose(master_time: float) -> void:
 func _finish_judge() -> void:
 	is_judged = true
 	is_removed = true
-	Global.combo += 1
 	_update_accuracy()
 	_remove_from_judging_and_rendering()
 	explode()

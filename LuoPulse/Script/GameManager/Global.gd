@@ -70,7 +70,16 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"node_type": "HSlider",
 			"min": 0,
 			"max": 100,
-			"step": 1,
+			"step": 5,
+			"suffix": "%",
+		},
+		"背景音乐音量": {
+			"key": "volume_bg",
+			"config_key": "volume_bg",
+			"node_type": "HSlider",
+			"min": 0,
+			"max": 100,
+			"step": 5,
 			"suffix": "%",
 		},
 		"音符打击音量": {
@@ -79,7 +88,7 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"node_type": "HSlider",
 			"min": 0,
 			"max": 100,
-			"step": 1,
+			"step": 5,
 			"suffix": "%",
 		},
 		"歌曲音量": {
@@ -88,7 +97,7 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"node_type": "HSlider",
 			"min": 0,
 			"max": 100,
-			"step": 1,
+			"step": 5,
 			"suffix": "%",
 		},
 	},
@@ -96,20 +105,28 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 		"谱面偏移": {
 			"key": "chart_offset",
 			"config_key": "offset",
-			"node_type": "SpinBox",
+			"node_type": "HSlider",
 			"min": -200,
 			"max": 200,
-			"step": 1,
+			"step": 5,
 			"suffix": "ms",
 		},
 		"音符流速": {
 			"key": "note_flow_speed",
 			"config_key": "speed",
-			"node_type": "SpinBox",
-			"min": 1,
+			"node_type": "HSlider",
+			"min": -20,
 			"max": 20,
 			"step": 1,
 			"suffix": "",
+		},
+	},
+	"启动": {
+		"开始动画": {
+			"key": "if_play_start_animation",
+			"config_key": "if_play_start_animation",
+			"node_type": "ToggleButton",
+			"suffix": "%",
 		},
 	},
 }
@@ -216,7 +233,10 @@ var main_line_unlocked: int = 1
 var crystal: int = 0
 
 ## 已获得的彩蛋碎片 ID
-var story_fragments_unlocked: Array = []
+var story_fragments_unlocked: Array = [ ]
+
+## 是否初次打开游戏
+var is_first_open: bool = true
 
 
 # ---- 游戏配置 (config.json) ----
@@ -233,11 +253,17 @@ var volume_note: int = 70
 ## UI 音量
 var volume_ui: int = 60
 
+## 背景音乐音量
+var volume_bg: int = 60
+
 ## 谱面偏移
 var chart_offset: int = 0
 
 ## 音符流速，这个速度是将音符实际速度映射到 1-20 的区间， 方便玩家调节
-var note_flow_speed: int = 10
+var note_flow_speed: int = 0
+
+## 是否播放开始动画
+var if_play_start_animation: bool = true
 
 
 

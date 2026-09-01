@@ -21,9 +21,22 @@ extends Control
 
 func _ready() -> void:
 	load_config()
-	_setup_animations()
 	load_sympathy_song()
-	_play_intro_sequence()
+	if Global.if_play_start_animation:
+		_setup_animations()
+		_play_intro_sequence()
+		Global.is_first_open = false
+		pass
+	else:
+		$"..".start_scene_by_path("res://Scene/Ui/Menu/MainMenu.tscn")
+		pass
+	pass
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_Q:
+		$"..".start_scene_by_path("res://Scene/Ui/Menu/MainMenu.tscn")
+		pass
 	pass
 	
 
@@ -41,9 +54,10 @@ func _load_user_data() -> void:
 	# 默认数据
 	var default_data: Dictionary = {
 		"username": "小白",	# 用户名
+		"is_first_open": true,
 		"main_line_unlocked": 1,	# 主线中已经解锁的曲目数量
-		"crystal": 0,	# 水晶数
-		"story_fragments_unlocked": []	# 已解锁的故事碎片id
+		"crystal": 100,	# 水晶数
+		"story_fragments_unlocked": [], 	# 已解锁的故事碎片id
 	}
 
 	var data: Dictionary = default_data.duplicate()
@@ -84,9 +98,10 @@ func _load_user_data() -> void:
 	# print("重新保存用户数据")
 
 	# 赋值到 Global
-	Global.user_name = data["username"]
-	Global.main_line_unlocked = data["main_line_unlocked"]
-	Global.crystal = data["crystal"]
+	Global.user_name 				= data["username"]
+	Global.is_first_open 			= data["is_first_open"]
+	Global.main_line_unlocked 		= data["main_line_unlocked"]
+	Global.crystal 					= data["crystal"]
 	Global.story_fragments_unlocked = data["story_fragments_unlocked"]
 	pass
 
@@ -102,8 +117,10 @@ func _load_game_config() -> void:
 		"volume_song": 90,
 		"volume_note": 70,
 		"volume_ui": 60,
+		"volume_bg": 60,
 		"offset": 0,
-		"speed": 10
+		"speed": 10,
+		"if_play_start_animation": true
 	}
 
 	var data: Dictionary = default_data.duplicate()
@@ -142,12 +159,14 @@ func _load_game_config() -> void:
 	# _write_json_file(config_path, data)
 
 	# 赋值到 Global
-	Global.config_version 	= data["version"]
-	Global.volume_song 		= data["volume_song"]
-	Global.volume_note 		= data["volume_note"]
-	Global.volume_ui 		= data["volume_ui"]
-	Global.chart_offset 	= data["offset"]
-	Global.note_flow_speed 	= data["speed"]
+	Global.config_version 			= data["version"]
+	Global.volume_song 				= data["volume_song"]
+	Global.volume_note 				= data["volume_note"]
+	Global.volume_bg				= data["volume_bg"]
+	Global.volume_ui 				= data["volume_ui"]
+	Global.chart_offset 			= data["offset"]
+	Global.note_flow_speed 			= data["speed"]
+	Global.if_play_start_animation 	= data["if_play_start_animation"]
 	pass
 
 
@@ -199,7 +218,7 @@ func _play_intro_sequence() -> void:
 	# 淡入第一段文字
 	animation_player.play("fade_in_text1")
 	await animation_player.animation_finished
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(1.0).timeout
 
 	# 淡出第一段文字
 	animation_player.play("fade_out_text1")
@@ -209,7 +228,7 @@ func _play_intro_sequence() -> void:
 	# 淡入第二段文字
 	animation_player.play("fade_in_text2")
 	await animation_player.animation_finished
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(1.0).timeout
 
 	# 淡出第二段文字
 	animation_player.play("fade_out_text2")

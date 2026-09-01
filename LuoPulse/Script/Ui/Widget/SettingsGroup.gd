@@ -16,6 +16,7 @@ func set_up(settings_group_key: String, settings_group: Dictionary) -> void:
 
 		var name_label: Label = Label.new()
 		name_label.text = setting_name
+		name_label.add_theme_font_size_override("font_size", 40)
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(name_label)
@@ -37,6 +38,8 @@ func _create_widget(setting: Dictionary) -> Control:
 			return _create_lineedit(setting)
 		"OptionButton":
 			return _create_optionbutton(setting)
+		"ToggleButton":
+			return _create_togglebutton(setting)
 	return Control.new()
 
 
@@ -126,6 +129,23 @@ func _create_optionbutton(setting: Dictionary) -> Control:
 	return box
 
 
+func _create_togglebutton(setting: Dictionary) -> Control:
+	var box: HBoxContainer = HBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	box.size_flags_horizontal = Control.SIZE_SHRINK_END
+
+	var togglebutton: Button = Button.new()
+	togglebutton.toggle_mode = true
+	togglebutton.button_pressed = bool(Global.get(setting["key"]))
+	togglebutton.text = "开" if togglebutton.button_pressed else "关"
+	togglebutton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	togglebutton.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	box.add_child(togglebutton)
+
+	togglebutton.toggled.connect(_on_togglebutton_toggled.bind(togglebutton, setting["key"]))
+	return box
+
+
 func _format_value(value: float, suffix: String) -> String:
 	var text: String = str(int(value))
 	if suffix != "":
@@ -151,6 +171,12 @@ func _on_lineedit_changed(text: String, key: String) -> void:
 
 func _on_optionbutton_changed(index: int, key: String) -> void:
 	_apply_setting(key, index)
+	pass
+
+
+func _on_togglebutton_toggled(is_on: bool, togglebutton: Button, key: String) -> void:
+	togglebutton.text = "开" if is_on else "关"
+	_apply_setting(key, is_on)
 	pass
 
 

@@ -58,16 +58,16 @@ extends Control
 @onready var username: Label = $UI/MarginContainer/HBoxContainer/Username
 
 ## 音符流速大小标签 (-20 ~ 20)
-@onready var speed_label: Label = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedLabel
+@onready var speed_label: Label = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedLabel
 
 ## 音符流速大小滑动条
-@onready var speed_scroll_bar: HSlider = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/VBoxContainer/SpeedScrollBar
+@onready var speed_scroll_bar: HSlider = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar
 
 ## 第一个音符到达判定线倒计时标签
 @onready var tick: Label = $UI/Tick
 
 ## 结束按钮
-@onready var finish_button: Button = $UI/FinishButton
+@onready var finish_button_mask: ColorRect = $UI/Mask
 
 
 ## 解析完成的谱面数据
@@ -165,10 +165,10 @@ const JUDGMENT_TEXT: Dictionary = {
 
 ## 不同判定反馈词颜色
 const JUDGMENT_COLORS: Dictionary = {
-	"harmonious": Color(0.419, 0.792, 0.421, 1.0),
-	"sympathetic": Color(1.0, 0.85, 0.3, 1.0),
-	"aware": Color(0.4, 0.7, 1.0, 1.0),
-	"lost": Color(0.6, 0.6, 0.6, 1.0),
+	"harmonious": Color("6bca6bff"),
+	"sympathetic": Color("66b3ffff"),
+	"aware": Color("ffd94dff"),
+	"lost": Color("999999ff"),
 }
 
 ## 过早点击反馈词颜色
@@ -484,11 +484,13 @@ func _ready() -> void:
 	_setup_judgment_feedback()
 	_collect_input_processers()
 	_setup_countdown_label()
+	reset_speed()
 
 	video_stream_player	.visible = true
 	tick				.visible = false
-	finish_button		.visible = false
+	finish_button_mask	.visible = false
 	_pause_panel		.visible = false
+	_pause_button		.disabled = true
 	autoplay			.visible = Global.is_autoplay
 	_pause_panel.modulate.a = 0.0
 	username.text = Global.user_name
@@ -508,7 +510,7 @@ func _ready() -> void:
 	get_first_last_note_time()
 	
 	# 若第一个音符到达判定线所需时间超过 2500ms, 则显示
-	if first_note_time >= 2500:
+	if first_note_time >= 1000:
 		tick.visible = true
 		pass
 
@@ -538,6 +540,7 @@ func _process(delta: float) -> void:
 			video_stream_player.visible = false
 			pass
 		is_audio_start = true
+		_pause_button.disabled = false
 		pass
 
 	# 加载音符
@@ -585,25 +588,16 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		if _is_counting_down:
-			return
-		if _is_pause_panel_visible:
-			_on_continue_button_pressed()
-			pass
-		else:
-			_on_pause_button_pressed()
-			pass
-		return
-
 	if not is_gaming:
 		return
-
+	
 	# 获取当前时刻的主时间 (解决 _input 比 _process 先执行的延迟问题)
 	var input_time: float = _compute_master_time()
 
 	# 触屏事件处理
 	if event is InputEventScreenTouch:
+		if finish_button_mask.visible == true:
+			return
 		var btn_rect: Rect2 = _pause_button.get_global_rect()
 		if btn_rect.has_point(event.position):
 			return
@@ -625,6 +619,24 @@ func _input(event: InputEvent) -> void:
 		pass
 
 	# 桌面键盘输入 (开发调试用)
+	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		if _pause_button.disabled == true:
+			return
+		if _is_counting_down:
+			return
+		
+		if _is_pause_panel_visible:
+			_on_continue_button_pressed()
+			pass
+		else:
+			_on_pause_button_pressed()
+			pass
+		return
+	
+	if event is InputEventKey and event.pressed and event.keycode == KEY_Q:
+		_on_finish_button_pressed()
+		pass
+
 	if event is InputEventKey and event.pressed and not event.echo:
 		var col: int = _get_column_from_key(event)
 		if col >= 0:
@@ -972,7 +984,7 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 # ---------- 结束游戏 ----------
 ## 显示结束按钮
 func show_finish_btn() -> void:
-	finish_button.visible = true
+	finish_button_mask.visible = true
 	pass
 
 
@@ -1235,6 +1247,12 @@ func _restart_game() -> void:
 
 	_hide_pause_panel()
 	is_gaming = true
+	
+	# 若第一个音符到达判定线所需时间超过 2500ms, 则显示
+	if first_note_time >= 2500:
+		tick.visible = true
+		pass
+	
 	pass
 
 

@@ -2,13 +2,6 @@
 
 [ext_resource type="Script" uid="uid://dhaieafuju8ky" path="res://Script/Ui/Widget/UnderlineButton.gd" id="1_script"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_trans"]
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0, 0, 0, 0)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k3ctm"]
 bg_color = Color(0, 0, 0, 1)
 border_width_left = 1
@@ -29,11 +22,12 @@ script = ExtResource("1_script")
 custom_minimum_size = Vector2(180, 50)
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.27509066, 0.27509055, 0.27509058, 1)
+theme_override_colors/font_focus_color = Color(0.39215687, 0.39215687, 0.39215687, 1)
+theme_override_colors/font_pressed_color = Color(0.31431594, 0.31431618, 0.31431603, 1)
+theme_override_colors/font_hover_color = Color(0.39215687, 0.39215687, 0.39215687, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.3137255, 0.3137255, 0.3137255, 1)
 theme_override_font_sizes/font_size = 50
-theme_override_styles/normal = SubResource("StyleBoxFlat_trans")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_trans")
-theme_override_styles/hover = SubResource("StyleBoxFlat_trans")
-theme_override_styles/focus = SubResource("StyleBoxFlat_trans")
 text = ">>>"
 
 [node name="Separator" type="HSeparator" parent="." unique_id=483453183]
