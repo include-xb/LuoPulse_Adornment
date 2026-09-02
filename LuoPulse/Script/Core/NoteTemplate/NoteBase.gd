@@ -47,22 +47,11 @@ var is_mulit_tap: bool = false
 const MULTI_TAP_BRIGHTEN: float = 0.6
 
 
+# ---------- 节点重载函数 ----------
 func _ready() -> void:
 	if is_mulit_tap:
 		_apply_multi_tap_color()
 		pass
-	pass
-
-
-# 多压提示: 复制材质后在原色基础上调亮, 避免同类型音符共享材质导致互相污染 (调试用)
-func _apply_multi_tap_color() -> void:
-	var src: ShaderMaterial = get_active_material(0)
-	if src == null:
-		return
-	var copied: ShaderMaterial = src.duplicate()
-	material_override = copied
-	var base_color: Color = copied.get_shader_parameter("original_color")
-	copied.set_shader_parameter("original_color", base_color.lightened(MULTI_TAP_BRIGHTEN))
 	pass
 
 
@@ -103,10 +92,35 @@ func _process(delta: float) -> void:
 	pass
 
 
+# ---------- 工具函数 ----------
+## 多压提示: 复制材质后在原色基础上调亮, 避免同类型音符共享材质导致互相污染 (调试用)
+func _apply_multi_tap_color() -> void:
+	var src: ShaderMaterial = get_active_material(0)
+	if src == null:
+		return
+	var copied: ShaderMaterial = src.duplicate()
+	material_override = copied
+	var base_color: Color = copied.get_shader_parameter("original_color")
+	copied.set_shader_parameter("original_color", base_color.lightened(MULTI_TAP_BRIGHTEN))
+	pass
+
+
+## 由 InputProcesser.gd 调用
+## 是否处于判定区间且未被头判
 func is_judgable() -> bool:
 	return not is_removed and not is_judged
 
 
+## 更新准度, 通过准度计算公式
+func _update_accuracy() -> void:
+	Global.total_judged += 1
+	var n: int = Global.total_judged
+	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
+	pass
+
+
+# ---------- 判定 ----------
+## 判定
 func judge(master_time: float) -> void:
 	if is_removed or is_judged:
 		return
@@ -157,35 +171,19 @@ func judge(master_time: float) -> void:
 	pass
 
 
-# 被触摸判定为 Lost (release 覆写为触摸即丢失)
+## 被触摸判定为 Lost (release 覆写为触摸即丢失)
 func lose(master_time: float) -> void:
 	_lose(master_time)
 	pass
 
 
-# 离开判定区间且未被判定时的处理 (子类可覆写)
+## 离开判定区间且未被判定时的处理 (子类可覆写)
 func _on_miss(master_time: float) -> void:
 	_lose(master_time)
 	pass
 
 
-# 自动播放命中处理 (子类可覆写)
-func _autoplay(master_time: float) -> void:
-	if master_time >= float(time) - 10.0 and not is_judged:
-		judge(master_time)
-		_flash_track_feedback()
-		pass
-	pass
-
-
-# 自动播放时的轨道点击反馈
-func _flash_track_feedback() -> void:
-	if root_node and root_node.has_method("flash_track_feedback"):
-		root_node.flash_track_feedback(column)
-		pass
-	pass
-
-
+## 判定为 lost
 @warning_ignore("unused_parameter")
 func _lose(master_time: float) -> void:
 	if is_removed or is_judged:
@@ -206,6 +204,7 @@ func _lose(master_time: float) -> void:
 	pass
 
 
+## 结束判定
 func _finish_judge() -> void:
 	is_judged = true
 	is_removed = true
@@ -215,13 +214,26 @@ func _finish_judge() -> void:
 	pass
 
 
-func _update_accuracy() -> void:
-	Global.total_judged += 1
-	var n: int = Global.total_judged
-	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
+# ---------- 自动播放 ----------
+## 自动播放命中处理 (子类可覆写)
+func _autoplay(master_time: float) -> void:
+	if master_time >= float(time) - 10.0 and not is_judged:
+		judge(master_time)
+		_flash_track_feedback()
+		pass
 	pass
 
 
+## 自动播放时的轨道点击反馈
+func _flash_track_feedback() -> void:
+	if root_node and root_node.has_method("flash_track_feedback"):
+		root_node.flash_track_feedback(column)
+		pass
+	pass
+
+
+# ---------- 清除 ----------
+## 清理对象池中的引用
 func _remove_from_judging_and_rendering() -> void:
 	var idx: int = Global.judging_area.find(self)
 	if idx >= 0:
@@ -234,8 +246,7 @@ func _remove_from_judging_and_rendering() -> void:
 	pass
 
 
-
-# 碎裂效果
+## 碎裂效果, 从场景中移除
 func explode() -> void:
 	var particle: GPUParticles3D = get_node("../../GPUParticles3D")
 	particle.emitting = false

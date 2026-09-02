@@ -14,6 +14,7 @@
 
 extends Control
 
+
 ## 背景
 @onready var background: TextureRect = $Background
 
@@ -51,7 +52,7 @@ extends Control
 @onready var pv_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
 
 
-## 歌曲信息
+# ---------- 歌曲信息 ----------
 ## 标题
 @onready var title: Label = $Control/VBoxContainer/Title
 
@@ -65,7 +66,10 @@ extends Control
 @onready var vocalist: Label = $Control/VBoxContainer/Vocalist
 
 
-# ---- 预览音频淡入淡出 ----
+# ---------- 预览音频淡入淡出 ----------
+## 用于音频淡入淡出
+var _audio_fade_tween: Tween = null
+
 ## 音频淡入时间
 const AUDIO_FADE_IN_TIME: float = 1.0
 
@@ -75,10 +79,8 @@ const AUDIO_FADE_OUT_TIME: float = 1.0
 ## 最小音量
 const AUDIO_SILENCE_DB: float = -80.0
 
-## 用于音频淡入淡出
-var _audio_fade_tween: Tween = null
 
-
+# ---------- 节点函数重载 ----------
 func _ready() -> void:
 	Global.game_mode = Global.GameMode.Sympathy
 	setting_panel.visible = false
@@ -124,6 +126,14 @@ func _process(delta: float) -> void:
 	pass
 
 
+# ---------- 工具函数 ----------
+## 进度条跟进
+func refresh_progress_bar()-> void:
+	progress_bar.value = int(float(Global.current_song_index + 1) / float(Global.sympath_song_num) * 100)
+	pass
+
+
+# ---------- 加载 ----------
 ## 加载曲包中的内容
 func load_song_info() -> void:
 	audio_stream_player.stream_paused = true
@@ -153,12 +163,7 @@ func load_song_info() -> void:
 	pass
 
 
-## 进度条跟进
-func refresh_progress_bar()-> void:
-	progress_bar.value = int(float(Global.current_song_index + 1) / float(Global.sympath_song_num) * 100)
-	pass
-
-
+# ---------- 预览音频 ----------
 ## 淡入音频
 func _fade_in_audio() -> void:
 	_kill_audio_fade()
@@ -196,7 +201,8 @@ func _kill_audio_fade() -> void:
 	pass
 
 
-# 返回 MainMenu
+# ---------- 按钮信号绑定 ----------
+## 返回 MainMenu
 func _on_back_pressed() -> void:
 	audio_stream_player.stop()
 	Global.play_ui_click_audio()
@@ -205,7 +211,7 @@ func _on_back_pressed() -> void:
 	pass
 
 
-# 向左切歌
+## 向左切歌
 func _on_left_pressed() -> void:
 	_fade_out_audio()
 	Global.play_ui_click_audio()
@@ -219,7 +225,7 @@ func _on_left_pressed() -> void:
 	pass
 
 
-# 向右切歌
+## 向右切歌
 func _on_right_pressed() -> void:
 	_fade_out_audio()
 	Global.play_ui_click_audio()
@@ -233,7 +239,7 @@ func _on_right_pressed() -> void:
 	pass
 
 
-# 开始
+## 开始
 func _on_start_pressed() -> void:
 	# audio_stream_player.stop()
 	_fade_out_audio()
@@ -242,7 +248,7 @@ func _on_start_pressed() -> void:
 	pass
 
 
-# 设置
+## 设置(选项)
 func _on_setting_pressed() -> void:
 	Global.play_ui_click_audio()
 	setting_panel.visible = true
@@ -265,7 +271,8 @@ func _on_setting_pressed() -> void:
 	pass
 
 
-# 设置界面的确认按钮
+# ---------- 设置(选项)界面 ----------
+## 设置(选项)界面的确认按钮
 func _on_ok_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	var tween: Tween = create_tween()

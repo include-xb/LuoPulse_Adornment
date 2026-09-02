@@ -2,17 +2,32 @@
 ##
 ## 节点结构定义在 FinishMenu.tscn 中, 本脚本只负责把 Global.gameplay_result 的数据填入对应节点
 
+
 extends Control
 
 
+## 等级 ∞ Infinity A B C D
 @onready var grade_label: Label = $ResultsBox/GradeLabel
+
+## 准度
 @onready var acc_label: Label = $ResultsBox/HBoxContainer/DataGrid/AccCount
+
+## 和一
 @onready var harmonious_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/HarmoniousCount
+## 共鸣
 @onready var sympathetic_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/SympatheticCount
+## 觉醒
 @onready var aware_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/AwareCount
+## 丢失
 @onready var lost_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/LostCount
+
+## 最大连击数
 @onready var combo_label: Label = $ResultsBox/HBoxContainer/DataGrid/ComboCount
+
+## 音符总数
 @onready var notes_label: Label = $ResultsBox/HBoxContainer/DataGrid/NotesCount
+
+## 获得水晶数
 @onready var crystal_label: Label = $ResultsBox/Crystal/CrystalCount
 
 
@@ -50,6 +65,7 @@ func _show_results() -> void:
 	pass
 
 
+# ---------- 按钮信号绑定 ----------
 func _on_continue_pressed() -> void:
 	Global.play_ui_click_audio()
 

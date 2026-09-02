@@ -4,8 +4,10 @@ extends MeshInstance3D
 ## 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var root_node: Control
 
+## 音符类型
 var type: String = "hold"
 
+## 音符序号
 var index: int = 0
 
 ## 从谱面加载所得的音符到达判定线的时间 (毫秒)
@@ -66,6 +68,7 @@ const MULTI_TAP_BRIGHTEN: float = 0.6
 const HOLD_RELEASE_TOLERANCE: float = 40.0
 
 
+# ---------- 节点重载函数 ----------
 func _ready() -> void:
 	_mesh_base_height = get_mesh().size.y
 	# 预计算 hold 全长 (世界单位)
@@ -182,14 +185,37 @@ func _process(delta: float) -> void:
 	pass
 
 
+# ---------- 谓词/工具函数 ----------
+## 由 InputProcesser.gd 调用
+## 是否处于判定区间且未被头判
 func is_head_judgable() -> bool:
 	return not is_head_judged and not is_removed
 
 
+## 由 InputProcesser.gd 调用
+## 是否处于判定区间且未被头判 (与 is_head_judgable() 函数相同)
 func is_judgable() -> bool:
 	return is_head_judgable()
 
 
+## 设置 is_holding 为 true
+@warning_ignore("unused_parameter")
+func on_hold_start(master_time: float) -> void:
+	is_holding = true
+	pass
+
+
+## 设置 hold 透明度 (0.0 ~ 1.0)
+## 通过 shader 的 color 参数控制 alpha, 保留 RGB 不变
+func _set_alpha(alpha: float) -> void:
+	var c: Color = material_override.get_shader_parameter("color")
+	c.a = alpha
+	material_override.set_shader_parameter("color", c)
+	pass
+
+
+# ---------- 判定 ----------
+## 头判
 func judge_head(master_time: float) -> void:
 	if is_head_judged or is_removed:
 		return
@@ -231,12 +257,8 @@ func judge_head(master_time: float) -> void:
 	pass
 
 
-@warning_ignore("unused_parameter")
-func on_hold_start(master_time: float) -> void:
-	is_holding = true
-	pass
-
-
+## 由 InputProcesser 节点调用
+## 松开, 对音符进行判定
 func on_released(master_time: float) -> void:
 	if not is_hold_completed:
 		if master_time >= float(time) + float(duration) - HOLD_RELEASE_TOLERANCE:
@@ -258,6 +280,7 @@ func on_released(master_time: float) -> void:
 	pass
 
 
+## 完成按住, 每帧持续调用
 func _complete_hold() -> void:
 	if is_hold_completed:
 		return
@@ -297,6 +320,7 @@ func _complete_hold() -> void:
 	pass
 
 
+## 判定为失败
 func _lose() -> void:
 	if is_removed:
 		return
@@ -321,6 +345,8 @@ func _lose() -> void:
 	pass
 
 
+# ---------- 清除 ----------
+## 清理对象池中的引用
 func _remove_from_judging_and_rendering() -> void:
 	var idx: int = Global.judging_area.find(self)
 	if idx >= 0:
@@ -333,20 +359,7 @@ func _remove_from_judging_and_rendering() -> void:
 	pass
 
 
-## 设置 hold 透明度 (0.0 ~ 1.0)
-## 通过 shader 的 color 参数控制 alpha, 保留 RGB 不变
-func _set_alpha(alpha: float) -> void:
-	var c: Color = material_override.get_shader_parameter("color")
-	c.a = alpha
-	material_override.set_shader_parameter("color", c)
-	pass
-
-
-func explode() -> void:
-	queue_free()
-	pass
-
-
+## 从场景中移除
 func _explode() -> void:
 	is_removed = true
 	_remove_from_judging_and_rendering()
@@ -355,7 +368,8 @@ func _explode() -> void:
 	pass
 
 
-# 自动播放
+# ---------- 自动播放 ----------
+## 自动播放
 func autoplay(master_time: float) -> void:
 	if not is_head_judged and master_time >= float(time):
 		judge_head(master_time)
@@ -373,7 +387,7 @@ func autoplay(master_time: float) -> void:
 	pass
 
 
-# 自动播放 hold 的轨道持续高亮转发
+## 自动播放 hold 的轨道持续高亮转发
 func _set_autoplay_hold(is_active: bool) -> void:
 	if root_node and root_node.has_method("set_track_autoplay_hold"):
 		root_node.set_track_autoplay_hold(column, is_active)

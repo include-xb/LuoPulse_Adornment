@@ -249,33 +249,33 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "最初日"
 
 [node name="MarginContainer" type="MarginContainer" parent="Control/VBoxContainer" unique_id=502763094]
 layout_mode = 2
-theme_override_constants/margin_top = 19
+theme_override_constants/margin_top = 10
 
 [node name="Producer" type="Label" parent="Control/VBoxContainer" unique_id=386705241]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 25
 text = "作词/作曲/编曲："
-
-[node name="Creator" type="Label" parent="Control/VBoxContainer" unique_id=1615023692]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 22
-text = "制谱："
 
 [node name="Vocalist" type="Label" parent="Control/VBoxContainer" unique_id=166633472]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 25
 text = "演唱："
+
+[node name="Creator" type="Label" parent="Control/VBoxContainer" unique_id=1615023692]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 25
+text = "制谱："
 
 [node name="Cover" type="TextureRect" parent="Control" unique_id=327564411]
 material = SubResource("ShaderMaterial_qx1yg")
@@ -391,6 +391,7 @@ theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.7843
 theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+toggle_mode = true
 text = "自动播放          开"
 
 [node name="PVButton" type="Button" parent="SettingPanel/CenterContainer/VBoxContainer/Body" unique_id=1420917600]
@@ -400,6 +401,7 @@ theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.7843
 theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+toggle_mode = true
 text = "播放 PV        开"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SettingPanel/CenterContainer/VBoxContainer" unique_id=946676189]

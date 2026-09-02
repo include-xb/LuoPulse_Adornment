@@ -3,6 +3,7 @@
 ## 遍历 Global.SETTINGS 中定义的设置分组, 动态生成 SettingsGroup 组件
 ## INFO: 欲修改设置项，请前往Global.SETTINGS
 
+
 extends Control
 
 
@@ -25,5 +26,6 @@ func _build_settings() -> void:
 	pass
 
 
+## 返回按钮
 func _on_back_pressed() -> void:
 	$"..".back_to_previous_scene()

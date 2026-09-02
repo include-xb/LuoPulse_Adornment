@@ -128,9 +128,10 @@ var _pause_frozen_tick: int = 0
 ## 暂停面板是否正在显示
 var _is_pause_panel_visible: bool = false
 
-## 倒计时状态
+## 继续后的倒计时状态
 var _is_counting_down: bool = false
 var _countdown_remaining: float = 0.0
+## 继续后的倒计时时间
 const COUNTDOWN_DURATION: float = 3.0
 
 ## 显示倒计时的标签
@@ -1283,6 +1284,7 @@ func _clear_notes() -> void:
 ## 当音符流速滑动条被滑动时, 重新设置音符流速, 更新现有音符的位置
 func _on_speed_scroll_bar_value_changed(value: float) -> void:
 	Global.note_flow_speed = int(value)
+	Global.save_config()
 	reset_speed()
 	speed_label.text = str(value)
 	pass

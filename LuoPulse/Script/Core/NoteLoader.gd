@@ -7,6 +7,7 @@ extends Node
 class_name NoteLoader
 
 
+## 所有音符模板
 var note_type: Dictionary = {
 	"tap": preload("res://Scene/Core/NoteTemplate/Tap.tscn"),
 	"drag": preload("res://Scene/Core/NoteTemplate/Drag.tscn"),
@@ -15,7 +16,7 @@ var note_type: Dictionary = {
 	"heart": preload("res://Scene/Core/NoteTemplate/Heart.tscn"),
 }
 
-
+## 当前正在加载的音符
 var note_template: MeshInstance3D = null
 
 

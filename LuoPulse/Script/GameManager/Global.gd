@@ -5,7 +5,7 @@ extends Control
 @onready var ui_click: AudioStreamPlayer = $UiClick
 
 
-# 常量
+# ---------- 常量 ----------
 
 ## 版本号
 const VERSION: String = "0.0.1"
@@ -132,7 +132,7 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 }
 
 
-# 变量
+# ---------- 变量 ----------
 
 ## 音符速度, 这个速度是下落的实际速度准值
 var note_speed: float = 10.0
@@ -224,7 +224,7 @@ var rendering_area: Array = [ ]
 var start_duration: int = 3000
 
 
-# ---- 用户数据 (user.json) ----
+# ---------- 用户数据 (user.json) ----------
 
 ## 已解锁的共鸣曲目数
 var main_line_unlocked: int = 1
@@ -239,7 +239,7 @@ var story_fragments_unlocked: Array = [ ]
 var is_first_open: bool = true
 
 
-# ---- 游戏配置 (config.json) ----
+# ---------- 游戏配置 (config.json) ----------
 
 ## 游戏配置版本号
 var config_version: String = "0.0.0.1"
@@ -266,7 +266,6 @@ var note_flow_speed: int = 0
 var if_play_start_animation: bool = true
 
 
-
 ## 最后一场游戏的结果数据
 var gameplay_result: Dictionary = {
 	"accuracy": 0.0,
@@ -283,6 +282,8 @@ var gameplay_result: Dictionary = {
 ## 当前最大连击 (由 Gameplay 每帧更新)
 var max_combo: int = 0
 
+
+# ---------- 工具函数 ----------
 
 ## 计算获取当前主线的界面灰度
 func get_current_gray_scale() -> float:
@@ -327,6 +328,14 @@ func get_crystal_reward(acc: float) -> int:
 	else:
 		result = 20.0
 	return int(round(result))
+
+
+## 弹出消息
+func display_notice(info: String) -> void:
+	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
+	notice.text = "  " + info
+	NOTICE_BOX.add_child(notice)
+	pass
 
 
 # ============================================================
@@ -533,14 +542,7 @@ func _read_video_from_lpz(lpz_path: String) -> VideoStream:
 	return video_stream
 
 
-## 弹出消息
-func display_notice(info: String) -> void:
-	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
-	notice.text = "  " + info
-	NOTICE_BOX.add_child(notice)
-	pass
-
-
+# ---------- 永久化配置数据 ----------
 ## 将当前设置写入 config.json
 ## 遍历 SETTINGS, 按 config_key 组装数据, 立即保存
 func save_config() -> void:

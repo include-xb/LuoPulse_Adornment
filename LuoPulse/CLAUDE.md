@@ -28,24 +28,24 @@ Theme: Telling stories of Chinese Vocaloid culture — producers and their creat
 
 ### Autoloads (Singletons)
 
-| Autoload       | Script                                    | Purpose                                                                                                                        |
-| -------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `Global`       | `Script/GameManager/Global.gd`            | Shared game state: user prefs, song lists, judging constants, game mode, combo/accuracy. Holds `NOTICE_BOX` for notifications. |
-| `SceneManager` | `Script/GameManager/SceneManager.gd`      | Scene transitions with fade-to-black/fade-from-black tween (0.25s each). Always use `SceneManager.change_scene(path)`.         |
-| `MCPRuntime`   | `addons/godot_mcp/runtime/mcp_runtime.gd` | Godot MCP runtime helper.                                                                                                      |
+| Autoload     | Script                                    | Purpose                                                                                                                        |
+| ------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `Global`     | `Script/GameManager/Global.gd`            | Shared game state: user prefs, song lists, judging constants, game mode, combo/accuracy. Holds `NOTICE_BOX` for notifications. 通过 `Scene/GameManager/Global.tscn` 挂载为 autoload。 |
+| `McpRuntime` | `addons/godot_mcp/runtime/mcp_runtime.gd` | Godot MCP runtime helper (project.godot 中的 autoload 名为 `McpRuntime`).                                                      |
+
+> **SceneManager 不是 autoload**: `Script/GameManager/SceneManager.gd` / `Scene/GameManager/SceneManager.tscn` 是 **main_scene**(`run/main_scene`)。它管理场景转场(淡入淡出 0.25s),所有 UI 场景作为其子节点存在,通过 `$"..".start_scene_by_path(path)` / `$"..".back_to_previous_scene()` 切换(不再调用 `SceneManager.change_scene`)。启动时自动 `start_scene_by_path("res://Scene/Ui/Launch.tscn")`。
 
 ### Scene Flow
 
 ```
 Launch ──→ MainMenu ──→ Sympathy (song select) ──→ Gameplay ──→ FinishMenu
-				├──→ Side Line (断章, unlocked at ≥60% 共鸣)
+				├──→ Album (断章, 当前代码命名, UI 显示「断章」)
 				├──→ Notebook (资料卡 + 故事碎片)
-				└──→ Settings (设置)
-					  ├──→ About (关于 + 开发者页面)                         │
-					  └──→ Credits (感谢名单, 共鸣100%后解锁)
+				└──→ SettingsMenu (设置)
+					  └──→ AboutMenu (关于;入口按钮「! 关于」已在 SettingsMenu 场景中, 尚未接线)
 ```
 
-> **Current code vs design doc**: MainMenu currently uses `Album` naming for 断章. Settings button currently goes to Notebook, and About button goes to SettingMenu. These need rework to match the design.
+> **Current code**: MainMenu 四个按钮路由已正确 —— 共鸣→`Sympathy.tscn`、断章→`Album.tscn`、笔记→`Notebook.tscn`、设置→`SettingsMenu.tscn`。`AboutMenu.tscn` 场景存在,`! 关于` 按钮已放在 SettingsMenu 场景中,但尚未连接 `pressed` 信号(AboutMenu 脚本已实现返回/感谢逻辑)。Credits/感谢名单场景 `ThanksMenu.tscn` 尚不存在。
 
 ### Data Storage
 
@@ -66,9 +66,10 @@ OS.get_user_data_dir()/
 ```json
 {
 	"username": "小白",
-	"main_line_unlocked": 13,        // count of unlocked 共鸣 songs
-	"crystal": 250,                  // crystal currency
-	"story_fragments_unlocked": [1, 3, 5]  // discovered fragment IDs
+	"is_first_open": true,
+	"main_line_unlocked": 1,         // count of unlocked 共鸣 songs
+	"crystal": 100,                  // crystal currency
+	"story_fragments_unlocked": []   // discovered fragment IDs
 }
 ```
 
@@ -80,8 +81,10 @@ OS.get_user_data_dir()/
 	"volume_song": 90,
 	"volume_note": 70,
 	"volume_ui": 60,
+	"volume_bg": 60,
 	"offset": 0,          // milliseconds, chart offset
-	"speed": 10           // note scroll speed (1-20)
+	"speed": 10,          // note_flow_speed, 滑块范围 -20 ~ 20 (映射实际下落速度约 1 ~ 20)
+	"if_play_start_animation": true
 }
 ```
 
@@ -96,19 +99,24 @@ Per design doc — **4 timing windows** based on ms offset from ideal hit time:
 | ±180ms | **Aware（觉醒）**       | 0.5                 | —             |
 | ±240ms | **Lost（丢失）**        | 0.0                 | —             |
 
-> **Current code conflict**: `Global.gd` only defines 3 boundaries (`SYMPATHY_TIME=60`, `SYNCED_TIME=120`, `CONNECTED_TIME=180`). Missing the 240ms Lost boundary and `END_JUDGE_TIME` should be ±240ms, not ±180ms.
+> **Code status**: `Global.gd` 已实现 4 档边界 —— `HARMONIOUS_TIME=60`, `SYMPATHETIC_TIME=120`, `AWARE_TIME=180`, `LOST_TIME=240`;判定窗 `START_JUDGE_TIME=-240` / `END_JUDGE_TIME=240`,与上表一致。
 
-**Accuracy formula** (per design doc):
+**Accuracy formula** (代码实现, `NoteBase._update_accuracy`):
 
 ```gdscript
-# Initialize at game start
-var acc: float = 1.0
+# 游戏开始时 (Global.gd)
+Global.accuracy     = 0.0
+Global.total_judged = 0
 
-# Update on each judgment (n = note index, 1-based)
-acc = (acc * n + a) / (n + 1)
+# 每次判定后 (NoteBase._update_accuracy)
+Global.total_judged += 1
+var n: int = Global.total_judged
+Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于纯平均 (a₁+…+a_N)/N
 ```
 
-**Visual feedback**: Early hit → light blue ▲ above judgment line. Late hit → light red ▼ below.
+> 即所有已判定音符准度的算术平均 (lost 记 `a=0` 自然拉低)。全 Perfect → 1.0。注:设计文档公式 (初始 acc=1.0, `(acc*n+a)/(n+1)`) 会使满分永远不可达 (恒为 N/(N+1)), 已弃用, 以代码为准。
+
+**Visual feedback**: 早击/晚击用 `▲ EARLY` / `▼ LATE` 文字(早击在判定线上方上浮, 晚击在下方下沉), 颜色取判定等级色 (`JUDGMENT_COLORS`: 和一绿/共鸣蓝/觉醒金/丢失灰)。`EARLY_COLOR`/`LATE_COLOR` 常量已定义但未使用。
 
 ### Rating System
 
@@ -138,9 +146,9 @@ acc = (acc * n + a) / (n + 1)
 
 3. **NoteLoader** (`Script/Core/NoteLoader.gd`): Factory instantiating note scenes from `res://Scene/Core/NoteTemplate/` based on chart `type` string.
 
-4. **InputProcesser** (`Script/Core/InputProcesser.gd`): **Design doc specifies touch-only input.** The current keyboard-based code (D/F/J/K) is a desktop placeholder. Track states: `is_pressed`, `is_held`, `is_released`, `is_clicked`.
+4. **InputProcesser** (`Script/Core/InputProcesser.gd`): 每根轨道 (Column 节点) 挂载一个实例, 处理该轨道的触屏/按键判定。触屏输入已在 `Gameplay._input` 实现 (根据屏幕 X 映射到轨道列, 支持多点触控); 键盘 D/F/J/K 保留为桌面调试输入。轨道按下/松开触发 `press_judge` / hold 释放逻辑, 附带轨道高亮 shader 反馈。
 
-5. **Note templates** (`Script/Core/NoteTemplate/`): Each extends `Sprite2D`. Note falls via `position.y += speed * delta`, enters judge area, calls `judge()` on hit, `explode()` for destruction.
+5. **Note templates** (`Script/Core/NoteTemplate/`, 场景在 `Scene/Core/NoteTemplate/`): 音符为 3D 轨道内的 `MeshInstance3D` (`NoteBase`), 通过 `position.z = note_speed * (master_time - time) / 1000` 定位下落 (到达判定线时 z=0)。进入判定窗时注册到 `Global.judging_area`, 命中调用 `judge()`, 未中 `_lose()`, `explode()` 播放粒子后销毁。
 
 ### Track Design
 
@@ -223,7 +231,7 @@ A `.lpz` file is a ZIP archive:
 }
 ```
 
-> **Current code conflict**: Existing code reads `audio.wav` and `cover.png`. Design specifies `audio.ogg` and `cover.png`. Update Sympathy.gd audio reader from wav to ogg.
+> **Code status**: 读取逻辑在 `Global._read_lpz` / `_read_audio_from_lpz`(读 `audio.ogg`, `AudioStreamOggVorbis.load_from_buffer`), 封面读 `cover.png`, 视频读 `video.ogv`。与上表一致。
 
 ### Economic System
 
@@ -348,20 +356,22 @@ From `README.md` — follow these strictly:
 - **Blocks**: Every block (if/for/while/func) ends with `pass`.
 - **Class names**: PascalCase via `class_name`.
 
-## Key Known Conflicts: Code vs Design Doc
+## Key Known Conflicts: Code vs Design Doc (以代码为准)
 
-| Issue                  | Current Code                                     | Design Doc                                  | Action                            |
-| ---------------------- | ------------------------------------------------ | ------------------------------------------- | --------------------------------- |
-| Judging boundaries     | 3 levels, max ±180ms                             | 4 levels, max ±240ms                        | Update `Global.gd` constants      |
-| Judging constant names | `SYMPATHY_TIME`, `SYNCED_TIME`, `CONNECTED_TIME` | Harmonious/Sympathetic/Aware/Lost           | Rename for clarity                |
-| Lost boundary          | Uses `START_JUDGE_TIME=-180`                     | ±240ms                                      | Change to `-240`/`240`            |
-| 断章 naming              | `Album` everywhere                               | `Side Line` / `断章`                          | Rename scenes, scripts, variables |
-| Audio file in .lpz     | `audio.wav`                                      | `audio.ogg`                                 | Update `Sympathy.gd` readers      |
-| Cover file in .lpz     | Already `cover.png`                              | `cover.png`                                 | No change needed                  |
-| Audio clock            | `Time.get_ticks_msec()` based                    | `AudioStreamPlayer.get_playback_position()` | Rework `Gameplay.gd` timing       |
-| Autoload name          | `Global.tscn`                                    | `GameData.tscn`                             | Rename when convenient            |
-| Main menu buttons      | Wrong routing                                    | 共鸣/断章/笔记/设置                                 | Rework `MainMenu.gd`              |
-| Input method           | Keyboard D/F/J/K                                 | Touch only                                  | Rewrite `InputProcesser.gd`       |
+> 多数冲突已在代码中解决。下表记录各项**现状** —— 已实现行标 ✅,仍与设计文档有差异的行注明"以代码为准保留"。
+
+| Issue               | 现状 (以代码为准)                                                    |
+| ------------------- | --------------------------------------------------------------------- |
+| Judging boundaries  | ✅ 已实现 4 档, max ±240ms                                           |
+| Judging constant names | ✅ `HARMONIOUS_TIME` / `SYMPATHETIC_TIME` / `AWARE_TIME` / `LOST_TIME` |
+| Lost boundary       | ✅ `START_JUDGE_TIME` / `END_JUDGE_TIME` = ±240                        |
+| 断章命名             | 代码保留 `Album` (场景/脚本/变量); UI 显示「断章」                        |
+| Audio in .lpz       | ✅ 已读 `audio.ogg` (`AudioStreamOggVorbis.load_from_buffer`)           |
+| Cover in .lpz       | ✅ `cover.png`                                                         |
+| Audio clock         | ✅ 音频启动后以 `playback_position` 为主时钟 (非音频预载段用 tick)         |
+| Autoload 名          | 保留 `Global.tscn` (未改 GameData)                                     |
+| 主菜单按钮           | ✅ 路由正确 (共鸣→Sympathy / 断章→Album / 笔记→Notebook / 设置→SettingsMenu) |
+| Input               | ✅ 触屏已实现, 键盘 D/F/J/K 保留为桌面调试                               |
 
 ## Key Script Paths
 
@@ -379,7 +389,7 @@ From `README.md` — follow these strictly:
 | Main menu            | `Script/Ui/Menu/MainMenu.gd`         |
 | Notebook             | `Script/Ui/Menu/Notebook.gd`         |
 | Finish/results       | `Script/Ui/Menu/FinishMenu.gd`       |
-| Settings             | `Script/Ui/Menu/SettingMenu.gd`      |
+| Settings             | `Script/Ui/Menu/SettingsMenu.gd`     |
 | About                | `Script/Ui/Menu/AboutMenu.gd`        |
 | Chart editor         | `Script/Creator/Editor.gd`           |
 | Gray scale shader    | `Shader/gray_scale.gdshader`         |

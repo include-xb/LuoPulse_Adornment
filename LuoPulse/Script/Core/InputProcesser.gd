@@ -5,38 +5,40 @@
 extends Node3D
 
 
+## 当前轨道数 (1 ~ 4)
 @export var column: int = 0
 
+## 轨道节点
 @onready var single_track: MeshInstance3D = $SingleTrack
 
-# 粒子效果
+## 粒子效果
 @onready var gpu_particles_3d: GPUParticles3D = $GPUParticles3D
 
 
-
-# 轨道材质副本 (每列独立, 用于触屏高亮)
+## 轨道材质副本 (每列独立, 用于触屏高亮)
 var _track_material: ShaderMaterial = null
 
-# 触屏高亮强度 (shader uniform)
+## 触屏高亮强度 (shader uniform)
 var _highlight: float = 1.0
 const HIGHLIGHT_FADE: float = 8.0
 
-# 当前触摸计数 (支持多点触控)
+## 当前触摸计数 (支持多点触控)
 var _touch_count: int = 0
 
-# 自动播放 hold 是否处于按住状态 (用于持续高亮)
+## 自动播放 hold 是否处于按住状态 (用于持续高亮)
 var is_autoplay_holding: bool = false
 
-# 是否正在长按 (hold)
+## 是否正在长按 (hold)
 var is_holding: bool = false
 
-# 当前正在持有的 hold 音符
+## 当前正在持有的 hold 音符
 var current_hold_note: MeshInstance3D = null
 
-# 当前帧触摸时间 (由 Gameplay 传入)
+## 当前帧触摸时间 (由 Gameplay 传入)
 var _touch_time: float = -999999.0
 
 
+# ---------- 节点重载函数 ----------
 func _ready() -> void:
 	var src: ShaderMaterial = single_track.get_active_material(0)
 	_track_material = src.duplicate()
@@ -61,6 +63,23 @@ func _process(delta: float) -> void:
 	pass
 
 
+# ---------- 工具函数 ----------
+## 获取当前列的所有在判定区间的音符
+func _get_column_notes() -> Array:
+	var result: Array = []
+	for note in Global.judging_area:
+		if not is_instance_valid(note):
+			continue
+		var note_column: int = note.get("column")
+		if note_column == column:
+			result.append(note)
+			pass
+		pass
+	return result
+
+
+# ---------- 触屏输入 ----------
+## 被按下
 func on_touch_pressed(master_time: float) -> void:
 	_touch_time = master_time
 	_touch_count += 1
@@ -75,6 +94,7 @@ func on_touch_pressed(master_time: float) -> void:
 	pass
 
 
+## 被释放
 func on_touch_released(master_time: float) -> void:
 	_touch_time = master_time
 	_touch_count = maxi(0, _touch_count - 1)
@@ -92,23 +112,8 @@ func on_touch_released(master_time: float) -> void:
 	pass
 
 
-# 自动播放时的轨道点击反馈 (仅触发高亮, 不参与判定)
-func flash_track() -> void:
-	_highlight = 1.0
-	_track_material.set_shader_parameter("highlight", _highlight)
-	pass
-
-
-# 自动播放 hold: 设置按住状态 (按住期间持续高亮, 松开后恢复衰减)
-func set_autoplay_hold(is_active: bool) -> void:
-	is_autoplay_holding = is_active
-	if is_active:
-		# _highlight = 0.8
-		pass
-	_track_material.set_shader_parameter("highlight", _highlight)
-	pass
-
-
+# ---------- 判定 ----------
+## 被按下后对音符进行判定
 func press_judge(master_time: float) -> void:
 	if is_holding:
 		if not is_instance_valid(current_hold_note):
@@ -182,14 +187,19 @@ func press_judge(master_time: float) -> void:
 	pass
 
 
-func _get_column_notes() -> Array:
-	var result: Array = []
-	for note in Global.judging_area:
-		if not is_instance_valid(note):
-			continue
-		var note_column: int = note.get("column")
-		if note_column == column:
-			result.append(note)
-			pass
+# ---------- 自动播放 ----------
+## 自动播放时的轨道点击反馈 (仅触发高亮, 不参与判定)
+func flash_track() -> void:
+	_highlight = 1.0
+	_track_material.set_shader_parameter("highlight", _highlight)
+	pass
+
+
+## 自动播放 hold: 设置按住状态 (按住期间持续高亮, 松开后恢复衰减)
+func set_autoplay_hold(is_active: bool) -> void:
+	is_autoplay_holding = is_active
+	if is_active:
+		# _highlight = 0.8
 		pass
-	return result
+	_track_material.set_shader_parameter("highlight", _highlight)
+	pass

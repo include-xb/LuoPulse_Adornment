@@ -14,6 +14,7 @@
 
 extends Control
 
+
 ## 主页背景
 @onready var background: TextureRect = $Background
 
@@ -24,6 +25,7 @@ extends Control
 @onready var amount: Label = $Currency/HBoxContainer/Amount
 
 
+# ---------- 节点重载函数 ----------
 func _ready() -> void:
 	# 主页面背景色彩变化并非线性, 而是 U 形变化
 	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
@@ -43,21 +45,26 @@ func _enter_tree() -> void:
 	pass
 
 
+# ---------- 按钮信号绑定 ----------
+## 共鸣 (主线)
 func _on_sympathy_pressed() -> void:
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Ui/SongSelect/Sympathy.tscn")
 
 
+## 断章
 func _on_album_pressed() -> void:
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Ui/SongSelect/Album.tscn")
 
 
+## 笔记
 func _on_note_pressed() -> void:
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Ui/Menu/Notebook.tscn")
 
 
+## 设置
 func _on_setting_pressed() -> void:
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Ui/Menu/SettingsMenu.tscn")

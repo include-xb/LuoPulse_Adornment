@@ -19,6 +19,7 @@ extends Control
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 
 
+# ---------- 节点重载函数 ----------
 func _ready() -> void:
 	load_config()
 	load_sympathy_song()
@@ -38,8 +39,109 @@ func _input(event: InputEvent) -> void:
 		$"..".start_scene_by_path("res://Scene/Ui/Menu/MainMenu.tscn")
 		pass
 	pass
-	
 
+
+# ---------- 工具函数 ----------
+## 将字典写入 JSON 文件
+func _write_json_file(path: String, data: Dictionary) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()
+		pass
+	pass
+
+
+## 将 Asset/SongPackage 中的 .lpz 文件复制到 user://CustomizedPlaylist/
+func _copy_lpz_to_customized_playlist() -> void:
+	var source_dir: String = "res://Asset/SongPackage"	# 源文件路径
+	var target_dir: String = _get_customized_playlist_dir()	# 复制目标路径
+
+	# 创建目标文件夹 (如果不存在)	
+	DirAccess.make_dir_recursive_absolute(target_dir)
+
+	# 所有 .lpz 文件的文件名
+	var lpz_file_names: Array[String] = _list_lpz_files(source_dir)
+	for file_name: String in lpz_file_names:
+		var source_path := source_dir.path_join(file_name)
+		var target_path := target_dir.path_join(file_name)
+		# 如果文件已经存在 (已经复制) 则跳过
+		if FileAccess.file_exists(target_path):
+			continue
+		# 进行复制
+		_copy_binary_file(source_path, target_path)
+		pass
+	pass
+
+
+## 将每个 .lpz 文件的完整路径记录到 Global.sympath_song_path_list
+func _record_sympath_song_paths() -> void:
+	# 目标文件夹
+	var target_dir: String = _get_customized_playlist_dir()
+	# 所有 .lpz 文件的文件名
+	var lpz_file_names: Array[String] = _list_lpz_files(target_dir)
+	var paths: Array[String] = [ ]
+	for fname: String in lpz_file_names:
+		# 记录到 paths
+		paths.append(target_dir.path_join(fname))
+		pass
+	# 赋值到 Global
+	Global.sympath_song_path_list = paths
+	pass
+
+
+## 统计歌曲数目, 保存到 Global.sympathy_song_num
+func _count_sympath_songs() -> void:
+	Global.sympath_song_num = Global.sympath_song_path_list.size()
+	pass
+
+
+## 获取 CustomizedPlaylist 目录的绝对路径 (user://CustomizedPlaylist/)
+func _get_customized_playlist_dir() -> String:
+	return OS.get_user_data_dir().path_join("CustomizedPlaylist")
+
+
+## 列出指定目录下所有 .lpz 文件名 (不含路径前缀)
+func _list_lpz_files(dir_path: String) -> Array[String]:
+	var files: Array[String] = [ ]
+	var dir: DirAccess = DirAccess.open(dir_path)
+	if dir == null:
+		push_error("无法打开目录: %s" % dir_path)
+		return [ ]
+
+	dir.list_dir_begin()
+	var file_name: String = dir.get_next()
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.get_extension() == "lpz":
+			files.append(file_name)
+			pass
+		file_name = dir.get_next()
+		pass
+	dir.list_dir_end()
+	return files
+
+
+## 以二进制方式复制单个文件
+func _copy_binary_file(source: String, target: String) -> void:
+	var reader: FileAccess = FileAccess.open(source, FileAccess.READ)
+	if reader == null:
+		push_error("无法读取源文件: %s" % source)
+		return
+
+	var data: PackedByteArray = reader.get_buffer(reader.get_length())
+	reader.close()
+
+	var writer: FileAccess = FileAccess.open(target, FileAccess.WRITE)
+	if writer == null:
+		push_error("无法写入目标文件: %s" % target)
+		return
+	writer.store_buffer(data)
+	writer.close()
+	pass
+
+
+# ---------- 加载配置 ----------
+## 加载配置
 func load_config() -> void:
 	_load_user_data()
 	_load_game_config()
@@ -170,7 +272,23 @@ func _load_game_config() -> void:
 	pass
 
 
-## 设置动画
+# ---------- 加载曲目 ----------
+## 加载共鸣曲目
+func load_sympathy_song() -> void:
+	_copy_lpz_to_customized_playlist()
+	_record_sympath_song_paths()
+	_count_sympath_songs()
+	pass
+
+
+func load_album_song() -> void:
+	# 加载专辑主线歌曲
+	# 暂时不制作
+	pass
+
+
+# ---------- 开始动画 ----------
+## 设置开始动画
 func _setup_animations() -> void:
 	var lib: AnimationLibrary = AnimationLibrary.new()
 
@@ -214,6 +332,7 @@ func _setup_animations() -> void:
 	pass
 
 
+## 播放开始动画
 func _play_intro_sequence() -> void:
 	# 淡入第一段文字
 	animation_player.play("fade_in_text1")
@@ -236,116 +355,4 @@ func _play_intro_sequence() -> void:
 
 	# 通过 SceneManager 切换到主菜单（带淡入淡出效果）
 	$"..".start_scene_by_path("res://Scene/Ui/Menu/MainMenu.tscn")
-	pass
-
-
-## 将字典写入 JSON 文件
-func _write_json_file(path: String, data: Dictionary) -> void:
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(data, "\t"))
-		file.close()
-		pass
-	pass
-
-
-## 加载共鸣曲目
-func load_sympathy_song() -> void:
-	_copy_lpz_to_customized_playlist()
-	_record_sympath_song_paths()
-	_count_sympath_songs()
-	pass
-
-
-## 将 Asset/SongPackage 中的 .lpz 文件复制到 user://CustomizedPlaylist/
-func _copy_lpz_to_customized_playlist() -> void:
-	var source_dir: String = "res://Asset/SongPackage"	# 源文件路径
-	var target_dir: String = _get_customized_playlist_dir()	# 复制目标路径
-
-	# 创建目标文件夹 (如果不存在)	
-	DirAccess.make_dir_recursive_absolute(target_dir)
-
-	# 所有 .lpz 文件的文件名
-	var lpz_file_names: Array[String] = _list_lpz_files(source_dir)
-	for file_name: String in lpz_file_names:
-		var source_path := source_dir.path_join(file_name)
-		var target_path := target_dir.path_join(file_name)
-		# 如果文件已经存在 (已经复制) 则跳过
-		if FileAccess.file_exists(target_path):
-			continue
-		# 进行复制
-		_copy_binary_file(source_path, target_path)
-		pass
-	pass
-
-
-## 将每个 .lpz 文件的完整路径记录到 Global.sympath_song_path_list
-func _record_sympath_song_paths() -> void:
-	# 目标文件夹
-	var target_dir: String = _get_customized_playlist_dir()
-	# 所有 .lpz 文件的文件名
-	var lpz_file_names: Array[String] = _list_lpz_files(target_dir)
-	var paths: Array[String] = [ ]
-	for fname: String in lpz_file_names:
-		# 记录到 paths
-		paths.append(target_dir.path_join(fname))
-		pass
-	# 赋值到 Global
-	Global.sympath_song_path_list = paths
-	pass
-
-
-## 统计歌曲数目, 保存到 Global.sympathy_song_num
-func _count_sympath_songs() -> void:
-	Global.sympath_song_num = Global.sympath_song_path_list.size()
-	pass
-
-
-## 获取 CustomizedPlaylist 目录的绝对路径 (user://CustomizedPlaylist/)
-func _get_customized_playlist_dir() -> String:
-	return OS.get_user_data_dir().path_join("CustomizedPlaylist")
-
-
-## 列出指定目录下所有 .lpz 文件名 (不含路径前缀)
-func _list_lpz_files(dir_path: String) -> Array[String]:
-	var files: Array[String] = [ ]
-	var dir: DirAccess = DirAccess.open(dir_path)
-	if dir == null:
-		push_error("无法打开目录: %s" % dir_path)
-		return [ ]
-
-	dir.list_dir_begin()
-	var file_name: String = dir.get_next()
-	while file_name != "":
-		if not dir.current_is_dir() and file_name.get_extension() == "lpz":
-			files.append(file_name)
-			pass
-		file_name = dir.get_next()
-		pass
-	dir.list_dir_end()
-	return files
-
-
-## 以二进制方式复制单个文件
-func _copy_binary_file(source: String, target: String) -> void:
-	var reader: FileAccess = FileAccess.open(source, FileAccess.READ)
-	if reader == null:
-		push_error("无法读取源文件: %s" % source)
-		return
-
-	var data: PackedByteArray = reader.get_buffer(reader.get_length())
-	reader.close()
-
-	var writer: FileAccess = FileAccess.open(target, FileAccess.WRITE)
-	if writer == null:
-		push_error("无法写入目标文件: %s" % target)
-		return
-	writer.store_buffer(data)
-	writer.close()
-	pass
-
-
-func load_album_song() -> void:
-	# 加载专辑主线歌曲
-	# 暂时不制作
 	pass

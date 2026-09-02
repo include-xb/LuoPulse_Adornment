@@ -3,10 +3,14 @@
 ## 根据 Global.SETTINGS 中定义的设置项, 动态生成每一行的名称与控件
 ## INFO: 欲修改设置项，请前往Global.SETTINGS
 
+
 extends VBoxContainer
 
 
+
+
 func set_up(settings_group_key: String, settings_group: Dictionary) -> void:
+	# 设置组名
 	$MarginContainer/VBoxContainer/Label.text = settings_group_key
 
 	for setting_name: String in settings_group:
@@ -24,9 +28,12 @@ func set_up(settings_group_key: String, settings_group: Dictionary) -> void:
 		var widget: Control = _create_widget(setting)
 		row.add_child(widget)
 
+		# 收纳设置选项的容器
 		$MarginContainer/VBoxContainer/VBoxContainer.add_child(row)
 
 
+# ---------- 创建组件 ----------
+## 根据设置内容创建组件
 func _create_widget(setting: Dictionary) -> Control:
 	var node_type: String = setting["node_type"]
 	match node_type:
@@ -43,6 +50,7 @@ func _create_widget(setting: Dictionary) -> Control:
 	return Control.new()
 
 
+## 创建滑动条
 func _create_slider(setting: Dictionary) -> Control:
 	var box: HBoxContainer = HBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
@@ -68,6 +76,7 @@ func _create_slider(setting: Dictionary) -> Control:
 	return box
 
 
+## 创建数字输入框
 func _create_spinbox(setting: Dictionary) -> Control:
 	var box: HBoxContainer = HBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
@@ -94,6 +103,7 @@ func _create_spinbox(setting: Dictionary) -> Control:
 	return box
 
 
+## 创建单行文本输入框
 func _create_lineedit(setting: Dictionary) -> Control:
 	var box: HBoxContainer = HBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
@@ -110,6 +120,7 @@ func _create_lineedit(setting: Dictionary) -> Control:
 	return box
 
 
+## 创建下拉菜单按钮
 func _create_optionbutton(setting: Dictionary) -> Control:
 	var box: HBoxContainer = HBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
@@ -129,6 +140,7 @@ func _create_optionbutton(setting: Dictionary) -> Control:
 	return box
 
 
+## 创建开关按钮
 func _create_togglebutton(setting: Dictionary) -> Control:
 	var box: HBoxContainer = HBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
@@ -146,6 +158,7 @@ func _create_togglebutton(setting: Dictionary) -> Control:
 	return box
 
 
+## 添加后缀
 func _format_value(value: float, suffix: String) -> String:
 	var text: String = str(int(value))
 	if suffix != "":
@@ -153,6 +166,7 @@ func _format_value(value: float, suffix: String) -> String:
 	return text
 
 
+# ---------- 组件被调节 / 值被修改 ----------
 func _on_slider_changed(value: float, value_label: Label, key: String, suffix: String) -> void:
 	value_label.text = _format_value(value, suffix)
 	_apply_setting(key, int(value))
@@ -180,6 +194,7 @@ func _on_togglebutton_toggled(is_on: bool, togglebutton: Button, key: String) ->
 	pass
 
 
+## 写入新的设置值到 Global, 并永久化
 func _apply_setting(key: String, value: Variant) -> void:
 	Global.set(key, value)
 	Global.save_config()
