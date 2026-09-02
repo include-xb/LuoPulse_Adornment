@@ -20,6 +20,15 @@ func _ready() -> void:
 	texture_rect.modulate.a = 0
 	start_scene_by_path(LAUNCH_SCENE_PATH)
 
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		back_to_previous_scene()
+		pass
+	# get_viewport().set_input_as_handled()
+	pass
+
+
 # ===== Public =====
 
 ## 启动场景并传递参数
@@ -45,6 +54,7 @@ func start_scene_by_path(scene_path: String, pass_args: Dictionary = {}, animati
 ## 返回上一个场景
 func back_to_previous_scene() -> void:
 	if _scene_track.is_empty():
+		# show_exit_dialog()
 		return
 
 	await _play_enter_animation(_last_animation_name)

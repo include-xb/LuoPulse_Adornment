@@ -22,7 +22,7 @@ shader = ExtResource("3_bhst1")
 shader_parameter/edge_color = Color(0, 0, 0, 0)
 shader_parameter/edge_width_y = 0.350000016625
 shader_parameter/edge_width_x = 0.250000011875
-shader_parameter/original_color = Color(0, 0, 0, 0.5882353)
+shader_parameter/original_color = Color(0, 0, 0, 0.78431374)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_in2dp"]
 material = SubResource("ShaderMaterial_ogl7y")

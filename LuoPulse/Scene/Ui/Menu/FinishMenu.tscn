@@ -31,6 +31,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_f4cmf")
+expand_mode = 5
+stretch_mode = 6
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1735808130]
 material = SubResource("ShaderMaterial_ncgm8")
