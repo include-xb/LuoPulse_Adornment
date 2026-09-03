@@ -14,7 +14,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="LuoPulse_from_git"
+config/name="LuoPulse_Adornment"
 config/tags=PackedStringArray("初始化后的lp仓库")
 run/main_scene="uid://cwgd5663wpeft"
 config/quit_on_go_back=false

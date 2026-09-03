@@ -160,7 +160,7 @@ func _load_user_data() -> void:
 		"username": "小白",	# 用户名
 		"is_first_open": true,
 		"main_line_unlocked": 1,	# 主线中已经解锁的曲目数量
-		"crystal": 100,	# 水晶数
+		"crystal": 25,	# 水晶数
 		"story_fragments_unlocked": [], 	# 已解锁的故事碎片id
 	}
 
