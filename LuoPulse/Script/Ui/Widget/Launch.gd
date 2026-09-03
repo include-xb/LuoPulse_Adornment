@@ -44,7 +44,7 @@ func _input(event: InputEvent) -> void:
 # ---------- 工具函数 ----------
 ## 将字典写入 JSON 文件
 func _write_json_file(path: String, data: Dictionary) -> void:
-	var file := FileAccess.open(path, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
@@ -63,8 +63,8 @@ func _copy_lpz_to_customized_playlist() -> void:
 	# 所有 .lpz 文件的文件名
 	var lpz_file_names: Array[String] = _list_lpz_files(source_dir)
 	for file_name: String in lpz_file_names:
-		var source_path := source_dir.path_join(file_name)
-		var target_path := target_dir.path_join(file_name)
+		var source_path: String = source_dir.path_join(file_name)
+		var target_path: String = target_dir.path_join(file_name)
 		# 如果文件已经存在 (已经复制) 则跳过
 		if FileAccess.file_exists(target_path):
 			continue
@@ -125,6 +125,7 @@ func _list_lpz_files(dir_path: String) -> Array[String]:
 func _copy_binary_file(source: String, target: String) -> void:
 	var reader: FileAccess = FileAccess.open(source, FileAccess.READ)
 	if reader == null:
+		reader.close()
 		push_error("无法读取源文件: %s" % source)
 		return
 
@@ -133,6 +134,7 @@ func _copy_binary_file(source: String, target: String) -> void:
 
 	var writer: FileAccess = FileAccess.open(target, FileAccess.WRITE)
 	if writer == null:
+		writer.close()
 		push_error("无法写入目标文件: %s" % target)
 		return
 	writer.store_buffer(data)
@@ -212,7 +214,7 @@ func _load_user_data() -> void:
 ## 保存在 OS.get_user_data_dir()，若不存在则创建默认数据
 func _load_game_config() -> void:
 	# 路径指向用户数据文件夹/config.json
-	var config_path: String= OS.get_user_data_dir().path_join("config.json")
+	var config_path: String = OS.get_user_data_dir().path_join("config.json")
 	# 默认数据
 	var default_data: Dictionary = {
 		"version": "0.0.0.1",

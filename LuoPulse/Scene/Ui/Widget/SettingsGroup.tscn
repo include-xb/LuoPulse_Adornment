@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://585pvauog3j1" path="res://Script/Ui/Widget/SettingsGroup.gd" id="1_66j5d"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_rt3um"]
-color = Color(0, 0, 0, 0.78431374)
+color = Color(0.25882354, 0.25882354, 0.25882354, 0.78431374)
 thickness = 2
 
 [node name="SettingsGroup" type="VBoxContainer" unique_id=486346425]

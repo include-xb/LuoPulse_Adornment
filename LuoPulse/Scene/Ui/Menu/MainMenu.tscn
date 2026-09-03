@@ -59,6 +59,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Sympathy" index="0" unique_id=45460652]
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.3137255)
 text = "> 共鸣"
 
 [node name="Separator" parent="MenuContainer/MenuButtons/Sympathy" index="1" unique_id=483453183]
@@ -69,6 +70,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Album" index="0" unique_id=45460652]
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.3137255)
 disabled = true
 text = "# 断章"
 
@@ -80,6 +82,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Note" index="0" unique_id=45460652]
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.3137255)
 disabled = true
 text = "= 笔记"
 
@@ -91,6 +94,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Setting" index="0" unique_id=45460652]
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.3137255)
 text = "* 设置"
 
 [node name="Separator" parent="MenuContainer/MenuButtons/Setting" index="1" unique_id=483453183]

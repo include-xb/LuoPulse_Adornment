@@ -51,6 +51,9 @@ extends Control
 ## PV 播放按钮
 @onready var pv_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
 
+## 解锁按钮
+@onready var unlock_button: Button = $MarginContainer/Option/UnlockButton
+
 
 # ---------- 歌曲信息 ----------
 ## 标题
@@ -65,6 +68,12 @@ extends Control
 ## 演唱
 @onready var vocalist: Label = $Control/VBoxContainer/Vocalist
 
+
+## 当前歌曲是否未解锁
+var is_locked: bool = false
+
+## 解锁当前歌曲需要的水晶数量
+var needed_crystal_num: int = 10
 
 # ---------- 预览音频淡入淡出 ----------
 ## 用于音频淡入淡出
@@ -89,8 +98,10 @@ func _ready() -> void:
 	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	# cover.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	
-	# 界面数值显示
-	amount.text = str(Global.crystal)
+	# 水晶数值显示
+	update_crystal_num()
+	# 解锁按钮文字设置
+	update_unlock_button()
 	
 	animation_player.play("unfold")
 	load_song_info()
@@ -103,7 +114,8 @@ func _ready() -> void:
 func _enter_tree() -> void:
 	if not is_node_ready():
 		return
-	amount.text = str(Global.crystal)
+	update_crystal_num()
+	update_unlock_button()
 	pass
 
 
@@ -133,6 +145,55 @@ func refresh_progress_bar()-> void:
 	pass
 
 
+## 更新当前歌曲信息
+func update_song() -> void:
+	animation_player.play_backwards("unfold")
+	await animation_player.animation_finished
+	load_song_info()
+	update_unlock_button()
+	animation_player.play("unfold")
+	pass
+
+
+## 更新水晶数量
+func update_crystal_num() -> void:
+	amount.text = str(Global.crystal)
+	pass
+
+
+## 当前歌曲是否未解锁
+func if_locked() -> bool:
+	return Global.current_song_index + 1 > Global.main_line_unlocked
+
+
+## 更新解锁按钮文本
+func update_unlock_button() -> void:
+	unlock_button.text = ("$ 解锁 ◇-" + str(needed_crystal_num)) if is_locked else "已解锁"
+	unlock_button.disabled = false if is_locked else true
+	pass
+
+
+## 更新当前解锁状态
+func update_if_locked() -> void:
+	is_locked = if_locked()
+	if is_locked:
+		start.disabled = true
+		pass
+	else:
+		start.disabled = false
+		pass
+	pass
+
+
+## 解锁
+func unlock() -> void:
+	is_locked = false
+	start.disabled = false
+	Global.main_line_unlocked += 1
+	Global.save_user_data()
+	pass
+
+
 # ---------- 加载 ----------
 ## 加载曲包中的内容
 func load_song_info() -> void:
@@ -143,18 +204,29 @@ func load_song_info() -> void:
 	var song_cover: ImageTexture = Global._read_cover_from_lpz(song_package_path)
 	background.texture = song_cover
 	cover.texture = song_cover
+
+	if is_locked:
+		background.material.set_shader_parameter("gray_scale", 1.0)
+		cover.material.set_shader_parameter("gray_scale", 1.0)
+		pass
+	else:
+		background.material.set_shader_parameter("gray_scale", 0.0)
+		cover.material.set_shader_parameter("gray_scale", 0.0)
+		pass
 	
 	# 加载歌曲信息
 	var song_chart: Dictionary = Global._read_chart_from_lpz(song_package_path)
 	var general: Dictionary = song_chart.get("General", {})
-	title.text = general.get("Title", "-")
-	producer.text = general.get("Artist", "-")
-	creator.text = general.get("Creator", "-")
-	vocalist.text = general.get("Vocalist", "-")
+	title.text = general.get("Title", "-") if not is_locked else "???"
+	producer.text = general.get("Artist", "-") if not is_locked else "???"
+	creator.text = general.get("Creator", "-") if not is_locked else "???"
+	vocalist.text = general.get("Vocalist", "-") if not is_locked else "???"
 	
 	# 加载歌曲音频
 	var song_audio_stream: AudioStream = Global._read_audio_from_lpz(song_package_path)
 	audio_stream_player.stream = song_audio_stream
+	if is_locked:
+		return
 	if audio_stream_player.stream:
 		var start_pointer: float = float(general.get("Preview", 0)) / 1000
 		audio_stream_player.play(start_pointer)
@@ -217,11 +289,8 @@ func _on_left_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.current_song_index -= 1 # if Global.current_song_index > 0 else 0
 	refresh_progress_bar()
-	
-	animation_player.play_backwards("unfold")
-	await animation_player.animation_finished
-	load_song_info()
-	animation_player.play("unfold")
+	update_if_locked()
+	update_song()
 	pass
 
 
@@ -231,11 +300,8 @@ func _on_right_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.current_song_index += 1 # if Global.current_song_index < Global.sympath_song_num - 1 else 0
 	refresh_progress_bar()
-	
-	animation_player.play_backwards("unfold")
-	await animation_player.animation_finished
-	load_song_info()
-	animation_player.play("unfold")
+	update_if_locked()
+	update_song()
 	pass
 
 
@@ -285,7 +351,7 @@ func _on_ok_button_pressed() -> void:
 	pass
 
 
-# 是否自动播放
+## 是否自动播放
 func _on_autoplay_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.is_autoplay = !Global.is_autoplay
@@ -293,9 +359,29 @@ func _on_autoplay_button_pressed() -> void:
 	pass
 
 
-# 是否播放 PV
+## 是否播放 PV
 func _on_pv_button_pressed() -> void:
 	Global.play_ui_click_audio()
 	Global.is_pvplay = !Global.is_pvplay
 	pv_button.text = "播放 PV        " + ("开" if Global.is_pvplay else "关")
+	pass
+
+
+## 解锁按钮
+func _on_unlock_button_pressed() -> void:
+
+	if Global.crystal < needed_crystal_num:
+		# 余额不足
+		print("余额不足")
+		Global.display_notice("◇数量不足")
+		return
+	else:
+		print("解锁成功")
+		Global.display_notice("解锁成功")
+		Global.crystal -= needed_crystal_num
+		update_crystal_num()
+		unlock()
+		pass
+	update_song()
+	update_unlock_button()
 	pass

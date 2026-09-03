@@ -103,7 +103,7 @@ _data = {
 }
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
-bg_color = Color(0, 0, 0, 0.92156863)
+bg_color = Color(0, 0, 0, 0.9411765)
 
 [node name="Sympathy" type="Control" unique_id=1456702183]
 layout_mode = 3
@@ -357,6 +357,12 @@ size_flags_horizontal = 0
 size_flags_vertical = 3
 text = "* 选项"
 
+[node name="UnlockButton" type="Button" parent="MarginContainer/Option" unique_id=896117029]
+layout_mode = 2
+size_flags_horizontal = 8
+disabled = true
+text = "$ 解锁"
+
 [node name="SettingPanel" type="PanelContainer" parent="." unique_id=9111105]
 visible = false
 layout_mode = 1
@@ -372,7 +378,7 @@ layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SettingPanel/CenterContainer" unique_id=722070349]
 layout_mode = 2
-theme_override_constants/separation = 60
+theme_override_constants/separation = 50
 
 [node name="Label" type="Label" parent="SettingPanel/CenterContainer/VBoxContainer" unique_id=1185414228]
 layout_mode = 2
@@ -425,6 +431,7 @@ text = "> 确定"
 [connection signal="pressed" from="Select/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="Select/Right" to="." method="_on_right_pressed"]
 [connection signal="pressed" from="MarginContainer/Option/PopSetting/Setting" to="." method="_on_setting_pressed"]
+[connection signal="pressed" from="MarginContainer/Option/UnlockButton" to="." method="_on_unlock_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton" to="." method="_on_autoplay_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/PVButton" to="." method="_on_pv_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/VBoxContainer/OKButton" to="." method="_on_ok_button_pressed"]

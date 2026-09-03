@@ -44,7 +44,7 @@ material = SubResource("StandardMaterial3D_fdpuf")
 size = Vector2(4, 22)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
-bg_color = Color(0, 0, 0, 0.92156863)
+bg_color = Color(0, 0, 0, 0.9411765)
 
 [node name="Gameplay" type="Control" unique_id=1217592357 groups=["JudgeArea"]]
 layout_mode = 3

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://csbkbsk5saeqa"]
+
+[ext_resource type="Script" uid="uid://cx7xifk3eym6m" path="res://_probe_notice.gd" id="1_tacwq"]
+
+[node name="ProbeNotice" type="Node" unique_id=108899038]
+script = ExtResource("1_tacwq")

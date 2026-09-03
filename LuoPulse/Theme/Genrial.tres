@@ -48,7 +48,7 @@ texture = SubResource("GradientTexture1D_uegkn")
 
 [resource]
 Button/colors/font_color = Color(1, 1, 1, 0.78431374)
-Button/colors/font_disabled_color = Color(0, 0, 0, 0.15686275)
+Button/colors/font_disabled_color = Color(1, 1, 1, 0.39215687)
 Button/colors/font_focus_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)

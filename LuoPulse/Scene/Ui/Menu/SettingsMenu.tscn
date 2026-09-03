@@ -71,6 +71,10 @@ offset_right = -60.0
 offset_bottom = -67.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 50
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer" unique_id=788741798]
 layout_mode = 2
@@ -83,10 +87,16 @@ size_flags_horizontal = 3
 [node name="About" type="Button" parent="." unique_id=1095626041]
 propagate_maximum_size = true
 layout_mode = 1
-offset_left = 550.0
-offset_top = 652.0
-offset_right = 730.0
-offset_bottom = 702.0
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -39.5
+offset_top = -44.0
+offset_right = 39.5
+grow_horizontal = 2
+grow_vertical = 0
 size_flags_vertical = 3
 theme_override_font_sizes/font_size = 35
 theme_override_styles/normal = SubResource("StyleBoxFlat_trans")

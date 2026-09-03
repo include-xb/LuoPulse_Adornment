@@ -157,13 +157,13 @@ var is_pvplay: bool = true
 ## 共鸣主线歌曲路径列表
 var sympath_song_path_list: Array[String] = [ ]
 
-## 共鸣主线歌曲数
+## 共鸣主线歌曲数 (自然计数)
 var sympath_song_num: int = 17
 
 ## 专辑主线歌曲路径列表
 var album_song_path_list: Array[String] = [ ]
 
-## 专辑主线歌曲数
+## 专辑主线歌曲数 (自然计数)
 var album_song_num: int = 0
 
 ## 当前歌曲
@@ -184,10 +184,10 @@ var notebook_return_scene: String = "home"
 ## 笔记返回的歌曲标题
 var notebook_return_song_title: String = ""
 
-## 当前歌曲的索引
+## 当前歌曲的索引 (从 0 开始计数)
 var current_song_index: int = 0
 
-## 最后一次解锁的歌曲索引
+## 最后一次解锁的歌曲索引 (从 0 开始计数)
 var current_unlocked_song_index: int = 0
 
 # 四类判定等级
@@ -226,10 +226,10 @@ var start_duration: int = 3000
 
 # ---------- 用户数据 (user.json) ----------
 
-## 已解锁的共鸣曲目数
+## 已解锁的共鸣曲目数 (自然计数)
 var main_line_unlocked: int = 1
 
-## 水晶数
+## 水晶数 (自然计数)
 var crystal: int = 0
 
 ## 已获得的彩蛋碎片 ID
@@ -335,6 +335,7 @@ func display_notice(info: String) -> void:
 	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
 	notice.text = "  " + info
 	NOTICE_BOX.add_child(notice)
+	notice.born()
 	pass
 
 
@@ -356,6 +357,7 @@ func _read_lpz(lpz_path: String) -> Dictionary:
 	var zip := ZIPReader.new()
 	var err := zip.open(lpz_path)
 	if err != OK:
+		zip.close()
 		push_error("无法打开 .lpz 文件: %s" % lpz_path)
 		return result
 
@@ -413,6 +415,7 @@ func _read_cover_from_lpz(lpz_path: String) -> ImageTexture:
 	var zip := ZIPReader.new()
 	var err := zip.open(lpz_path)
 	if err != OK:
+		zip.close()
 		push_error("无法打开 .lpz 文件: %s" % lpz_path)
 		return null
 
@@ -444,6 +447,7 @@ func _read_audio_from_lpz(lpz_path: String) -> AudioStream:
 	var zip := ZIPReader.new()
 	var err := zip.open(lpz_path)
 	if err != OK:
+		zip.close()
 		push_error("无法打开 .lpz 文件: %s" % lpz_path)
 		return null
 
@@ -473,7 +477,8 @@ func _read_chart_from_lpz(lpz_path: String) -> Dictionary:
 	var zip := ZIPReader.new()
 	var err := zip.open(lpz_path)
 	if err != OK:
-		return {}
+		zip.close()
+		return { }
 
 	var chart_path := ""
 	for f in zip.get_files():
@@ -494,7 +499,7 @@ func _read_chart_from_lpz(lpz_path: String) -> Dictionary:
 	var parse_err := json.parse(json_str)
 	if parse_err != OK:
 		push_error("无法解析 chart.lp: %s" % lpz_path)
-		return {}
+		return { }
 
 	var data = json.get_data()
 	#if data is Dictionary and data.has("General"):
@@ -508,6 +513,7 @@ func _read_video_from_lpz(lpz_path: String) -> VideoStream:
 	var zip := ZIPReader.new()
 	var err := zip.open(lpz_path)
 	if err != OK:
+		zip.close()
 		push_error("无法打开 .lpz 文件: %s" % lpz_path)
 		return null
 
@@ -532,6 +538,7 @@ func _read_video_from_lpz(lpz_path: String) -> VideoStream:
 	var temp_path := temp_dir.path_join("_video_temp.ogv")
 	var file := FileAccess.open(temp_path, FileAccess.WRITE)
 	if file == null:
+		file.close()
 		push_error("无法创建临时视频文件: %s" % temp_path)
 		return null
 	file.store_buffer(video_bytes)
@@ -561,7 +568,8 @@ func save_config() -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
-		file.close()
+		pass
+	file.close()
 	pass
 
 
@@ -577,6 +585,6 @@ func save_user_data() -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
-		file.close()
 		pass
+	file.close()
 	pass
