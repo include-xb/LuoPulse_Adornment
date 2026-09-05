@@ -2,31 +2,30 @@
 
 [ext_resource type="Script" uid="uid://bpujobp6ug4v5" path="res://Script/Core/InputProcesser.gd" id="1_ogl7y"]
 [ext_resource type="Shader" uid="uid://dtrackedge001" path="res://Shader/track_edge.gdshader" id="2_8ks2l"]
-[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note_edge.gdshader" id="3_bhst1"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8ks2l"]
 render_priority = 0
 shader = ExtResource("2_8ks2l")
 shader_parameter/edge_color = Color(0, 0, 0, 0.7647059)
-shader_parameter/edge_width = 0.5
+shader_parameter/edge_width = 0.0
 shader_parameter/track_color = Color(0, 0, 0, 0.5882353)
 shader_parameter/highlight = 0.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
 material = SubResource("ShaderMaterial_8ks2l")
-size = Vector2(1, 22)
+size = Vector2(0.98, 22)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ogl7y"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_m7grc"]
 render_priority = 0
-shader = ExtResource("3_bhst1")
+shader = ExtResource("2_8ks2l")
 shader_parameter/edge_color = Color(0, 0, 0, 0)
-shader_parameter/edge_width_y = 0.350000016625
-shader_parameter/edge_width_x = 0.250000011875
-shader_parameter/original_color = Color(0, 0, 0, 0.78431374)
+shader_parameter/edge_width = 0.0
+shader_parameter/track_color = Color(1, 1, 1, 0.13725491)
+shader_parameter/highlight = 0.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_in2dp"]
-material = SubResource("ShaderMaterial_ogl7y")
-size = Vector2(1.2, 0.4)
+material = SubResource("ShaderMaterial_m7grc")
+size = Vector2(0.98, 0.1)
 center_offset = Vector3(0, 0.01, 0)
 
 [sub_resource type="Curve" id="Curve_bhst1"]

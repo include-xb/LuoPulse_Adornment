@@ -21,6 +21,7 @@ extends Control
 
 # ---------- 节点重载函数 ----------
 func _ready() -> void:
+	Engine.max_fps = 50
 	load_config()
 	load_sympathy_song()
 	if Global.if_play_start_animation:

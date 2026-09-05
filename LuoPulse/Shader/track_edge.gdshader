@@ -3,11 +3,11 @@ render_mode blend_mix, unshaded, cull_disabled;
 
 // ============ 可调参数 ============
 // 边缘线颜色（含透明度）
-uniform vec4 edge_color : source_color = vec4(0.0, 0.0, 0.0, 0.078);
+uniform vec4 edge_color : source_color = vec4(0.0, 0.0, 0.0, 0.0);
 // 边缘线粗细（UV 空间，0.0 ~ 0.1）
 uniform float edge_width : hint_range(0.0, 0.5) = 0.5;
 // 轨道本体颜色（含透明度）
-uniform vec4 track_color : source_color = vec4(0.0, 0.0, 0.0, 0.47);
+uniform vec4 track_color : source_color = vec4(0.0, 0.0, 0.0, 0.58);
 // 触屏高亮强度 (0.0 ~ 1.0)
 uniform float highlight : hint_range(0.0, 2.0) = 0.0;
 

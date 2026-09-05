@@ -1,5 +1,6 @@
 extends MeshInstance3D
 
+# TODO 用状态机重写
 
 ## 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var root_node: Control
