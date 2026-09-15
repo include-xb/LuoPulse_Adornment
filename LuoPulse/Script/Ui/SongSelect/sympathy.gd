@@ -435,7 +435,7 @@ func _on_unlock_button_pressed() -> void:
 		print("余额不足")
 		Global.display_notice("◇数量不足")
 		return
-	elif Global.crystal > needed_crystal_num:
+	elif Global.current_song_index > Global.main_line_unlocked:
 		# 禁止超前解锁
 		print("请先解锁上一关卡")
 		Global.display_notice("请先解锁上一关卡")
