@@ -1,8 +1,8 @@
 extends Control
 
 
-@onready var NOTICE_BOX: VBoxContainer = $NoticeBox
-@onready var ui_click: AudioStreamPlayer = $UiClick
+@export var NOTICE_BOX: VBoxContainer # = $NoticeBox
+@export var ui_click: AudioStreamPlayer # = $UiClick
 
 
 # ---------- 常量 ----------

@@ -16,58 +16,58 @@ extends Control
 
 
 ## 重要播放器, 播放音频
-@onready var audio_system: AudioStreamPlayer = $"AudioSystem"
+@export var audio_system: AudioStreamPlayer # = $AudioSystem
 
 ## 谱面音符加载器
-@onready var note_loader: NoteLoader = $"NoteLoader"
+@export var note_loader: NoteLoader # = $NoteLoader
 
 ## 进度条
-@onready var progress_bar: ProgressBar = $"UI/ProgressBar"
+@export var progress_bar: ProgressBar # = $UI/ProgressBar
 
 ## 背景图
-@onready var background: TextureRect = $UI/Background
+@export var background: TextureRect # = $UI/Background
 
 ## PV 播放器
-@onready var video_stream_player: VideoStreamPlayer = $UI/VideoStreamPlayer
+@export var video_stream_player: VideoStreamPlayer # = $UI/VideoStreamPlayer
 
 ## 3D 视图窗口
-@onready var _subviewport: SubViewport = $UI/TextureRect/SubViewport
+@export var _subviewport: SubViewport # = $UI/TextureRect/SubViewport
 
 ## 3D 场景中的摄像机
-@onready var _camera: Camera3D = $UI/TextureRect/SubViewport/Node3D/Camera3D
+@export var _camera: Camera3D # = $UI/TextureRect/SubViewport/Node3D/Camera3D
 
 ## 轨道部分
-@onready var _track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
+@export var _track: Node3D # = $UI/TextureRect/SubViewport/Node3D/Track
 
 ## UI 节点
-@onready var _ui: Control = $UI
+@export var _ui: Control # = $UI
 
 ## 连击数标签
-@onready var _combo_label: Label = $UI/Combo
+@export var _combo_label: Label # = $UI/Combo
 
 ## 暂停按钮
-@onready var _pause_button: Button = $"UI/PauseButton"
+@export var _pause_button: Button # = $"UI/PauseButton"
 
 ## 暂停界面
-@onready var _pause_panel: PanelContainer = $"UI/PausePanel"
+@export var _pause_panel: PanelContainer # = $"UI/PausePanel"
 
 ## autoplay 标签
-@onready var autoplay: Label = $UI/MarginContainer/HBoxContainer/Autoplay
+@export var autoplay: Label # = $UI/MarginContainer/HBoxContainer/Autoplay
 
 ## username 标签
-@onready var username: Label = $UI/MarginContainer/HBoxContainer/Username
+@export var username: Label # = $UI/MarginContainer/HBoxContainer/Username
 
 ## 音符流速大小标签 (-20 ~ 20)
-@onready var speed_label: Label = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedLabel
+@export var speed_label: Label # = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedLabel
 
 ## 音符流速大小滑动条
-@onready var speed_scroll_bar: HSlider = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar
+@export var speed_scroll_bar: HSlider # = $UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar
 
 ## 第一个音符到达判定线倒计时标签
-@onready var tick: Label = $UI/Tick
+@export var tick: Label # = $UI/Tick
 
 ## 结束按钮
-@onready var finish_button_mask: ColorRect = $UI/Mask
+@export var finish_button_mask: ColorRect # = $UI/Mask
 
 
 ## 解析完成的谱面数据

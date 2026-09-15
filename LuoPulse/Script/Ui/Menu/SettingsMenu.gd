@@ -7,7 +7,7 @@
 extends Control
 
 
-@onready var settings_list: VBoxContainer = $MarginContainer/ScrollContainer/VBoxContainer
+@export var settings_list: VBoxContainer # = $MarginContainer/ScrollContainer/VBoxContainer
 
 
 func _ready() -> void:

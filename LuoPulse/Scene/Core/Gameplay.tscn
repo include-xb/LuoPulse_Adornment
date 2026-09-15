@@ -46,7 +46,7 @@ size = Vector2(4, 22)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,6 +54,24 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_i27d6")
+audio_system = NodePath("AudioSystem")
+note_loader = NodePath("NoteLoader")
+progress_bar = NodePath("UI/ProgressBar")
+background = NodePath("UI/Background")
+video_stream_player = NodePath("UI/VideoStreamPlayer")
+_subviewport = NodePath("UI/TextureRect/SubViewport")
+_camera = NodePath("UI/TextureRect/SubViewport/Node3D/Camera3D")
+_track = NodePath("UI/TextureRect/SubViewport/Node3D/Track")
+_ui = NodePath("UI")
+_combo_label = NodePath("UI/Combo")
+_pause_button = NodePath("UI/PauseButton")
+_pause_panel = NodePath("UI/PausePanel")
+autoplay = NodePath("UI/MarginContainer/HBoxContainer/Autoplay")
+username = NodePath("UI/MarginContainer/HBoxContainer/Username")
+speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedLabel")
+speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
+tick = NodePath("UI/Tick")
+finish_button_mask = NodePath("UI/Mask")
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1

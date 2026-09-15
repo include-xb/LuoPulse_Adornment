@@ -7,28 +7,28 @@ extends Control
 
 
 ## 等级 ∞ Infinity A B C D
-@onready var grade_label: Label = $ResultsBox/GradeLabel
+@export var grade_label: Label # = $ResultsBox/GradeLabel
 
 ## 准度
-@onready var acc_label: Label = $ResultsBox/HBoxContainer/DataGrid/AccCount
+@export var acc_label: Label # = $ResultsBox/HBoxContainer/DataGrid/AccCount
 
 ## 和一
-@onready var harmonious_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/HarmoniousCount
+@export var harmonious_count: Label # = $ResultsBox/HBoxContainer/JudgingGrid/HarmoniousCount
 ## 共鸣
-@onready var sympathetic_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/SympatheticCount
+@export var sympathetic_count: Label # = $ResultsBox/HBoxContainer/JudgingGrid/SympatheticCount
 ## 觉醒
-@onready var aware_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/AwareCount
+@export var aware_count: Label # = $ResultsBox/HBoxContainer/JudgingGrid/AwareCount
 ## 丢失
-@onready var lost_count: Label = $ResultsBox/HBoxContainer/JudgingGrid/LostCount
+@export var lost_count: Label # = $ResultsBox/HBoxContainer/JudgingGrid/LostCount
 
 ## 最大连击数
-@onready var combo_label: Label = $ResultsBox/HBoxContainer/DataGrid/ComboCount
+@export var combo_label: Label # = $ResultsBox/HBoxContainer/DataGrid/ComboCount
 
 ## 音符总数
-@onready var notes_label: Label = $ResultsBox/HBoxContainer/DataGrid/NotesCount
+@export var notes_label: Label # = $ResultsBox/HBoxContainer/DataGrid/NotesCount
 
 ## 获得水晶数
-@onready var crystal_label: Label = $ResultsBox/Crystal/CrystalCount
+@export var crystal_label: Label # = $ResultsBox/Crystal/CrystalCount
 
 
 func _ready() -> void:

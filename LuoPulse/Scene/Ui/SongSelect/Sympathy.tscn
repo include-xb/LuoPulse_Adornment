@@ -105,7 +105,7 @@ _data = {
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Sympathy" type="Control" unique_id=1456702183]
+[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -113,6 +113,23 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_qx1yg")
+background = NodePath("Background")
+cover = NodePath("Control/Cover")
+left = NodePath("Select/Left")
+start = NodePath("Select/Start")
+right = NodePath("Select/Right")
+animation_player = NodePath("AnimationPlayer")
+audio_stream_player = NodePath("AudioStreamPlayer")
+progress_bar = NodePath("ProgressBar")
+amount = NodePath("HBoxContainer/Currency/HBoxContainer/Amount")
+setting_panel = NodePath("SettingPanel")
+autoplay_button = NodePath("SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton")
+pv_button = NodePath("SettingPanel/CenterContainer/VBoxContainer/Body/PVButton")
+unlock_button = NodePath("MarginContainer/Option/UnlockButton")
+title = NodePath("Control/VBoxContainer/Title")
+producer = NodePath("Control/VBoxContainer/Producer")
+creator = NodePath("Control/VBoxContainer/Creator")
+vocalist = NodePath("Control/VBoxContainer/Vocalist")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1136130409]
 material = SubResource("ShaderMaterial_558w5")

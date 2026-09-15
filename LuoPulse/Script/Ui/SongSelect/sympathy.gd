@@ -16,57 +16,57 @@ extends Control
 
 
 ## 背景
-@onready var background: TextureRect = $Background
+@export var background: TextureRect # = $Background
 
 ## 曲绘封面
-@onready var cover: TextureRect = $Control/Cover
+@export var cover: TextureRect # = $Control/Cover
 
 ## 左切
-@onready var left: Button = $Select/Left
+@export var left: Button # = $Select/Left
 
 ## 开始 (选中)
-@onready var start: Button = $Select/Start
+@export var start: Button # = $Select/Start
 
 ## 右切
-@onready var right: Button = $Select/Right
+@export var right: Button # = $Select/Right
 
 ## 展开/回退 动画
-@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@export var animation_player: AnimationPlayer # = $AnimationPlayer
 
 ## 预览音频
-@onready var audio_stream_player: AudioStreamPlayer = $AudioStreamPlayer
+@export var audio_stream_player: AudioStreamPlayer # = $AudioStreamPlayer
 
 ## 下方进度条
-@onready var progress_bar: ProgressBar = $ProgressBar
+@export var progress_bar: ProgressBar # = $ProgressBar
 
 ## 显示水晶数的标签
-@onready var amount: Label = $HBoxContainer/Currency/HBoxContainer/Amount
+@export var amount: Label # = $HBoxContainer/Currency/HBoxContainer/Amount
 
 ## 设置菜单
-@onready var setting_panel: PanelContainer = $SettingPanel
+@export var setting_panel: PanelContainer # = $SettingPanel
 
 ## 自动播放按钮
-@onready var autoplay_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton
+@export var autoplay_button: Button # = $SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton
 
 ## PV 播放按钮
-@onready var pv_button: Button = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
+@export var pv_button: Button # = $SettingPanel/CenterContainer/VBoxContainer/Body/PVButton
 
 ## 解锁按钮
-@onready var unlock_button: Button = $MarginContainer/Option/UnlockButton
+@export var unlock_button: Button # = $MarginContainer/Option/UnlockButton
 
 
 # ---------- 歌曲信息 ----------
 ## 标题
-@onready var title: Label = $Control/VBoxContainer/Title
+@export var title: Label # = $Control/VBoxContainer/Title
 
 ## P 主
-@onready var producer: Label = $Control/VBoxContainer/Producer
+@export var producer: Label # = $Control/VBoxContainer/Producer
 
 ## 谱师
-@onready var creator: Label = $Control/VBoxContainer/Creator
+@export var creator: Label # = $Control/VBoxContainer/Creator
 
 ## 演唱
-@onready var vocalist: Label = $Control/VBoxContainer/Vocalist
+@export var vocalist: Label # = $Control/VBoxContainer/Vocalist
 
 
 ## 当前歌曲是否未解锁
@@ -196,15 +196,15 @@ func if_locked() -> bool:
 func update_unlock_button() -> void:
 	unlock_button.text = ("$ 解锁 ◇-" + str(needed_crystal_num)) if is_locked else "已解锁"
 	unlock_button.disabled = false if is_locked else true
-	if is_locked:
-		if Global.current_song_index > Global.main_line_unlocked:
-			unlock_button.disabled = true
-			unlock_button.tooltip_text = "必须先解锁上一个关卡"
-			pass
-		else:
-			unlock_button.disabled = false
-			unlock_button.tooltip_text = ""
-			pass
+	# if is_locked:
+	# 	if Global.current_song_index > Global.main_line_unlocked:
+	# 		unlock_button.disabled = true
+	# 		unlock_button.tooltip_text = "必须先解锁上一个关卡"
+	# 		pass
+	# 	else:
+	# 		unlock_button.disabled = false
+	# 		unlock_button.tooltip_text = ""
+	# 		pass
 	pass
 
 
@@ -434,6 +434,11 @@ func _on_unlock_button_pressed() -> void:
 		# 余额不足
 		print("余额不足")
 		Global.display_notice("◇数量不足")
+		return
+	elif Global.crystal > needed_crystal_num:
+		# 禁止超前解锁
+		print("请先解锁上一关卡")
+		Global.display_notice("请先解锁上一关卡")
 		return
 	else:
 		print("解锁成功")

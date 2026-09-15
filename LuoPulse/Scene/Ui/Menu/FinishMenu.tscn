@@ -13,7 +13,7 @@ shader_parameter/gray_scale = 0.1200000057
 shader = ExtResource("3_t01hv")
 shader_parameter/blur_amount = 2.2
 
-[node name="FinishMenu" type="Control" unique_id=1595795645]
+[node name="FinishMenu" type="Control" unique_id=1595795645 node_paths=PackedStringArray("grade_label", "acc_label", "harmonious_count", "sympathetic_count", "aware_count", "lost_count", "combo_label", "notes_label", "crystal_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,6 +21,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_8iowy")
+grade_label = NodePath("ResultsBox/GradeLabel")
+acc_label = NodePath("ResultsBox/HBoxContainer/DataGrid/AccCount")
+harmonious_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/HarmoniousCount")
+sympathetic_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/SympatheticCount")
+aware_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/AwareCount")
+lost_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/LostCount")
+combo_label = NodePath("ResultsBox/HBoxContainer/DataGrid/ComboCount")
+notes_label = NodePath("ResultsBox/HBoxContainer/DataGrid/NotesCount")
+crystal_label = NodePath("ResultsBox/Crystal/CrystalCount")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1911982318]
 material = SubResource("ShaderMaterial_46tx6")

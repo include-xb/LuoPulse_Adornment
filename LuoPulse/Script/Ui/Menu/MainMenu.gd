@@ -16,13 +16,13 @@ extends Control
 
 
 ## 主页背景
-@onready var background: TextureRect = $Background
+@export var background: TextureRect # = $Background
 
 ## 用户名
-@onready var username: Label = $Profile/VBoxContainer/InfoPanel/Username
+@export var username: Label # = $Profile/VBoxContainer/InfoPanel/Username
 
 ## 水晶值
-@onready var amount: Label = $Currency/HBoxContainer/Amount
+@export var amount: Label # = $Currency/HBoxContainer/Amount
 
 
 # ---------- 节点重载函数 ----------

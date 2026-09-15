@@ -16,7 +16,7 @@ extends Control
 
 
 ## 用于淡入淡出文字
-@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@export var animation_player: AnimationPlayer # = $AnimationPlayer
 
 
 # ---------- 节点重载函数 ----------

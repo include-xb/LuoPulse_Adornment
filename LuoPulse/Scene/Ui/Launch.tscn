@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://esbj00n5wyml" path="res://Script/Ui/Widget/Launch.gd" id="1_sc0u0"]
 
-[node name="Launch" type="Control" unique_id=1952455162]
+[node name="Launch" type="Control" unique_id=1952455162 node_paths=PackedStringArray("animation_player")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,6 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sc0u0")
+animation_player = NodePath("AnimationPlayer")
 
 [node name="Background" type="ColorRect" parent="." unique_id=964636709]
 layout_mode = 1

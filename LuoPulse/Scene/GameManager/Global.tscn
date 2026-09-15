@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://db7s130jodufv" path="res://Scene/Ui/Widget/Notice.tscn" id="2_yjbyn"]
 [ext_resource type="AudioStream" uid="uid://7exxcrifkxjb" path="res://Asset/Audio/leave.wav" id="3_gydpq"]
 
-[node name="Global" type="Control" unique_id=224931585]
+[node name="Global" type="Control" unique_id=224931585 node_paths=PackedStringArray("NOTICE_BOX", "ui_click")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,6 +12,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_i4ohj")
+NOTICE_BOX = NodePath("NoticeBox")
+ui_click = NodePath("UiClick")
 
 [node name="NoticeBox" type="VBoxContainer" parent="." unique_id=1211581081]
 z_index = 10

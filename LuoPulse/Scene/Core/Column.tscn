@@ -83,8 +83,10 @@ albedo_texture = SubResource("GradientTexture2D_u0bcu")
 [sub_resource type="QuadMesh" id="QuadMesh_fndbt"]
 material = SubResource("StandardMaterial3D_2yv3u")
 
-[node name="Column" type="Node3D" unique_id=1704662228]
+[node name="Column" type="Node3D" unique_id=1704662228 node_paths=PackedStringArray("single_track", "gpu_particles_3d")]
 script = ExtResource("1_ogl7y")
+single_track = NodePath("SingleTrack")
+gpu_particles_3d = NodePath("GPUParticles3D")
 
 [node name="NotePool" type="Node3D" parent="." unique_id=270649043]
 

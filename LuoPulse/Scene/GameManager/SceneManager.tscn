@@ -2,8 +2,10 @@
 
 [ext_resource type="Script" uid="uid://bj84hr26lx2bj" path="res://Script/GameManager/SceneManager.gd" id="1_pibfg"]
 
-[node name="SceneManager" type="Node" unique_id=547550823]
+[node name="SceneManager" type="Node" unique_id=547550823 node_paths=PackedStringArray("color_rect", "texture_rect")]
 script = ExtResource("1_pibfg")
+color_rect = NodePath("CanvasLayer/ColorRect")
+texture_rect = NodePath("CanvasLayer/TextureRect")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=623813923]
 

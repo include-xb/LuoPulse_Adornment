@@ -4,8 +4,8 @@ extends Node
 
 const LAUNCH_SCENE_PATH: String = "res://Scene/Ui/Launch.tscn"
 
-@onready var color_rect: ColorRect = $CanvasLayer/ColorRect
-@onready var texture_rect: TextureRect = $CanvasLayer/TextureRect
+@export var color_rect: ColorRect # = $CanvasLayer/ColorRect
+@export var texture_rect: TextureRect # = $CanvasLayer/TextureRect
 
 var _scene_track: Array = [ ]
 var _args: Dictionary = { }
