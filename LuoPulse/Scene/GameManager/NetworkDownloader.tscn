@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bo3ln066sccn1"]
+
+[ext_resource type="Script" uid="uid://byjyo8iitxtwv" path="res://Script/GameManager/Downloader.gd" id="1_4dox1"]
+
+[node name="Downloader" type="Node" unique_id=1778118414]
+script = ExtResource("1_4dox1")

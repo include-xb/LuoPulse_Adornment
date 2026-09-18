@@ -18,11 +18,26 @@ extends Control
 ## 用于淡入淡出文字
 @export var animation_player: AnimationPlayer # = $AnimationPlayer
 
+## 加载面板 (下载期间显示, 其余时间隐藏)
+@export var loading_panel: Control # = $LoadingPanel
+
+## 下载进度条
+@export var download_progress_bar: ProgressBar # = $LoadingPanel/DownloadProgressBar
+
+## 下载状态文字
+@export var download_label: Label # = $LoadingPanel/DownloadLabel
+
+
+## 正在下载曲包 (期间禁止切换场景)
+var _is_downloading: bool = false
+
 
 # ---------- 节点重载函数 ----------
 func _ready() -> void:
 	Engine.max_fps = 50
 	load_config()
+	# 进入场景立刻开始下载缺失的曲包, 全部结束后才进入后续流程
+	await _download_all_song_packages()
 	load_sympathy_song()
 	if Global.if_play_start_animation:
 		_setup_animations()
@@ -36,9 +51,63 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	# 下载期间不允许切换场景, 否则下载器会随本场景一起被销毁
+	if _is_downloading:
+		return
 	if event is InputEventKey and event.pressed and event.keycode == KEY_Q:
 		$"..".start_scene_by_path("res://Scene/Ui/Menu/MainMenu.tscn")
 		pass
+	pass
+
+
+# ---------- 曲包下载 ----------
+## 依次下载 Global.SONG_PACKAGE_URL_LIST 中缺失的曲包, 并推进进度条
+## 全部下完 (或失败跳过) 后才会返回, 调用方用 await 等待
+func _download_all_song_packages() -> void:
+	var url_list: Array[String] = Global.SONG_PACKAGE_URL_LIST
+	var total: int = url_list.size()
+	if total == 0:
+		return
+
+	_is_downloading = true
+	_setup_download_bar_style()
+	loading_panel.visible = true
+
+	for index: int in total:
+		var url: String = url_list[index]
+		_update_download_ui(url, index, total)
+
+		var is_success: bool = await $Downloader.download(url)
+		if not is_success:
+			push_error("曲包下载失败, 已跳过: %s" % url)
+			pass
+
+		# 进度条按 "已下载文件数 / 总文件数" 推进
+		download_progress_bar.value = float(index + 1) / float(total) * 100.0
+		pass
+
+	loading_panel.visible = false
+	_is_downloading = false
+	pass
+
+
+## 刷新下载状态文字 (例: 正在下载 2.lpz (1/2))
+func _update_download_ui(url: String, index: int, total: int) -> void:
+	download_label.text = "正在下载 %s (%d/%d)" % [ url.get_file(), index + 1, total ]
+	pass
+
+
+## 覆盖进度条样式
+## 全局主题里进度条的填充是纯黑噪点贴图、轨道是全透明的, 在黑色背景下完全看不见
+func _setup_download_bar_style() -> void:
+	var track: StyleBoxFlat = StyleBoxFlat.new()
+	track.bg_color = Color(1, 1, 1, 0.15)
+
+	var fill: StyleBoxFlat = StyleBoxFlat.new()
+	fill.bg_color = Color(0.952941, 0.933333, 0.866667, 1)
+
+	download_progress_bar.add_theme_stylebox_override("background", track)
+	download_progress_bar.add_theme_stylebox_override("fill", fill)
 	pass
 
 
@@ -49,28 +118,6 @@ func _write_json_file(path: String, data: Dictionary) -> void:
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
-		pass
-	pass
-
-
-## 将 Asset/SongPackage 中的 .lpz 文件复制到 user://CustomizedPlaylist/
-func _copy_lpz_to_customized_playlist() -> void:
-	var source_dir: String = "res://Asset/SongPackage"	# 源文件路径
-	var target_dir: String = _get_customized_playlist_dir()	# 复制目标路径
-
-	# 创建目标文件夹 (如果不存在)	
-	DirAccess.make_dir_recursive_absolute(target_dir)
-
-	# 所有 .lpz 文件的文件名
-	var lpz_file_names: Array[String] = _list_lpz_files(source_dir)
-	for file_name: String in lpz_file_names:
-		var source_path: String = source_dir.path_join(file_name)
-		var target_path: String = target_dir.path_join(file_name)
-		# 如果文件已经存在 (已经复制) 则跳过
-		if FileAccess.file_exists(target_path):
-			continue
-		# 进行复制
-		_copy_binary_file(source_path, target_path)
 		pass
 	pass
 
@@ -120,27 +167,6 @@ func _list_lpz_files(dir_path: String) -> Array[String]:
 		pass
 	dir.list_dir_end()
 	return files
-
-
-## 以二进制方式复制单个文件
-func _copy_binary_file(source: String, target: String) -> void:
-	var reader: FileAccess = FileAccess.open(source, FileAccess.READ)
-	if reader == null:
-		reader.close()
-		push_error("无法读取源文件: %s" % source)
-		return
-
-	var data: PackedByteArray = reader.get_buffer(reader.get_length())
-	reader.close()
-
-	var writer: FileAccess = FileAccess.open(target, FileAccess.WRITE)
-	if writer == null:
-		writer.close()
-		push_error("无法写入目标文件: %s" % target)
-		return
-	writer.store_buffer(data)
-	writer.close()
-	pass
 
 
 # ---------- 加载配置 ----------
@@ -276,9 +302,8 @@ func _load_game_config() -> void:
 
 
 # ---------- 加载曲目 ----------
-## 加载共鸣曲目
+## 加载共鸣曲目 (扫描 CustomizedPlaylist 目录, 曲包由 _download_all_song_packages 下载)
 func load_sympathy_song() -> void:
-	_copy_lpz_to_customized_playlist()
 	_record_sympath_song_paths()
 	_count_sympath_songs()
 	pass

@@ -319,7 +319,6 @@ stretch_mode = 6
 libraries/ = SubResource("AnimationLibrary_ohs4k")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=781416472]
-volume_db = -12.0
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1321983800]
 custom_minimum_size = Vector2(15, 0)

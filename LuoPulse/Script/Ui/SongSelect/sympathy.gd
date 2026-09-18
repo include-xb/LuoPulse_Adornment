@@ -92,10 +92,10 @@ var end_pointer: float = 0.0
 var is_back: bool = false
 
 ## 音频淡入时间
-const AUDIO_FADE_IN_TIME: float = 1.0
+const AUDIO_FADE_IN_TIME: float = 1.5
 
 ## 音频淡出时间
-const AUDIO_FADE_OUT_TIME: float = 1.0
+const AUDIO_FADE_OUT_TIME: float = 2.0
 
 ## 最小音量
 const AUDIO_SILENCE_DB: float = -80.0
@@ -300,7 +300,7 @@ func _fade_in_audio() -> void:
 	_audio_fade_tween.tween_property(
 		audio_stream_player, 
 		"volume_db", 
-		0.0, 
+		0.0,
 		AUDIO_FADE_IN_TIME
 	).set_trans(Tween.TRANS_QUART) # 三次插值曲线
 	_audio_fade_tween.tween_callback(set_is_back_false) # 淡入完成后播放音频
@@ -429,7 +429,6 @@ func _on_pv_button_pressed() -> void:
 
 ## 解锁按钮
 func _on_unlock_button_pressed() -> void:
-
 	if Global.crystal < needed_crystal_num:
 		# 余额不足
 		print("余额不足")

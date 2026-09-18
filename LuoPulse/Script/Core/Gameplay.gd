@@ -493,6 +493,7 @@ func _ready() -> void:
 	_pause_panel		.visible = false
 	_pause_button		.disabled = true
 	autoplay			.visible = Global.is_autoplay
+	audio_system.volume_linear = (float(Global.volume_song) / 100) * 2
 	_pause_panel.modulate.a = 0.0
 	username.text = Global.user_name
 	
@@ -686,7 +687,7 @@ func set_track_autoplay_hold(column: int, is_active: bool) -> void:
 func _update_master_time() -> void:
 	master_time = _compute_master_time()
 	# NOTICE: 为什么已经将 master_time 传入 Global 了, 还需要引用 root_node 获取 master_time
-	Global.master_time = master_time 
+	Global.master_time = master_time + (Global.chart_offset * 1000)
 	pass
 
 

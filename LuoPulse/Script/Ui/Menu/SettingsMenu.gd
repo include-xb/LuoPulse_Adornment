@@ -28,4 +28,5 @@ func _build_settings() -> void:
 
 ## 返回按钮
 func _on_back_pressed() -> void:
+	Global.play_ui_click_audio()
 	$"..".back_to_previous_scene()

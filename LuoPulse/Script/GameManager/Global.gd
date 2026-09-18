@@ -52,6 +52,16 @@ const AWARE_TIME: int = 180
 ## 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
 const LOST_TIME: int = 240
 
+## 调节音量时的音量缩放因子
+const VOLUME_FACTOR: float = 0.01
+
+## 需要下载的曲包链接列表 (启动时按顺序逐个下载, 已存在的会跳过)
+## 文件名取自链接末段, 例: ".../EGoCb/2.lpz" → "2.lpz"
+const SONG_PACKAGE_URL_LIST: Array[String] = [
+	"https://pan.vcyacg.com/f/d/EGoCb/2.lpz",
+	"https://pan.vcyacg.com/f/d/4KgIn/3.lpz",
+]
+
 ## INFO: 设置项仅在此处修改，控件将会动态生成
 ## 设置项
 ## 每个设置项字段:
@@ -294,6 +304,7 @@ func get_current_gray_scale() -> float:
 
 ## ui 点击音效
 func play_ui_click_audio() -> void:
+	ui_click.volume_linear = volume_ui * VOLUME_FACTOR
 	ui_click.play()
 	pass
 
