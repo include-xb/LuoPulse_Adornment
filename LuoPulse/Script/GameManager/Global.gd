@@ -55,12 +55,10 @@ const LOST_TIME: int = 240
 ## 调节音量时的音量缩放因子
 const VOLUME_FACTOR: float = 0.01
 
-## 需要下载的曲包链接列表 (启动时按顺序逐个下载, 已存在的会跳过)
-## 文件名取自链接末段, 例: ".../EGoCb/2.lpz" → "2.lpz"
-const SONG_PACKAGE_URL_LIST: Array[String] = [
-	"https://pan.vcyacg.com/f/d/EGoCb/2.lpz",
-	"https://pan.vcyacg.com/f/d/4KgIn/3.lpz",
-]
+## 曲包清单链接
+## 返回格式: { "list": [ "曲包下载链接", ... ] }
+## 启动时从这里拉取全部曲包链接, 再逐个下载
+const SONG_PACKAGE_MANIFEST_URL: String = "https://lpfileserv.thirhythm.top/directlink/1/songpackages/list.json"
 
 ## INFO: 设置项仅在此处修改，控件将会动态生成
 ## 设置项
@@ -163,6 +161,10 @@ var is_autoplay: bool = false
 
 ## 是否播放 PV
 var is_pvplay: bool = true
+
+## 曲包下载链接列表 (启动时从 SONG_PACKAGE_MANIFEST_URL 拉取)
+## 文件名取自链接末段, 例: ".../songpackages/3.lpz" → "3.lpz"
+var song_package_url_list: Array[String] = [ ]
 
 ## 共鸣主线歌曲路径列表
 var sympath_song_path_list: Array[String] = [ ]

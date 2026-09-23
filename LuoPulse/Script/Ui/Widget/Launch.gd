@@ -27,17 +27,26 @@ extends Control
 ## 下载状态文字
 @export var download_label: Label # = $LoadingPanel/DownloadLabel
 
+## 下载时的背景图
+@export var background: TextureRect
+
 
 ## 正在下载曲包 (期间禁止切换场景)
 var _is_downloading: bool = false
+
+## 当前正在下载的文件序号 (从 0 开始) 与文件总数, 用于把单文件进度换算成总体进度
+var _download_index: int = 0
+var _download_total: int = 0
 
 
 # ---------- 节点重载函数 ----------
 func _ready() -> void:
 	Engine.max_fps = 50
 	load_config()
+	$Downloader.download_progress.connect(_on_download_progress)
 	# 进入场景立刻开始下载缺失的曲包, 全部结束后才进入后续流程
 	await _download_all_song_packages()
+	
 	load_sympathy_song()
 	if Global.if_play_start_animation:
 		_setup_animations()
@@ -61,29 +70,34 @@ func _input(event: InputEvent) -> void:
 
 
 # ---------- 曲包下载 ----------
-## 依次下载 Global.SONG_PACKAGE_URL_LIST 中缺失的曲包, 并推进进度条
+## 先从服务器拉取曲包清单, 再依次下载缺失的曲包, 并推进进度条
 ## 全部下完 (或失败跳过) 后才会返回, 调用方用 await 等待
 func _download_all_song_packages() -> void:
-	var url_list: Array[String] = Global.SONG_PACKAGE_URL_LIST
-	var total: int = url_list.size()
-	if total == 0:
-		return
-
 	_is_downloading = true
-	_setup_download_bar_style()
+	#_setup_download_bar_style()
 	loading_panel.visible = true
+	# 立刻显示 0%, 避免在拉取清单期间一直停在场景里的占位文字
+	_apply_download_progress(0.0)
 
-	for index: int in total:
-		var url: String = url_list[index]
-		_update_download_ui(url, index, total)
+	var is_manifest_ok: bool = await _load_song_package_url_list()
+	if not is_manifest_ok:
+		push_error("曲包清单获取失败, 本次跳过下载")
+	else:
+		var url_list: Array[String] = Global.song_package_url_list
+		_download_total = url_list.size()
 
-		var is_success: bool = await $Downloader.download(url)
-		if not is_success:
-			push_error("曲包下载失败, 已跳过: %s" % url)
+		for index: int in _download_total:
+			var url: String = url_list[index]
+			_download_index = index
+
+			var is_success: bool = await $Downloader.download(url)
+			if not is_success:
+				push_error("曲包下载失败, 已跳过: %s" % url)
+				pass
+
+			# 该文件结束, 进度推进到整数刻度
+			_apply_download_progress(float(index + 1) / float(_download_total))
 			pass
-
-		# 进度条按 "已下载文件数 / 总文件数" 推进
-		download_progress_bar.value = float(index + 1) / float(total) * 100.0
 		pass
 
 	loading_panel.visible = false
@@ -91,24 +105,66 @@ func _download_all_song_packages() -> void:
 	pass
 
 
-## 刷新下载状态文字 (例: 正在下载 2.lpz (1/2))
-func _update_download_ui(url: String, index: int, total: int) -> void:
-	download_label.text = "正在下载 %s (%d/%d)" % [ url.get_file(), index + 1, total ]
+## 拉取曲包清单并解析出下载链接, 结果写入 Global.song_package_url_list
+## @return: 是否成功解析到清单 (清单为空也算成功)
+func _load_song_package_url_list() -> bool:
+	var text: String = await $Downloader.fetch_text(Global.SONG_PACKAGE_MANIFEST_URL)
+	if text.is_empty():
+		return false
+
+	var parsed: Variant = JSON.parse_string(text)
+	if parsed == null or parsed is not Dictionary:
+		push_error("曲包清单解析失败: %s" % Global.SONG_PACKAGE_MANIFEST_URL)
+		return false
+
+	var raw_list: Variant = (parsed as Dictionary).get("list", [ ])
+	if raw_list is not Array:
+		push_error("曲包清单缺少 list 字段: %s" % Global.SONG_PACKAGE_MANIFEST_URL)
+		return false
+
+	var urls: Array[String] = [ ]
+	for item: Variant in (raw_list as Array):
+		if item is String and not (item as String).is_empty():
+			urls.append(item as String)
+			pass
+		pass
+
+	Global.song_package_url_list = urls
+	print("曲包清单获取完成, 共 %d 个" % urls.size())
+	return true
+
+
+## 当前文件的字节进度变化 → 换算成总体进度
+## 总体进度 = (已完成文件数 + 当前文件字节比例) / 文件总数
+func _on_download_progress(file_ratio: float) -> void:
+	if _download_total <= 0:
+		return
+	var overall: float = (float(_download_index) + clampf(file_ratio, 0.0, 1.0)) / float(_download_total)
+	_apply_download_progress(overall)
+	pass
+
+
+## 应用总体进度 (0.0 ~ 1.0), 同步进度条、背景色彩与提示文字
+func _apply_download_progress(ratio: float) -> void:
+	var clamped: float = clampf(ratio, 0.0, 1.0)
+	download_progress_bar.value = clamped * 100.0
+	background.material.set_shader_parameter("gray_scale", 1.0 - clamped)
+	download_label.text = "正在下载曲包, 请不要退出游戏 (%d%%)" % int(clamped * 100.0)
 	pass
 
 
 ## 覆盖进度条样式
 ## 全局主题里进度条的填充是纯黑噪点贴图、轨道是全透明的, 在黑色背景下完全看不见
-func _setup_download_bar_style() -> void:
-	var track: StyleBoxFlat = StyleBoxFlat.new()
-	track.bg_color = Color(1, 1, 1, 0.15)
-
-	var fill: StyleBoxFlat = StyleBoxFlat.new()
-	fill.bg_color = Color(0.952941, 0.933333, 0.866667, 1)
-
-	download_progress_bar.add_theme_stylebox_override("background", track)
-	download_progress_bar.add_theme_stylebox_override("fill", fill)
-	pass
+#func _setup_download_bar_style() -> void:
+	#var track: StyleBoxFlat = StyleBoxFlat.new()
+	#track.bg_color = Color(1, 1, 1, 0.15)
+#
+	#var fill: StyleBoxFlat = StyleBoxFlat.new()
+	#fill.bg_color = Color(0.952941, 0.933333, 0.866667, 1)
+#
+	#download_progress_bar.add_theme_stylebox_override("background", track)
+	#download_progress_bar.add_theme_stylebox_override("fill", fill)
+	#pass
 
 
 # ---------- 工具函数 ----------

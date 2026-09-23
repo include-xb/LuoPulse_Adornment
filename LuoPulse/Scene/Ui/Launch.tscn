@@ -2,8 +2,51 @@
 
 [ext_resource type="Script" uid="uid://esbj00n5wyml" path="res://Script/Ui/Widget/Launch.gd" id="1_sc0u0"]
 [ext_resource type="Script" uid="uid://byjyo8iitxtwv" path="res://Script/GameManager/Downloader.gd" id="2_chhln"]
+[ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="3_awa0l"]
+[ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="3_gqisj"]
 
-[node name="Launch" type="Control" unique_id=1952455162 node_paths=PackedStringArray("animation_player", "loading_panel", "download_progress_bar", "download_label")]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gqisj"]
+shader = ExtResource("3_awa0l")
+shader_parameter/gray_scale = 1.0
+
+[sub_resource type="Animation" id="Animation_awa0l"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_3u8ks"]
+resource_name = "downloader_fadeout"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ColorRect:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(0, 0, 0, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rfmce"]
+_data = {
+&"RESET": SubResource("Animation_awa0l"),
+&"downloader_fadeout": SubResource("Animation_3u8ks")
+}
+
+[node name="Launch" type="Control" unique_id=1952455162 node_paths=PackedStringArray("animation_player", "loading_panel", "download_progress_bar", "download_label", "background")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,8 +56,9 @@ grow_vertical = 2
 script = ExtResource("1_sc0u0")
 animation_player = NodePath("AnimationPlayer")
 loading_panel = NodePath("LoadingPanel")
-download_progress_bar = NodePath("LoadingPanel/DownloadProgressBar")
-download_label = NodePath("LoadingPanel/DownloadLabel")
+download_progress_bar = NodePath("LoadingPanel/VBoxContainer/DownloadProgressBar")
+download_label = NodePath("LoadingPanel/VBoxContainer/DownloadLabel")
+background = NodePath("LoadingPanel/Background")
 
 [node name="Background" type="ColorRect" parent="." unique_id=964636709]
 layout_mode = 1
@@ -98,41 +142,58 @@ script = ExtResource("2_chhln")
 metadata/_custom_type_script = "uid://byjyo8iitxtwv"
 
 [node name="LoadingPanel" type="Control" parent="." unique_id=1737859034]
-visible = false
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DownloadLabel" type="Label" parent="LoadingPanel" unique_id=414873825]
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -40.0
-offset_right = 300.0
+[node name="Background" type="TextureRect" parent="LoadingPanel" unique_id=888213480]
+material = SubResource("ShaderMaterial_gqisj")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("3_gqisj")
+expand_mode = 5
+stretch_mode = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LoadingPanel" unique_id=613314272]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -41.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="DownloadLabel" type="Label" parent="LoadingPanel/VBoxContainer" unique_id=414873825]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 28
-text = "正在下载 (0/0)"
+text = "正在下载曲包, 请不要退出游戏 (0%)"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DownloadProgressBar" type="ProgressBar" parent="LoadingPanel" unique_id=819977280]
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = 12.0
-offset_right = 300.0
-offset_bottom = 24.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="DownloadProgressBar" type="ProgressBar" parent="LoadingPanel/VBoxContainer" unique_id=819977280]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_vertical = 3
 step = 0.1
 show_percentage = false
+
+[node name="ColorRect" type="ColorRect" parent="LoadingPanel" unique_id=441531056]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="LoadingPanel" unique_id=533973617]
+libraries/ = SubResource("AnimationLibrary_rfmce")

@@ -19,7 +19,14 @@ const MAX_RETRY: int = 3
 # 两次重试之间的等待时间 (秒)
 const RETRY_DELAY: float = 1.0
 
+
+## 单个文件的下载进度变化 (0.0 ~ 1.0), 仅在已知文件总大小时发出
+signal download_progress(ratio: float)
+
 var http_request: HTTPRequest
+
+## 正在接收响应体, 用于在 _process 中上报字节进度
+var _is_receiving: bool = false
 
 ## 正式文件路径, 下载全部完成后才写入
 var full_save_path: String
@@ -53,8 +60,10 @@ func download(url: String) -> bool:
 			await get_tree().create_timer(RETRY_DELAY).timeout
 			continue
 
+		_is_receiving = true
 		# await 多参数信号拿到的是参数数组 [result, response_code, headers, body]
 		var args: Array = await http_request.request_completed
+		_is_receiving = false
 		if _finish_request(args):
 			print("下载成功: ", full_save_path)
 			print("绝对路径: ", ProjectSettings.globalize_path(full_save_path))
@@ -68,6 +77,49 @@ func download(url: String) -> bool:
 	_discard_temp_file()
 	push_error("下载失败, 已用尽重试次数: %s" % url)
 	return false
+
+
+## 拉取文本内容 (用于读取曲包清单这类小文件), 失败会自动重试
+## @param url: 请求链接
+## @return: 响应文本, 失败时返回空字符串
+func fetch_text(url: String) -> String:
+	var request: HTTPRequest = _ensure_http_request()
+
+	for attempt: int in MAX_RETRY:
+		# 必须清空 download_file, 否则响应体会被写进磁盘而不是作为 body 返回
+		request.download_file = ""
+
+		var err := request.request(url)
+		if err != OK:
+			push_error("请求发起失败，错误码: %d" % err)
+			await get_tree().create_timer(RETRY_DELAY).timeout
+			continue
+
+		var args: Array = await request.request_completed
+		if _is_request_ok(args):
+			return (args[3] as PackedByteArray).get_string_from_utf8()
+
+		push_error("第 %d 次拉取失败: %s" % [ attempt + 1, url ])
+		await get_tree().create_timer(RETRY_DELAY).timeout
+		pass
+
+	push_error("拉取失败, 已用尽重试次数: %s" % url)
+	return ""
+
+
+## 上报当前文件的字节进度, 供外部进度条使用
+func _process(_delta: float) -> void:
+	if not _is_receiving or http_request == null:
+		return
+
+	# 302 跳转/握手阶段还不知道文件总大小, 此时不上报
+	var body_size: int = http_request.get_body_size()
+	if body_size <= 0:
+		return
+
+	var ratio: float = clampf(float(http_request.get_downloaded_bytes()) / float(body_size), 0.0, 1.0)
+	download_progress.emit(ratio)
+	pass
 
 
 func _ensure_directory_exists() -> void:
@@ -101,9 +153,9 @@ func _request_once(url: String) -> Error:
 	return request.request(url)
 
 
-## 校验一次请求的结果, 通过则把临时文件改名成正式文件
+## 校验一次请求的网络层结果与 HTTP 状态码
 ## @param args: request_completed 信号的参数 [result, response_code, headers, body]
-func _finish_request(args: Array) -> bool:
+func _is_request_ok(args: Array) -> bool:
 	var result: int = args[0]
 	var response_code: int = args[1]
 
@@ -115,6 +167,15 @@ func _finish_request(args: Array) -> bool:
 	# 检查 HTTP 状态码 (200-299 表示成功)
 	if response_code < 200 or response_code >= 300:
 		push_error("HTTP 错误，状态码: %d" % response_code)
+		return false
+
+	return true
+
+
+## 校验一次下载的结果, 通过则把临时文件改名成正式文件
+## @param args: request_completed 信号的参数 [result, response_code, headers, body]
+func _finish_request(args: Array) -> bool:
+	if not _is_request_ok(args):
 		return false
 
 	# 验证文件是否已成功写入临时文件
