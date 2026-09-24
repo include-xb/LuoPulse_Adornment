@@ -10,6 +10,7 @@ shader_parameter/edge_color = Color(0, 0, 0, 0.7647059)
 shader_parameter/edge_width = 0.0
 shader_parameter/track_color = Color(0, 0, 0, 0.5882353)
 shader_parameter/highlight = 0.0
+shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
 material = SubResource("ShaderMaterial_8ks2l")
@@ -22,6 +23,7 @@ shader_parameter/edge_color = Color(0, 0, 0, 0)
 shader_parameter/edge_width = 0.0
 shader_parameter/track_color = Color(1, 1, 1, 0.13725491)
 shader_parameter/highlight = 0.0
+shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_in2dp"]
 material = SubResource("ShaderMaterial_m7grc")
@@ -102,6 +104,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.022740126, 0.15707707, 0.0
 emitting = false
 amount = 30
 lifetime = 0.18000000000000002
+explosiveness = 0.9
 transform_align = 1
 transform_align_channel_filter = 1
 process_material = SubResource("ParticleProcessMaterial_sbk8k")

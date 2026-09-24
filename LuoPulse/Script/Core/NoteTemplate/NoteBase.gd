@@ -167,7 +167,7 @@ func judge(master_time: float) -> void:
 		root_node.show_judgment_feedback(time_offset, level, column)
 		pass
 
-	_finish_judge()
+	_finish_judge(level)
 	pass
 
 
@@ -200,34 +200,62 @@ func _lose(master_time: float) -> void:
 
 	_update_accuracy()
 	_remove_from_judging_and_rendering()
-	explode()
+	explode("lost")
 	pass
 
 
 ## 结束判定
-func _finish_judge() -> void:
+## @param level: 判定等级, 决定粒子配色/数量与轨道反馈强度
+func _finish_judge(level: String) -> void:
 	is_judged = true
 	is_removed = true
 	_update_accuracy()
 	_remove_from_judging_and_rendering()
-	explode()
+
+	# 漏键不点亮轨道也不发声, 否则等于在奖励失误
+	_flash_track_feedback(HitFeedback.flash_of(level))
+	if level != "lost":
+		_play_hit_sound()
+		_flash_background()
+		pass
+
+	explode(level)
 	pass
 
 
 # ---------- 自动播放 ----------
 ## 自动播放命中处理 (子类可覆写)
 func _autoplay(master_time: float) -> void:
+	# 命中反馈统一由 _finish_judge 触发, 这里不再重复
 	if master_time >= float(time) - 10.0 and not is_judged:
 		judge(master_time)
-		_flash_track_feedback()
 		pass
 	pass
 
 
-## 自动播放时的轨道点击反馈
-func _flash_track_feedback() -> void:
+## 命中时的轨道与判定线反馈 (column 为 1-based 音符列)
+## @param strength: 高亮强度 (0.0 ~ 1.0), 漏键传 0
+func _flash_track_feedback(strength: float = 1.0) -> void:
+	if strength <= 0.0:
+		return
 	if root_node and root_node.has_method("flash_track_feedback"):
-		root_node.flash_track_feedback(column)
+		root_node.flash_track_feedback(column, strength)
+		pass
+	pass
+
+
+## 播放打击音效 (音量接 Global.volume_note, 播放池由 Gameplay 统一管理)
+func _play_hit_sound() -> void:
+	if root_node and root_node.has_method("play_hit_sound"):
+		root_node.play_hit_sound()
+		pass
+	pass
+
+
+## 命中时的背景脉冲 (幅度很小, 主要反馈由连击数驱动)
+func _flash_background() -> void:
+	if root_node and root_node.has_method("flash_background"):
+		root_node.flash_background()
 		pass
 	pass
 
@@ -246,12 +274,50 @@ func _remove_from_judging_and_rendering() -> void:
 	pass
 
 
-## 碎裂效果, 从场景中移除
-func explode() -> void:
-	var particle: GPUParticles3D = get_node("../../GPUParticles3D")
+## 取音符自身的颜色 (note_edge shader 的 original_color 参数)
+## 粒子用它上色, 保证粒子颜色与音符本体一致
+func get_note_color() -> Color:
+	var mat: ShaderMaterial = get_active_material(0) as ShaderMaterial
+	if mat == null:
+		return HitFeedback.FALLBACK_COLOR
+
+	var value: Variant = mat.get_shader_parameter("original_color")
+	if value is Color:
+		var note_color: Color = value
+		return note_color
+	return HitFeedback.FALLBACK_COLOR
+
+
+## 发射一次粒子爆发 (不销毁自身, 供长键等需要继续存活的音符使用)
+## @param level: 判定等级, 只决定粒子数量 (颜色取音符本体颜色)
+func emit_particles(level: String = "harmonious") -> void:
+	var particle: GPUParticles3D = get_node_or_null("../../GPUParticles3D")
+	if particle == null:
+		return
+
+	var column_node: Node = get_node("../..")
+	# 颜色取音符自身的颜色, 判定等级只体现在粒子数量上
+	if column_node and column_node.has_method("set_particle_style"):
+		column_node.set_particle_style(get_note_color(), HitFeedback.amount_of(level))
+		pass
+
 	particle.emitting = false
 	particle.position.z = self.position.z
 	particle.one_shot = true
 	particle.emitting = true
+	pass
+
+
+## 碎裂效果: 发射粒子后销毁自身
+## @param level: 判定等级, 决定粒子配色与数量
+func explode(level: String = "harmonious") -> void:
+	emit_particles(level)
+	queue_free()
+	pass
+
+
+## 静默移除自身 (无粒子、无反馈)
+## 用于"做对了但不该有打击反馈"的场合, 例如红键被正确忽略
+func remove_silently() -> void:
 	queue_free()
 	pass

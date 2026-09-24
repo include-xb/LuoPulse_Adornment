@@ -202,6 +202,92 @@ var _feedback_index: int = 0
 var _max_feedback_labels: int = 8
 
 
+## ---- 打击音效 ----
+## 打击音播放池大小 (要能盖住最密的连打: 200BPM 的 16 分音符约 13 次/秒)
+const HIT_SOUND_POOL_SIZE: int = 8
+
+## 打击音播放池 (轮转使用, 避免快速连打互相截断)
+var _hit_sound_players: Array[AudioStreamPlayer] = [ ]
+
+## 播放池轮转索引
+var _hit_sound_index: int = 0
+
+
+## ---- 连击动效 ----
+## 触发放大动效的最小连击数
+const COMBO_PULSE_MIN: int = 2
+
+## 普通连击的放大动效时长
+const COMBO_PULSE_DURATION: float = 0.18
+
+## 普通连击的放大峰值
+const COMBO_PULSE_SCALE: float = 1.25
+
+## 每达到该连击数的整数倍时播放一次更强的动效
+const COMBO_MILESTONE: int = 50
+
+## 里程碑连击的放大峰值
+const COMBO_MILESTONE_SCALE: float = 1.6
+
+## 里程碑连击的字色
+const COMBO_MILESTONE_COLOR: Color = Color(1.0, 0.85, 0.35, 1.0)
+
+## 连击中断时的字色
+const COMBO_BREAK_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
+
+## 普通连击的字色 (与场景中的初始值一致)
+const COMBO_BASE_COLOR: Color = Color(0.7246, 0.7246, 0.7246, 1.0)
+
+## 连击中断后红字停留的时长
+const COMBO_BREAK_HOLD: float = 0.35
+
+## 上一帧的连击数 (只在变化时触发动效, 避免每帧重写)
+var _last_combo: int = 0
+
+## 连击数字当前的动效 tween
+var _combo_tween: Tween = null
+
+
+## ---- 背景脉冲 ----
+## 背景高亮瞬时增量 (命中时叠加, 之后快速衰减)
+var _background_flash: float = 0.0
+
+## 瞬时增量的衰减速度
+const BACKGROUND_FLASH_DECAY: float = 6.0
+
+## 每次命中给背景叠加的瞬时增量
+## 必须很小: 密集谱面下逐音符闪光会变成频闪, 既不安全也干扰读谱
+const BACKGROUND_FLASH_ON_HIT: float = 0.03
+
+## 由连击数驱动的背景高亮上限
+const BACKGROUND_FLASH_COMBO_MAX: float = 0.10
+
+## 达到背景高亮上限所需的连击数
+const BACKGROUND_FLASH_COMBO_FULL: float = 150.0
+
+
+## ---- 画面震动 ----
+## 震动时长
+const SHAKE_DURATION: float = 0.12
+
+## 震动幅度 (像素)
+const SHAKE_STRENGTH: float = 4.0
+
+## 当前震动 tween
+var _shake_tween: Tween = null
+
+## 显示 SubViewport 的 TextureRect (震动目标)
+## 注意: 震动的是这个 2D 节点而不是 Camera3D —— 移动相机会让
+## _calculate_track_screen_bounds() 缓存下来的轨道屏幕边界失效, 触屏会点错轨道
+@onready var _view_rect: TextureRect = $UI/TextureRect
+
+## 震动基准位置
+var _view_rect_origin: Vector2 = Vector2.ZERO
+
+## 是否已记录过震动基准位置 (延迟到第一次震动时才取, 确保布局已稳定)
+var _has_view_rect_origin: bool = false
+
+
 # ---------- 测试场景 ----------
 ## 用于测试
 var default_chart: Array = [
@@ -483,6 +569,7 @@ func _ready() -> void:
 	_calculate_track_screen_bounds()
 	_reset_judging_stats()
 	_setup_judgment_feedback()
+	_setup_hit_sound_pool()
 	_collect_input_processers()
 	_setup_countdown_label()
 	reset_speed()
@@ -496,6 +583,7 @@ func _ready() -> void:
 	audio_system.volume_linear = (float(Global.volume_song) / 100) * 2
 	_pause_panel.modulate.a = 0.0
 	username.text = Global.user_name
+	
 	
 	if is_test == false:
 		# 从当前选择的曲包中加载谱面数据
@@ -579,13 +667,19 @@ func _process(delta: float) -> void:
 	if Global.combo > Global.max_combo:
 		Global.max_combo = Global.combo
 		pass
-		
 
-	if Global.combo != 0:
-		_combo_label.visible = true
-		_combo_label.text = str(Global.combo) + " COMBO"
-	else :
-		_combo_label.visible = false
+	# 连击只在变化时刷新, 并触发放大动效 (不再每帧重写文本)
+	if Global.combo != _last_combo:
+		_on_combo_changed()
+		pass
+
+	# 背景脉冲: 连击基准值 + 命中瞬时增量, 瞬时增量按指数快速衰减
+	# (gray_scale 负责整体灰度, flash 负责高亮, 两者互不影响)
+	_background_flash = maxf(0.0, _background_flash - BACKGROUND_FLASH_DECAY * delta * _background_flash)
+	if _background_flash < 0.001:
+		_background_flash = 0.0
+		pass
+	background.material.set_shader_parameter("flash", _combo_background_level() + _background_flash)
 	pass
 
 
@@ -663,16 +757,169 @@ func get_input_processor(column: int) -> Node3D:
 	return null
 
 
-# ---------- 自动播放 ----------
-## 自动播放时的轨道点击反馈 (column 为 1-based 音符列)
-func flash_track_feedback(column: int) -> void:
+# ---------- 轨道反馈 ----------
+## 命中时的轨道与判定线反馈 (column 为 1-based 音符列)
+## @param strength: 高亮强度 (0.0 ~ 1.0), 由判定等级决定
+func flash_track_feedback(column: int, strength: float = 1.0) -> void:
 	var processor: Node3D = get_input_processor(column - 1)
 	if processor and processor.has_method("flash_track"):
-		processor.flash_track()
+		processor.flash_track(strength)
 		pass
 	pass
 
 
+# ---------- 打击音效 ----------
+## 播放一记打击音 (音量接 Global.volume_note)
+## 从池中轮转取播放器, 避免快速连打时后一记截断前一记
+func play_hit_sound() -> void:
+	if _hit_sound_players.is_empty():
+		return
+
+	var player: AudioStreamPlayer = _hit_sound_players[_hit_sound_index]
+	_hit_sound_index = (_hit_sound_index + 1) % _hit_sound_players.size()
+	player.volume_linear = float(Global.volume_note) * Global.VOLUME_FACTOR
+	player.play()
+	pass
+
+
+## 建立打击音播放池
+func _setup_hit_sound_pool() -> void:
+	var stream: AudioStreamWAV = HitSoundFactory.make_hit_sound()
+	for i: int in HIT_SOUND_POOL_SIZE:
+		var player: AudioStreamPlayer = AudioStreamPlayer.new()
+		player.stream = stream
+		add_child(player)
+		_hit_sound_players.append(player)
+		pass
+	pass
+
+
+# ---------- 背景与画面反馈 ----------
+## 命中时的背景脉冲: 叠加一个很小的瞬时增量, 之后快速衰减
+func flash_background() -> void:
+	var ceiling: float = BACKGROUND_FLASH_COMBO_MAX + BACKGROUND_FLASH_ON_HIT
+	_background_flash = minf(_background_flash + BACKGROUND_FLASH_ON_HIT, ceiling)
+	pass
+
+
+## 由连击数驱动的背景高亮基准值 (连击越高背景越亮)
+## 刻意用连击而不是逐音符脉冲: 密集谱面下逐音符强闪会变成频闪
+func _combo_background_level() -> float:
+	var ratio: float = clampf(float(Global.combo) / BACKGROUND_FLASH_COMBO_FULL, 0.0, 1.0)
+	return ratio * BACKGROUND_FLASH_COMBO_MAX
+
+
+## 画面轻震 —— 只震显示用的 2D 节点, 不动 Camera3D
+func shake_view(strength: float = SHAKE_STRENGTH) -> void:
+	if _view_rect == null:
+		return
+
+	# 第一次震动时才记录基准位置, 此时布局一定已经稳定
+	if not _has_view_rect_origin:
+		_view_rect_origin = _view_rect.position
+		_has_view_rect_origin = true
+		pass
+
+	_kill_shake()
+	# 直接挪到偏移位置再缓回原位: "啪"一下比正弦晃动更干脆
+	_view_rect.position = _view_rect_origin + Vector2(
+		randf_range(-strength, strength),
+		randf_range(-strength, strength)
+	)
+
+	_shake_tween = create_tween()
+	_shake_tween.set_trans(Tween.TRANS_QUART)
+	_shake_tween.set_ease(Tween.EASE_OUT)
+	_shake_tween.tween_property(_view_rect, "position", _view_rect_origin, SHAKE_DURATION)
+	pass
+
+
+## 结束正在进行的震动
+func _kill_shake() -> void:
+	if _shake_tween and _shake_tween.is_valid():
+		_shake_tween.kill()
+		pass
+	_shake_tween = null
+	pass
+
+
+# ---------- 连击动效 ----------
+## 连击数变化时刷新标签与动效 (由 _process 在数值变化时调用, 不再每帧重写)
+func _on_combo_changed() -> void:
+	var combo: int = Global.combo
+
+	if combo == 0:
+		if _last_combo > 0:
+			_flash_combo_break()
+			pass
+		else:
+			_combo_label.visible = false
+			pass
+		_last_combo = 0
+		return
+
+	_combo_label.visible = true
+	_combo_label.text = str(combo) + " COMBO"
+
+	var is_milestone: bool = combo % COMBO_MILESTONE == 0
+	_pulse_combo_label(is_milestone)
+	if is_milestone:
+		shake_view()
+		pass
+
+	_last_combo = combo
+	pass
+
+
+## 连击数字的放大动效
+func _pulse_combo_label(is_milestone: bool) -> void:
+	_kill_combo_tween()
+
+	var peak: float = COMBO_MILESTONE_SCALE if is_milestone else COMBO_PULSE_SCALE
+	var color: Color = COMBO_MILESTONE_COLOR if is_milestone else COMBO_BASE_COLOR
+
+	_combo_label.add_theme_color_override("font_color", color)
+	# 以中心为缩放基准, 否则标签会往右下角"长"
+	_combo_label.pivot_offset = _combo_label.size * 0.5
+	_combo_label.scale = Vector2(peak, peak)
+
+	_combo_tween = create_tween()
+	_combo_tween.set_trans(Tween.TRANS_BACK)
+	_combo_tween.set_ease(Tween.EASE_OUT)
+	_combo_tween.tween_property(_combo_label, "scale", Vector2.ONE, COMBO_PULSE_DURATION)
+	pass
+
+
+## 连击中断: 保留旧数字并染红短暂停留, 让"断连"这件事被看见
+func _flash_combo_break() -> void:
+	_kill_combo_tween()
+
+	_combo_label.visible = true
+	_combo_label.scale = Vector2.ONE
+	_combo_label.add_theme_color_override("font_color", COMBO_BREAK_COLOR)
+
+	_combo_tween = create_tween()
+	_combo_tween.tween_interval(COMBO_BREAK_HOLD)
+	_combo_tween.tween_callback(_hide_combo_label)
+	pass
+
+
+## 隐藏连击标签
+func _hide_combo_label() -> void:
+	_combo_label.visible = false
+	pass
+
+
+## 结束连击数字的动效
+func _kill_combo_tween() -> void:
+	if _combo_tween and _combo_tween.is_valid():
+		_combo_tween.kill()
+		pass
+	_combo_tween = null
+	pass
+
+
+# ---------- 自动播放 ----------
 ## 自动播放 hold: 设置轨道按住状态 (column 为 1-based 音符列)
 func set_track_autoplay_hold(column: int, is_active: bool) -> void:
 	var processor: Node3D = get_input_processor(column - 1)

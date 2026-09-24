@@ -18,9 +18,26 @@ extends Node3D
 ## 轨道材质副本 (每列独立, 用于触屏高亮)
 var _track_material: ShaderMaterial = null
 
-## 触屏高亮强度 (shader uniform)
-var _highlight: float = 1.0
+## 判定线材质副本 (每列独立, 命中时闪光)
+var _judging_material: ShaderMaterial = null
+
+## 判定线节点 (与轨道复用同一个 shader, 自己的材质从未被驱动过)
+@onready var _judging_strip: MeshInstance3D = $Judging
+
+## 粒子材质副本 (每列独立, 按判定等级染色)
+var _particle_material: StandardMaterial3D = null
+
+## 轨道高亮强度 (shader uniform)
+var _highlight: float = 0.0
+
+## 轨道高亮衰减速度
 const HIGHLIGHT_FADE: float = 8.0
+
+## 判定线高亮强度 (命中时被 flash_track 点亮)
+var _judging_highlight: float = 0.0
+
+## 判定线高亮衰减速度 (比轨道更快, 强调"一击即散")
+const JUDGING_HIGHLIGHT_FADE: float = 10.0
 
 ## 当前触摸计数 (支持多点触控)
 var _touch_count: int = 0
@@ -43,17 +60,64 @@ func _ready() -> void:
 	var src: ShaderMaterial = single_track.get_active_material(0)
 	_track_material = src.duplicate()
 	single_track.material_override = _track_material
+
+	# 判定线与轨道复用同一个 shader, 同样需要独立副本, 否则 4 条轨道会互相污染
+	var judging_src: ShaderMaterial = _judging_strip.get_active_material(0)
+	_judging_material = judging_src.duplicate()
+	_judging_strip.material_override = _judging_material
+
+	# 粒子网格与材质也可能是 4 列共享的, 两份都要复制。
+	# 只在这里复制一次, 之后命中时只改颜色/数量, 避免每次命中都分配资源。
+	var particle_mesh: Mesh = gpu_particles_3d.draw_pass_1.duplicate() as Mesh
+	gpu_particles_3d.draw_pass_1 = particle_mesh
+	_particle_material = particle_mesh.surface_get_material(0).duplicate() as StandardMaterial3D
+	particle_mesh.surface_set_material(0, _particle_material)
+
+	# 粒子的最终颜色 = 材质色 × 贴图色, 而原贴图自带蓝色渐变,
+	# 会把音符颜色染歪 (黄键会偏绿)。这里把贴图的 RGB 中和成白色、
+	# 只保留它的透明度衰减, 让材质色单独决定色相。
+	_neutralize_particle_texture()
+	pass
+
+
+## 把粒子贴图的 RGB 中和成白色, 只保留原有的透明度衰减
+## 这样粒子的色相完全由 _particle_material.albedo_color 决定
+func _neutralize_particle_texture() -> void:
+	if _particle_material == null:
+		return
+	var src: GradientTexture2D = _particle_material.albedo_texture as GradientTexture2D
+	if src == null or src.gradient == null:
+		return
+
+	var gradient: Gradient = src.gradient.duplicate()
+	var colors: PackedColorArray = gradient.colors
+	for i: int in colors.size():
+		colors[i] = Color(1.0, 1.0, 1.0, colors[i].a)
+		pass
+	gradient.colors = colors
+
+	# 复制整张贴图 (连同 fill / 尺寸等设置一起), 只换掉渐变
+	var neutral: GradientTexture2D = src.duplicate() as GradientTexture2D
+	neutral.gradient = gradient
+	_particle_material.albedo_texture = neutral
 	pass
 
 
 func _process(delta: float) -> void:
+	# 轨道高亮: 按住期间保持满亮, 松开后指数衰减
 	if _touch_count > 0 or is_autoplay_holding:
 		_highlight = 1.0
 		_track_material.set_shader_parameter("highlight", _highlight)
 		pass
 	elif _highlight > 0.0:
-		_highlight = maxf(0.0, _highlight - HIGHLIGHT_FADE * delta)
+		_highlight = _decay_value(_highlight, HIGHLIGHT_FADE, delta)
 		_track_material.set_shader_parameter("highlight", _highlight)
+		pass
+
+	# 判定线高亮: 命中时被点亮, 独立且更快地衰减
+	if _judging_highlight > 0.0:
+		_judging_highlight = _decay_value(_judging_highlight, JUDGING_HIGHLIGHT_FADE, delta)
+		_judging_material.set_shader_parameter("highlight", _judging_highlight)
 		pass
 
 	if is_holding and not is_instance_valid(current_hold_note):
@@ -187,12 +251,42 @@ func press_judge(master_time: float) -> void:
 	pass
 
 
-# ---------- 自动播放 ----------
-## 自动播放时的轨道点击反馈 (仅触发高亮, 不参与判定)
-func flash_track() -> void:
-	_highlight = 1.0
+# ---------- 轨道 / 判定线反馈 ----------
+## 命中的视觉反馈: 点亮轨道与判定线 (仅触发高亮, 不参与判定)
+## @param strength: 高亮强度 (0.0 ~ 1.0), 由判定等级决定
+func flash_track(strength: float = 1.0) -> void:
+	var value: float = clampf(strength, 0.0, 1.0)
+
+	_highlight = maxf(_highlight, value)
 	_track_material.set_shader_parameter("highlight", _highlight)
+
+	# 判定线是玩家视线的焦点, 这一处闪光最容易被感知
+	_judging_highlight = maxf(_judging_highlight, value)
+	_judging_material.set_shader_parameter("highlight", _judging_highlight)
 	pass
+
+
+## 设置本列粒子的爆发样式 (染色 + 数量)
+## 材质已在 _ready 中复制过, 这里只改参数, 不会每次命中都分配资源
+## @param color: 粒子颜色 (由判定等级决定)
+## @param amount: 粒子数量
+func set_particle_style(color: Color, amount: int) -> void:
+	if _particle_material:
+		_particle_material.albedo_color = color
+		pass
+	gpu_particles_3d.amount = amount
+	pass
+
+
+## 指数衰减到 0 (快起快落, 比线性衰减更"脆"), 低于阈值直接归零避免残留
+func _decay_value(value: float, fade_speed: float, delta: float) -> float:
+	var next: float = maxf(0.0, value - fade_speed * delta * value)
+	if next < 0.01:
+		return 0.0
+	return next
+
+
+# ---------- 自动播放 ----------
 
 
 ## 自动播放 hold: 设置按住状态 (按住期间持续高亮, 松开后恢复衰减)

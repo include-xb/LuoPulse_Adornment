@@ -25,7 +25,7 @@ func lose(master_time: float) -> void:
 
 	_update_accuracy()
 	_remove_from_judging_and_rendering()
-	explode()
+	explode("lost")
 	pass
 
 
@@ -49,5 +49,6 @@ func _pass_through() -> void:
 		return
 	is_removed = true
 	_remove_from_judging_and_rendering()
-	explode()
+	# 正确忽略红键是"做对了", 不该有和漏键一样的爆开反馈, 所以静默移除
+	remove_silently()
 	pass

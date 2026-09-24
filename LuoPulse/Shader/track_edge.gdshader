@@ -8,8 +8,10 @@ uniform vec4 edge_color : source_color = vec4(0.0, 0.0, 0.0, 0.0);
 uniform float edge_width : hint_range(0.0, 0.5) = 0.5;
 // 轨道本体颜色（含透明度）
 uniform vec4 track_color : source_color = vec4(0.0, 0.0, 0.0, 0.58);
-// 触屏高亮强度 (0.0 ~ 1.0)
+// 高亮强度 (0.0 ~ 2.0), 由 InputProcesser 在触屏/命中时驱动
 uniform float highlight : hint_range(0.0, 2.0) = 0.0;
+// 高亮叠加效果: rgb 为叠加色, a 为同时提升的不透明度与叠加幅度
+uniform vec4 highlight_color : source_color = vec4(1.0, 1.0, 1.0, 0.35);
 
 // ============ 主函数 ============
 void fragment() {
@@ -22,8 +24,9 @@ void fragment() {
 	// 在轨道本体颜色和边缘线颜色之间混合
 	vec4 color = mix(track_color, edge_color, edge_mask);
 
-	// 触屏高亮：叠加亮色
-	color = mix(color, color + vec4(0.1, 0.1, 0.1, 0.1), highlight);
+	// 高亮：按强度叠加亮色并提升不透明度
+	color.rgb += highlight_color.rgb * highlight_color.a * highlight;
+	color.a = min(1.0, color.a + highlight_color.a * highlight);
 
 	ALBEDO = color.rgb;
 	ALPHA = color.a;

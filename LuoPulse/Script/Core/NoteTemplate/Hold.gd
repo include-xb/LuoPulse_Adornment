@@ -215,6 +215,78 @@ func _set_alpha(alpha: float) -> void:
 	pass
 
 
+# ---------- 命中反馈 ----------
+## 命中时的轨道与判定线反馈 (column 为 1-based 音符列)
+## @param strength: 高亮强度 (0.0 ~ 1.0), 漏键传 0
+func _flash_track_feedback(strength: float = 1.0) -> void:
+	if strength <= 0.0:
+		return
+	if root_node and root_node.has_method("flash_track_feedback"):
+		root_node.flash_track_feedback(column, strength)
+		pass
+	pass
+
+
+## 播放打击音效 (音量接 Global.volume_note, 播放池由 Gameplay 统一管理)
+func _play_hit_sound() -> void:
+	if root_node and root_node.has_method("play_hit_sound"):
+		root_node.play_hit_sound()
+		pass
+	pass
+
+
+## 命中时的背景脉冲 (幅度很小, 主要反馈由连击数驱动)
+func _flash_background() -> void:
+	if root_node and root_node.has_method("flash_background"):
+		root_node.flash_background()
+		pass
+	pass
+
+
+## 取长条自身的颜色 (hold shader 的 color 参数)
+## 粒子用它上色, 保证粒子颜色与长条本体一致
+func get_note_color() -> Color:
+	var mat: ShaderMaterial = material_override
+	if mat == null:
+		mat = get_active_material(0) as ShaderMaterial
+		pass
+	if mat == null:
+		return HitFeedback.FALLBACK_COLOR
+
+	var value: Variant = mat.get_shader_parameter("color")
+	if value is Color:
+		# 长条会通过同一个参数改透明度 (半透明 0.6 / 中断 0.2),
+		# 但粒子的 alpha 必须强制为 1, 否则会跟着一起变淡
+		var note_color: Color = value
+		return Color(note_color.r, note_color.g, note_color.b, 1.0)
+	return HitFeedback.FALLBACK_COLOR
+
+
+## 发射一次粒子爆发 (不销毁自身)
+## 长键在头部命中与尾部结算各发一次
+## @param level: 判定等级, 只决定粒子数量 (颜色取长条本体颜色)
+func emit_particles(level: String = "harmonious") -> void:
+	var particle: GPUParticles3D = get_node_or_null("../../GPUParticles3D")
+	if particle == null:
+		return
+
+	var column_node: Node = get_node("../..")
+	# 颜色取长条自身的颜色, 判定等级只体现在粒子数量上
+	if column_node and column_node.has_method("set_particle_style"):
+		column_node.set_particle_style(get_note_color(), HitFeedback.amount_of(level))
+		pass
+
+	particle.emitting = false
+	# 固定发在判定线上 (z = 0), 而不是 self.position.z。
+	# 长条的 mesh 被缩放并偏移过: position 取的是"中心", 到达判定线的是它的"下边缘"
+	# (见 _process 里的 position.z = head_z - _hold_length / 2.0),
+	# 所以头部命中时 self.position.z ≈ -长度/2, 直接用会把粒子打到轨道后方很远。
+	particle.position.z = 0.0
+	particle.one_shot = true
+	particle.emitting = true
+	pass
+
+
 # ---------- 判定 ----------
 ## 头判
 func judge_head(master_time: float) -> void:
@@ -253,6 +325,12 @@ func judge_head(master_time: float) -> void:
 	if root_node and root_node.has_method("show_judgment_feedback"):
 		root_node.show_judgment_feedback(time_offset, level, column)
 		pass
+
+	# 头部命中的反馈: 长键此前既不出粒子也不点亮轨道
+	_flash_track_feedback(HitFeedback.flash_of(level))
+	_play_hit_sound()
+	_flash_background()
+	emit_particles(level)
 
 	is_head_judged = true
 	pass
@@ -311,6 +389,13 @@ func _complete_hold() -> void:
 			Global.lost += 1
 			pass
 		Global.combo += 1
+
+		# 结算反馈: 按头部准度还原等级, 与普通音符共用同一套参数
+		var level: String = HitFeedback.level_from_accuracy(a)
+		_flash_track_feedback(HitFeedback.flash_of(level))
+		_play_hit_sound()
+		_flash_background()
+		emit_particles(level)
 		pass
 
 	is_hold_completed = true
@@ -342,6 +427,7 @@ func _lose() -> void:
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
 
 	_remove_from_judging_and_rendering()
+	emit_particles("lost")
 	# 不立即释放: 半透明后继续下落, 滚出屏幕后在 _process 中移除
 	pass
 

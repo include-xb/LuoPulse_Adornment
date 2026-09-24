@@ -14,6 +14,7 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_j17h8"]
 shader = ExtResource("2_j17h8")
 shader_parameter/gray_scale = 0.800000038
+shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fdpuf"]
 shader = ExtResource("5_j17h8")
@@ -181,7 +182,7 @@ theme_override_colors/font_color = Color(0.72464263, 0.72464263, 0.72464246, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 57
-text = "114 COMBO"
+text = "0 COMBO"
 horizontal_alignment = 1
 vertical_alignment = 1
 

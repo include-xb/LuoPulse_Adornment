@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dc6ytjhm13lqv"]
+
+[ext_resource type="Script" uid="uid://djtpk2t8v4vjs" path="res://_probe/VisualProbe.gd" id="1_w1dgr"]
+
+[node name="VisualProbe" type="Node" unique_id=994764003]
+script = ExtResource("1_w1dgr")

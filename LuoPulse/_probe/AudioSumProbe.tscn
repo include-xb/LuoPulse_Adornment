@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bsiv3tds7qjgw"]
+
+[ext_resource type="Script" path="res://_probe/AudioSumProbe.gd" id="1"]
+
+[node name="AudioSumProbe" type="Node"]
+script = ExtResource("1")
