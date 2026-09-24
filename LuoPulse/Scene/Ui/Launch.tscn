@@ -8,6 +8,7 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gqisj"]
 shader = ExtResource("3_awa0l")
 shader_parameter/gray_scale = 1.0
+shader_parameter/flash = 0.0
 
 [sub_resource type="Animation" id="Animation_awa0l"]
 length = 0.001

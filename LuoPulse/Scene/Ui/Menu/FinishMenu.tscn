@@ -8,12 +8,13 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_46tx6"]
 shader = ExtResource("2_t01hv")
 shader_parameter/gray_scale = 0.1200000057
+shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ncgm8"]
 shader = ExtResource("3_t01hv")
-shader_parameter/blur_amount = 2.2
+shader_parameter/blur_amount = 3.0
 
-[node name="FinishMenu" type="Control" unique_id=1595795645 node_paths=PackedStringArray("grade_label", "acc_label", "harmonious_count", "sympathetic_count", "aware_count", "lost_count", "combo_label", "notes_label", "crystal_label")]
+[node name="FinishMenu" type="Control" unique_id=1595795645 node_paths=PackedStringArray("grade_label", "title_label", "acc_label", "harmonious_count", "sympathetic_count", "aware_count", "lost_count", "combo_label", "notes_label", "crystal_label", "continue_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,15 +22,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_8iowy")
-grade_label = NodePath("ResultsBox/GradeLabel")
-acc_label = NodePath("ResultsBox/HBoxContainer/DataGrid/AccCount")
-harmonious_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/HarmoniousCount")
-sympathetic_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/SympatheticCount")
-aware_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/AwareCount")
-lost_count = NodePath("ResultsBox/HBoxContainer/JudgingGrid/LostCount")
-combo_label = NodePath("ResultsBox/HBoxContainer/DataGrid/ComboCount")
-notes_label = NodePath("ResultsBox/HBoxContainer/DataGrid/NotesCount")
-crystal_label = NodePath("ResultsBox/Crystal/CrystalCount")
+grade_label = NodePath("Card/Padding/VBox/Header/Grade")
+title_label = NodePath("Card/Padding/VBox/Header/Title")
+acc_label = NodePath("Card/Padding/VBox/Body/LeftGrid/AccCount")
+harmonious_count = NodePath("Card/Padding/VBox/Body/RightGrid/HarmoniousCount")
+sympathetic_count = NodePath("Card/Padding/VBox/Body/RightGrid/SympatheticCount")
+aware_count = NodePath("Card/Padding/VBox/Body/RightGrid/AwareCount")
+lost_count = NodePath("Card/Padding/VBox/Body/RightGrid/LostCount")
+combo_label = NodePath("Card/Padding/VBox/Body/LeftGrid/ComboCount")
+notes_label = NodePath("Card/Padding/VBox/Body/LeftGrid/NotesCount")
+crystal_label = NodePath("Card/Padding/VBox/Crystal")
+continue_button = NodePath("Card/Padding/VBox/ContinueButton")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1911982318]
 material = SubResource("ShaderMaterial_46tx6")
@@ -52,162 +55,181 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ResultsBox" type="VBoxContainer" parent="." unique_id=1519586395]
-layout_mode = 1
-anchors_preset = 8
+[node name="Card" type="ColorRect" parent="." unique_id=1711929231]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -260.5
-offset_right = 300.0
-offset_bottom = 258.0
+offset_left = -450.0
+offset_top = -260.0
+offset_right = 450.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
+color = Color(0.07058824, 0.06666667, 0.05882353, 0.8235294)
 
-[node name="GradeLabel" type="Label" parent="ResultsBox" unique_id=1763793407]
+[node name="Padding" type="MarginContainer" parent="Card" unique_id=527332286]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 32
+
+[node name="VBox" type="VBoxContainer" parent="Card/Padding" unique_id=1013837232]
 layout_mode = 2
-size_flags_vertical = 2
-theme_override_colors/font_color = Color(0.85490197, 0.64705884, 0.1254902, 1)
-theme_override_font_sizes/font_size = 60
-text = "∞ Infinity"
-horizontal_alignment = 1
+theme_override_constants/separation = 18
 
-[node name="HBoxContainer" type="HBoxContainer" parent="ResultsBox" unique_id=205027273]
+[node name="Header" type="HBoxContainer" parent="Card/Padding/VBox" unique_id=1177661948]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Card/Padding/VBox/Header" unique_id=957437099]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 0.8784314, 0.77254903)
+theme_override_font_sizes/font_size = 40
+text = "& 最初日"
+vertical_alignment = 1
+
+[node name="Grade" type="Label" parent="Card/Padding/VBox/Header" unique_id=76769418]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
+theme_override_font_sizes/font_size = 64
+text = "∞ Infinity"
+vertical_alignment = 1
+
+[node name="Rule1" type="ColorRect" parent="Card/Padding/VBox" unique_id=1097805134]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.8, 0.7490196, 0.6784314, 0.25)
+
+[node name="Body" type="HBoxContainer" parent="Card/Padding/VBox" unique_id=1376836439]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 80
+theme_override_constants/separation = 60
 
-[node name="JudgingGrid" type="GridContainer" parent="ResultsBox/HBoxContainer" unique_id=1859118343]
+[node name="LeftGrid" type="GridContainer" parent="Card/Padding/VBox/Body" unique_id=1940479346]
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
 theme_override_constants/h_separation = 35
-theme_override_constants/v_separation = 0
+theme_override_constants/v_separation = 8
 columns = 2
 
-[node name="HarmoniousLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1018154610]
-self_modulate = Color(1, 1, 1, 0.39215687)
+[node name="AccLabel" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=1368959459]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 0.55)
+theme_override_font_sizes/font_size = 34
+text = "准度"
+
+[node name="AccCount" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=435359626]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
+text = "98.42%"
+
+[node name="ComboLabel" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=2023048450]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 0.55)
+theme_override_font_sizes/font_size = 34
+text = "最大连击"
+
+[node name="ComboCount" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=481793036]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
+text = "1142"
+
+[node name="NotesLabel" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=1843742402]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 0.55)
+theme_override_font_sizes/font_size = 34
+text = "总音符"
+
+[node name="NotesCount" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=179686575]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
+text = "1876"
+
+[node name="RightGrid" type="GridContainer" parent="Card/Padding/VBox/Body" unique_id=87481434]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/h_separation = 35
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="HarmoniousLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=1930534758]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.41960785, 0.7921569, 0.41960785, 1)
+theme_override_font_sizes/font_size = 34
 text = "和一"
-horizontal_alignment = 1
 
-[node name="HarmoniousCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=968048052]
+[node name="HarmoniousCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=923162871]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
 text = "1719"
 
-[node name="SympatheticLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=473807588]
-self_modulate = Color(1, 1, 1, 0.39215687)
+[node name="SympatheticLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=1638676348]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.7019608, 1, 1)
+theme_override_font_sizes/font_size = 34
 text = "共鸣"
-horizontal_alignment = 1
 
-[node name="SympatheticCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=303988676]
+[node name="SympatheticCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=736455945]
 layout_mode = 2
-text = "0"
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
+text = "12"
 
-[node name="AwareLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=720148533]
-self_modulate = Color(1, 1, 1, 0.39215687)
+[node name="AwareLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=735446727]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8509804, 0.3019608, 1)
+theme_override_font_sizes/font_size = 34
 text = "觉醒"
-horizontal_alignment = 1
 
-[node name="AwareCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1910606805]
+[node name="AwareCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=1211778128]
 layout_mode = 2
-text = "0"
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
+text = "3"
 
-[node name="LostLabel" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1937840601]
-self_modulate = Color(1, 1, 1, 0.39215687)
+[node name="LostLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=804438885]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 34
 text = "丢失"
-horizontal_alignment = 1
 
-[node name="LostCount" type="Label" parent="ResultsBox/HBoxContainer/JudgingGrid" unique_id=1006047289]
+[node name="LostCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=2101391596]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
+theme_override_font_sizes/font_size = 34
 text = "0"
 
-[node name="DataGrid" type="GridContainer" parent="ResultsBox/HBoxContainer" unique_id=573109509]
+[node name="Rule2" type="ColorRect" parent="Card/Padding/VBox" unique_id=1788681240]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
-size_flags_horizontal = 10
-theme_override_constants/h_separation = 35
-theme_override_constants/v_separation = 0
-columns = 2
+color = Color(0.8, 0.7490196, 0.6784314, 0.25)
 
-[node name="AccLabel" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=780129692]
-self_modulate = Color(1, 1, 1, 0.39215687)
+[node name="Crystal" type="Label" parent="Card/Padding/VBox" unique_id=1095835732]
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_colors/font_color = Color(0.41960785, 0.7921569, 0.41960785, 1)
-text = "准度"
+theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
+theme_override_font_sizes/font_size = 44
+text = "◇ +14"
 horizontal_alignment = 1
 
-[node name="AccCount" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=355431759]
-layout_mode = 2
-size_flags_horizontal = 0
-text = "0.00%"
-
-[node name="ComboLabel" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=1122667581]
-self_modulate = Color(1, 1, 1, 0.39215687)
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-theme_override_colors/font_color = Color(0.4, 0.7019608, 1, 1)
-text = "最大连击"
-horizontal_alignment = 1
-
-[node name="ComboCount" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=1166815287]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-text = "0"
-
-[node name="NotesLabel" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=231464605]
-self_modulate = Color(1, 1, 1, 0.39215687)
-layout_mode = 2
-size_flags_horizontal = 0
-theme_override_colors/font_color = Color(1, 0.8509804, 0.3019608, 1)
-text = "总音符"
-horizontal_alignment = 1
-
-[node name="NotesCount" type="Label" parent="ResultsBox/HBoxContainer/DataGrid" unique_id=1392902209]
-layout_mode = 2
-size_flags_horizontal = 0
-text = "0"
-
-[node name="MarginContainer" type="MarginContainer" parent="ResultsBox" unique_id=124924685]
-layout_mode = 2
-theme_override_constants/margin_top = 45
-
-[node name="Crystal" type="HBoxContainer" parent="ResultsBox" unique_id=1183157762]
+[node name="ContinueButton" type="Button" parent="Card/Padding/VBox" unique_id=189853822]
+custom_minimum_size = Vector2(220, 56)
 layout_mode = 2
 size_flags_horizontal = 4
-
-[node name="CrystalLabel" type="Label" parent="ResultsBox/Crystal" unique_id=160534824]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 8
-theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
-text = "◇ "
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CrystalCount" type="Label" parent="ResultsBox/Crystal" unique_id=1614481000]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 8
-theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
-text = "+14"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ContinueButton" type="Button" parent="ResultsBox" unique_id=56507457]
-custom_minimum_size = Vector2(200, 50)
-layout_mode = 2
-size_flags_vertical = 8
+theme_override_font_sizes/font_size = 40
 text = ">>> 继续"
 
-[connection signal="pressed" from="ResultsBox/ContinueButton" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="Card/Padding/VBox/ContinueButton" to="." method="_on_continue_pressed"]

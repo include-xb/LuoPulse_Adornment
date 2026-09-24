@@ -266,28 +266,6 @@ const BACKGROUND_FLASH_COMBO_MAX: float = 0.10
 const BACKGROUND_FLASH_COMBO_FULL: float = 150.0
 
 
-## ---- 画面震动 ----
-## 震动时长
-const SHAKE_DURATION: float = 0.12
-
-## 震动幅度 (像素)
-const SHAKE_STRENGTH: float = 4.0
-
-## 当前震动 tween
-var _shake_tween: Tween = null
-
-## 显示 SubViewport 的 TextureRect (震动目标)
-## 注意: 震动的是这个 2D 节点而不是 Camera3D —— 移动相机会让
-## _calculate_track_screen_bounds() 缓存下来的轨道屏幕边界失效, 触屏会点错轨道
-@onready var _view_rect: TextureRect = $UI/TextureRect
-
-## 震动基准位置
-var _view_rect_origin: Vector2 = Vector2.ZERO
-
-## 是否已记录过震动基准位置 (延迟到第一次震动时才取, 确保布局已稳定)
-var _has_view_rect_origin: bool = false
-
-
 # ---------- 测试场景 ----------
 ## 用于测试
 var default_chart: Array = [
@@ -686,13 +664,17 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not is_gaming:
 		return
-	
+
+	# "点击屏幕任意位置结束" 的提示出现后, 整段轨道输入都不再处理
+	# (ESC 暂停 / Q 结束这类控制键不受影响, 它们在下面单独判断)
+	var is_track_input_blocked: bool = finish_button_mask.visible
+
 	# 获取当前时刻的主时间 (解决 _input 比 _process 先执行的延迟问题)
 	var input_time: float = _compute_master_time()
 
 	# 触屏事件处理
 	if event is InputEventScreenTouch:
-		if finish_button_mask.visible == true:
+		if is_track_input_blocked:
 			return
 		var btn_rect: Rect2 = _pause_button.get_global_rect()
 		if btn_rect.has_point(event.position):
@@ -734,6 +716,8 @@ func _input(event: InputEvent) -> void:
 		pass
 
 	if event is InputEventKey and event.pressed and not event.echo:
+		if is_track_input_blocked:
+			return
 		var col: int = _get_column_from_key(event)
 		if col >= 0:
 			_on_column_touch_pressed(col, input_time)
@@ -741,6 +725,8 @@ func _input(event: InputEvent) -> void:
 		pass
 
 	if event is InputEventKey and not event.echo and not event.pressed:
+		if is_track_input_blocked:
+			return
 		var col: int = _get_column_from_key(event)
 		if col >= 0:
 			_on_column_touch_released(col, input_time)
@@ -809,40 +795,6 @@ func _combo_background_level() -> float:
 	return ratio * BACKGROUND_FLASH_COMBO_MAX
 
 
-## 画面轻震 —— 只震显示用的 2D 节点, 不动 Camera3D
-func shake_view(strength: float = SHAKE_STRENGTH) -> void:
-	if _view_rect == null:
-		return
-
-	# 第一次震动时才记录基准位置, 此时布局一定已经稳定
-	if not _has_view_rect_origin:
-		_view_rect_origin = _view_rect.position
-		_has_view_rect_origin = true
-		pass
-
-	_kill_shake()
-	# 直接挪到偏移位置再缓回原位: "啪"一下比正弦晃动更干脆
-	_view_rect.position = _view_rect_origin + Vector2(
-		randf_range(-strength, strength),
-		randf_range(-strength, strength)
-	)
-
-	_shake_tween = create_tween()
-	_shake_tween.set_trans(Tween.TRANS_QUART)
-	_shake_tween.set_ease(Tween.EASE_OUT)
-	_shake_tween.tween_property(_view_rect, "position", _view_rect_origin, SHAKE_DURATION)
-	pass
-
-
-## 结束正在进行的震动
-func _kill_shake() -> void:
-	if _shake_tween and _shake_tween.is_valid():
-		_shake_tween.kill()
-		pass
-	_shake_tween = null
-	pass
-
-
 # ---------- 连击动效 ----------
 ## 连击数变化时刷新标签与动效 (由 _process 在数值变化时调用, 不再每帧重写)
 func _on_combo_changed() -> void:
@@ -863,9 +815,6 @@ func _on_combo_changed() -> void:
 
 	var is_milestone: bool = combo % COMBO_MILESTONE == 0
 	_pulse_combo_label(is_milestone)
-	if is_milestone:
-		shake_view()
-		pass
 
 	_last_combo = combo
 	pass
@@ -1085,6 +1034,22 @@ func load_list() -> void:
 	audio_length = int(lpz["audio"].get_length() * 1000)
 	chart = lpz["chart"].get("HitObjects")
 	video_stream_player.stream = lpz["video"]
+
+	# 顺手把曲目信息存进 Global
+	# 谱面的 General 只在这里拿得到, 而 Gameplay 场景结束后会被销毁,
+	# 结算画面 (FinishMenu) 只能靠 Global 取标题
+	_store_song_general(lpz["chart"].get("General", { }))
+	pass
+
+
+## 把谱面的 General 段落写入 Global, 供结算画面等后续场景使用
+## @param general: chart.lp 中的 General 字典
+func _store_song_general(general: Dictionary) -> void:
+	# 断章模式 (Album) 自己会写这些字段, 不要覆盖它
+	if Global.game_mode != Global.GameMode.Sympathy:
+		return
+
+	Global.current_song_title = str(general.get("Title", ""))
 	pass
 
 
@@ -1234,6 +1199,22 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 ## 显示结束按钮
 func show_finish_btn() -> void:
 	finish_button_mask.visible = true
+
+	# 到此为止不再处理轨道输入, 所以顺手清掉可能还按着的触摸:
+	# 否则 "松开" 事件会被输入守卫一起拦掉, 被按住的那条轨道会一直亮着
+	_release_all_track_input()
+	pass
+
+
+## 清空所有轨道的进行中状态 (触摸计数 / 长按 / 高亮)
+func _release_all_track_input() -> void:
+	active_touches.clear()
+
+	for i: int in Global.COLUMN_NUM:
+		var processor: Node3D = get_input_processor(i)
+		if processor and processor.has_method("reset_input_state"):
+			processor.reset_input_state()
+		pass
 	pass
 
 

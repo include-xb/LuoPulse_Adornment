@@ -30,6 +30,9 @@ var _particle_material: StandardMaterial3D = null
 ## 轨道高亮强度 (shader uniform)
 var _highlight: float = 0.0
 
+## 最大高亮强度
+var max_highlight: float = 0.6
+
 ## 轨道高亮衰减速度
 const HIGHLIGHT_FADE: float = 8.0
 
@@ -106,7 +109,7 @@ func _neutralize_particle_texture() -> void:
 func _process(delta: float) -> void:
 	# 轨道高亮: 按住期间保持满亮, 松开后指数衰减
 	if _touch_count > 0 or is_autoplay_holding:
-		_highlight = 1.0
+		_highlight = max_highlight
 		_track_material.set_shader_parameter("highlight", _highlight)
 		pass
 	elif _highlight > 0.0:
@@ -148,7 +151,7 @@ func on_touch_pressed(master_time: float) -> void:
 	_touch_time = master_time
 	_touch_count += 1
 
-	_highlight = 1.0
+	_highlight = max_highlight
 	_track_material.set_shader_parameter("highlight", _highlight)
 
 	if _touch_count > 1:
@@ -275,6 +278,23 @@ func set_particle_style(color: Color, amount: int) -> void:
 		_particle_material.albedo_color = color
 		pass
 	gpu_particles_3d.amount = amount
+	pass
+
+
+## 清空本轨道的进行中状态 (触摸计数 / 长按 / 高亮)
+## 用于"此后不再接受轨道输入"的场合 (例如结束时提示弹出):
+## 此时松手事件不会再传进来, 必须主动把状态清掉, 否则被按住的轨道会一直亮着
+## 注意: 不会替长音符补一次松手判定 —— 歌曲已结束, 让它自己按原有逻辑收尾更安全
+func reset_input_state() -> void:
+	_touch_count = 0
+	is_holding = false
+	current_hold_note = null
+
+	_highlight = 0.0
+	_track_material.set_shader_parameter("highlight", _highlight)
+
+	_judging_highlight = 0.0
+	_judging_material.set_shader_parameter("highlight", _judging_highlight)
 	pass
 
 
