@@ -205,4 +205,5 @@ func _apply_setting(key: String, value: Variant) -> void:
 		pass
 
 	Global.save_config()
+	Global.save_user_data()
 	pass

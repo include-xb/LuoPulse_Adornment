@@ -23,10 +23,25 @@ func _ready() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		# 当前场景可以拒绝离开 (例如设置页里用户名不合法)
+		if not _can_leave_current_scene():
+			return
 		back_to_previous_scene()
 		pass
 	# get_viewport().set_input_as_handled()
 	pass
+
+
+## 询问当前场景是否允许离开 (安卓返回手势走这里, 不经过各场景自己的返回按钮)
+## 场景只要实现 can_leave() -> bool 就能拦住返回, 见 SettingsMenu
+func _can_leave_current_scene() -> bool:
+	if _scene_track.is_empty():
+		return true
+
+	var current_scene: Node = _scene_track.back()
+	if current_scene and current_scene.has_method("can_leave"):
+		return current_scene.can_leave()
+	return true
 
 
 # ===== Public =====

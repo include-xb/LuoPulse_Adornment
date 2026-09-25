@@ -14,7 +14,7 @@ extends Control
 const VERSION: String = "0.0.1"
 
 ## 通知消息展示时间
-const NOTICE_LIFETIME: int = 3
+const NOTICE_LIFETIME: int = 2
 
 ## 通知消息组件
 const NOTICE_PACKED_SCENE: PackedScene = preload("res://Scene/Ui/Widget/Notice.tscn")
@@ -145,12 +145,19 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"suffix": "",
 		},
 	},
-	"启动": {
+	"外观": {
 		"开始动画": {
 			"key": "if_play_start_animation",
 			"config_key": "if_play_start_animation",
 			"node_type": "ToggleButton",
 			"suffix": "%",
+		},
+	},
+	"数据": {
+		"用户名": {
+			"key": "user_name",
+			# "config_key": "username",
+			"node_type": "LineEdit",
 		},
 	},
 }
@@ -425,7 +432,7 @@ func get_crystal_reward(acc: float) -> int:
 ## 弹出消息
 func display_notice(info: String) -> void:
 	var notice: RichTextLabel = NOTICE_PACKED_SCENE.instantiate()
-	notice.text = "  " + info
+	notice.text = info
 	NOTICE_BOX.add_child(notice)
 	notice.born()
 	pass

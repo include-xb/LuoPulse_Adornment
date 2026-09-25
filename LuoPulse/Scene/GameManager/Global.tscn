@@ -18,9 +18,16 @@ ui_click = NodePath("UiClick")
 
 [node name="NoticeBox" type="VBoxContainer" parent="." unique_id=1211581081]
 z_index = 10
+custom_maximum_size = Vector2(-1, 132)
+clip_contents = true
 layout_mode = 1
-offset_right = 100.0
-offset_bottom = 174.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -175.0
+offset_right = 175.0
+offset_bottom = 136.0
+grow_horizontal = 2
 
 [node name="Notice" parent="NoticeBox" unique_id=1340152822 instance=ExtResource("2_yjbyn")]
 z_index = 1
