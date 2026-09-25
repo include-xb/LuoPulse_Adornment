@@ -68,6 +68,12 @@ extends Control
 ## 演唱
 @export var vocalist: Label # = $Control/VBoxContainer/Vocalist
 
+## 笔记按钮 (未解锁时禁用)
+@export var note_button: Button # = $MarginContainer/Option/PopCard/Card
+
+## 选项按钮 (未解锁时禁用)
+@export var setting_button: Button # = $MarginContainer/Option/PopSetting/Setting
+
 
 ## 当前歌曲是否未解锁
 var is_locked: bool = false
@@ -215,23 +221,22 @@ func update_unlock_button() -> void:
 
 
 ## 更新当前解锁状态
+## INFO: 未解锁时禁用的按钮是 开始 / 笔记 / 选项 —— 这三件事都只在"这首歌能玩"的前提下才有意义
 func update_if_locked() -> void:
 	is_locked = if_locked()
-	if is_locked:
-		start.disabled = true
-		pass
-	else:
-		start.disabled = false
-		pass
+	start.disabled = is_locked
+	note_button.disabled = is_locked
+	setting_button.disabled = is_locked
 	pass
 
 
 ## 解锁
+## INFO: 解锁后必须重跑 update_if_locked(), 不能只手工把 start 打开 ——
+##       否则笔记 / 选项两个按钮会一直留在禁用状态
 func unlock() -> void:
-	is_locked = false
-	start.disabled = false
 	Global.main_line_unlocked += 1
 	Global.save_user_data()
+	update_if_locked()
 	pass
 
 
@@ -377,6 +382,18 @@ func _on_start_pressed() -> void:
 	_fade_out_audio()
 	Global.play_ui_click_audio()
 	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
+	pass
+
+
+## 笔记 —— 进笔记本展示当前这首歌的资料卡
+func _on_note_pressed() -> void:
+	Global.play_ui_click_audio()
+	# 预览音频在这里直接停掉, 否则会跟着一起进笔记本
+	audio_stream_player.stop()
+	$"..".start_scene_by_path(
+		"res://Scene/Ui/Menu/Notebook.tscn",
+		{ "card_index": Global.current_song_index }
+	)
 	pass
 
 
