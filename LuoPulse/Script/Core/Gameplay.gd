@@ -544,6 +544,9 @@ func test() -> void:
 
 # ---------- 节点重载函数 ----------
 func _ready() -> void:
+	# 游玩时背景音乐必须完全静音, 否则会盖住正在演奏的曲目
+	Global.mute_bgm()
+
 	_calculate_track_screen_bounds()
 	_reset_judging_stats()
 	_setup_judgment_feedback()

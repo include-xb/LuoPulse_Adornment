@@ -4,6 +4,9 @@ extends Control
 @export var NOTICE_BOX: VBoxContainer # = $NoticeBox
 @export var ui_click: AudioStreamPlayer # = $UiClick
 
+## 背景音乐播放器 (常驻循环播放, 音量由 volume_bg 控制)
+@onready var bgm_player: AudioStreamPlayer = $Bgm
+
 
 # ---------- 常量 ----------
 
@@ -53,7 +56,20 @@ const AWARE_TIME: int = 180
 const LOST_TIME: int = 240
 
 ## 调节音量时的音量缩放因子
-const VOLUME_FACTOR: float = 0.01
+const VOLUME_FACTOR: float = 0.02
+
+## 背景音乐 (启动后一直循环, 各场景只调整音量, 不打断播放)
+## INFO: 这里用 var 而不是 const —— const 持有的资源不能在代码里改属性, 而循环开关
+##      (AudioStreamOggVorbis.loop) 需要在 _ready() 里打开 (bgm.ogg 导入时是 loop=false)
+## INFO: 音频流在 _ready() 里才挂到 Global.tscn 的 Bgm 节点上 ——
+##      这个 MCP 无法给节点写资源型属性, 所以不放进场景文件
+# var bgm_stream: AudioStreamOggVorbis = preload("res://Asset/Audio/bgm.ogg")
+
+## 背景音乐淡入 / 淡出的时长 (秒)
+const BGM_FADE_TIME: float = 0.8
+
+## 正在进行的背景音乐淡变
+var _bgm_tween: Tween = null
 
 ## 曲包清单链接
 ## 返回格式: { "list": [ "曲包下载链接", ... ] }
@@ -146,7 +162,7 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 var note_speed: float = 10.0
 
 ## 用户名
-var user_name: String = ""
+var user_name: String = "小白"
 
 ## 游戏模式
 enum GameMode {
@@ -311,18 +327,81 @@ func play_ui_click_audio() -> void:
 	pass
 
 
+# ---------- 背景音乐 ----------
+## 音频流在这里挂上 (见 bgm_stream 的说明), 并在启动时就开始循环播放
+## 之后各场景只调整它的音量, 播放本身不会被中断;
+## UI 音效走的是另一个播放器, 所以不会影响背景音乐
+func _ready() -> void:
+	bgm_player.stream.loop = true
+	# bgm_player.stream = bgm_stream
+	bgm_player.volume_linear = _bgm_target_volume()
+	bgm_player.play()
+	pass
+
+
+## 淡入背景音乐 (回到 volume_bg 设定的音量)
+func fade_in_bgm() -> void:
+	_fade_bgm_to(_bgm_target_volume(), BGM_FADE_TIME)
+	pass
+
+
+## 淡出背景音乐 (淡到听不见, 但仍在循环播放)
+func fade_out_bgm() -> void:
+	_fade_bgm_to(0.0, BGM_FADE_TIME)
+	pass
+
+
+## 立刻静音背景音乐 (用于游戏界面, 避免和被演奏的曲目混在一起)
+func mute_bgm() -> void:
+	_fade_bgm_to(0.0, 0.0)
+	pass
+
+
+## 立刻把背景音乐音量刷成 volume_bg 设定的值 (不做淡变)
+## 配置刚加载完、或设置界面改动音量时用这个, 不要用带补间的 fade_in_bgm
+func apply_bgm_volume() -> void:
+	_fade_bgm_to(_bgm_target_volume(), 0.0)
+	pass
+
+
+## volume_bg 对应的线性音量
+func _bgm_target_volume() -> float:
+	return float(volume_bg) * VOLUME_FACTOR
+
+
+## 把背景音乐的音量补间到目标值
+## @param target: 目标线性音量
+## @param duration: 补间时长 (秒), 为 0 则立刻生效
+func _fade_bgm_to(target: float, duration: float) -> void:
+	# 先掐掉正在进行的淡变, 否则两条 tween 会抢同一个音量属性
+	if _bgm_tween and _bgm_tween.is_valid():
+		_bgm_tween.kill()
+		pass
+	_bgm_tween = null
+
+	if duration <= 0.0:
+		bgm_player.volume_linear = target
+		return
+
+	_bgm_tween = create_tween()
+	_bgm_tween.set_trans(Tween.TRANS_CUBIC)
+	_bgm_tween.set_ease(Tween.EASE_OUT)
+	_bgm_tween.tween_property(bgm_player, "volume_linear", target, duration)
+	pass
+
+
 ## 根据准度计算评级
 ## 返回 Dictionary { "grade": String, "color": Color }
 func get_grade(acc: float) -> Dictionary:
 	if acc >= 0.95:
 		return { "grade": "∞ Infinity", "color": Color.GOLDENROD }
 	elif acc >= 0.85:
-		return { "grade": "A", "color": Color.ORANGE }
+		return { "grade": "A - Harmonious", "color": Color.ORANGE }
 	elif acc >= 0.70:
-		return { "grade": "B", "color": Color.YELLOW }
+		return { "grade": "B - Sympathetic", "color": Color.YELLOW }
 	elif acc >= 0.50:
-		return { "grade": "C", "color": Color.CORNFLOWER_BLUE }
-	return { "grade": "D", "color": Color.GRAY }
+		return { "grade": "C - Aware", "color": Color.CORNFLOWER_BLUE }
+	return { "grade": "D - Lost", "color": Color.GRAY }
 
 
 ## 根据准度计算水晶奖励

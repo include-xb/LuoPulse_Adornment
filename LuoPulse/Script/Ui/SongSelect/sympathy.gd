@@ -128,6 +128,12 @@ func _ready() -> void:
 # 每次重新进入场景树时刷新水晶显示
 # SceneManager 通过 remove_child / add_child 复用场景节点, _ready 只在首次进入时执行一次
 func _enter_tree() -> void:
+	# 选歌页会试听曲目, 背景音乐必须让位。
+	# 必须放在 _enter_tree 而不是 _ready: 从结算页返回时场景是复用的
+	# (SceneManager 只做 remove_child / add_child), _ready 不会再执行, 只有 _enter_tree 会。
+	# 也要放在 is_node_ready() 判断之前, 否则首次进入不会生效。
+	Global.fade_out_bgm()
+
 	if not is_node_ready():
 		return
 	update_crystal_num()

@@ -197,5 +197,12 @@ func _on_togglebutton_toggled(is_on: bool, togglebutton: Button, key: String) ->
 ## 写入新的设置值到 Global, 并永久化
 func _apply_setting(key: String, value: Variant) -> void:
 	Global.set(key, value)
+
+	# 背景音乐音量要立刻生效, 否则拖动滑块时听不出变化
+	# (用 apply_bgm_volume 而不是 fade_in_bgm: 后者带补间, 拖滑块会拖泥带水)
+	if key == "volume_bg":
+		Global.apply_bgm_volume()
+		pass
+
 	Global.save_config()
 	pass

@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://kcv58wtwr8hg"]
-
-[ext_resource type="Script" uid="uid://7i0vppt6skra" path="res://_probe/LabelProbe.gd" id="1_2jec5"]
-
-[node name="LabelProbe" type="Node" unique_id=1369437900]
-script = ExtResource("1_2jec5")

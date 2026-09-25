@@ -57,10 +57,16 @@ const COUNT_UP_START_DELAY: float = 0.5
 @export var button_fade_duration: float = 0.75
 
 
-# TODO 数据增加, 标签和按钮淡入时播放铅笔写字音效
+## 数值开始增长时播放的音效 (铅笔写字声)
+## 只在"数值开始增长"这一个时间点播放一次, 所以要覆盖整段入场动画的话
+## 音效本身得足够长 (入场动画总长 = COUNT_UP_START_DELAY + 增长 + 评级淡入 + 按钮淡入)
+const COUNT_UP_SOUND: AudioStream = preload("res://Asset/Audio/pencil.wav")
 
 
 func _ready() -> void:
+	# 结算时曲目已经停了, 背景音乐淡入回来
+	Global.fade_in_bgm()
+
 	_show_results()
 	pass
 
@@ -92,10 +98,32 @@ func _show_results() -> void:
 	Global.crystal += crystal_earned
 	Global.save_user_data()
 
-	# ---- 入场动画时序: 数值增长 → 评级淡入 → 继续按钮淡入 ----
+	# ---- 入场动画时序: 音效 + 数值增长 → 评级淡入 → 继续按钮淡入 ----
+	_play_count_up_sound()
+
 	var grade_fade_start: float = COUNT_UP_START_DELAY + count_up_duration
 	_fade_in_after(grade_label, grade_fade_start, grade_fade_duration)
 	_fade_in_after(continue_button, grade_fade_start + grade_fade_duration, button_fade_duration)
+	pass
+
+
+## 在数值开始增长的那一刻播放音效
+## 用一次性的播放器节点: 播放期间挂在场景树上, 场景销毁时一并释放
+func _play_count_up_sound() -> void:
+	var player: AudioStreamPlayer = AudioStreamPlayer.new()
+	player.name = "CountUpSound"
+	player.stream = COUNT_UP_SOUND
+	player.volume_linear = float(Global.volume_ui) * Global.VOLUME_FACTOR * 4 
+	add_child(player)
+
+	# 与数值增长的起始时刻对齐
+	if COUNT_UP_START_DELAY <= 0.0:
+		player.play()
+		return
+
+	var tween: Tween = create_tween()
+	tween.tween_interval(COUNT_UP_START_DELAY)
+	tween.tween_callback(player.play)
 	pass
 
 

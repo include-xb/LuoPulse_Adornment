@@ -40,6 +40,10 @@ func _ready() -> void:
 func _enter_tree() -> void:
 	if not is_node_ready():
 		return
+	# 从选歌 / 结算返回时把背景音乐恢复回来
+	# (首次进入时不走这里, 那时背景音乐本来就是满音量)
+	Global.fade_in_bgm()
+
 	username.text = Global.user_name
 	amount.text = str(Global.crystal)
 	pass

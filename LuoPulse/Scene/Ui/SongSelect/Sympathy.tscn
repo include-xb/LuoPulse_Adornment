@@ -7,15 +7,17 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_558w5"]
 shader = ExtResource("2_qx1yg")
-shader_parameter/gray_scale = 0.0
+shader_parameter/gray_scale = 0.2000000095
+shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
 shader = ExtResource("4_lqs8k")
-shader_parameter/blur_amount = 2.2000001045
+shader_parameter/blur_amount = 3.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qx1yg"]
 shader = ExtResource("2_qx1yg")
 shader_parameter/gray_scale = 0.0
+shader_parameter/flash = 0.0
 
 [sub_resource type="Animation" id="Animation_qx1yg"]
 length = 0.001

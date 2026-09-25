@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://bcatgysrh6rfc"]
-
-[ext_resource type="Script" path="res://_probe/VerifyProbe.gd" id="1_vprobe"]
-
-[node name="VerifyProbe" type="Node"]
-script = ExtResource("1_vprobe")

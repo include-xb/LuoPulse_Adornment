@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://cwna26160iefa"]
-
-[ext_resource type="Script" uid="uid://bkkh3oakp18hm" path="res://_probe/ApiProbe.gd" id="1_gn4dr"]
-
-[node name="ApiProbe" type="Node" unique_id=540762869]
-script = ExtResource("1_gn4dr")

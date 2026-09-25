@@ -354,6 +354,10 @@ func _load_game_config() -> void:
 	Global.chart_offset 			= data["offset"]
 	Global.note_flow_speed 			= data["speed"]
 	Global.if_play_start_animation 	= data["if_play_start_animation"]
+
+	# 背景音乐在 Global._ready() 里就已经开始播放了, 那时读到的还是 volume_bg 的默认值;
+	# 配置加载完之后立刻刷一次, 让启动时的音量就是玩家实际设定的值
+	Global.apply_bgm_volume()
 	pass
 
 

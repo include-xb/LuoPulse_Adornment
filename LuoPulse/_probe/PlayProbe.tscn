@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://76y06sehrisu"]
-
-[ext_resource type="Script" uid="uid://ld1cevqixxm1" path="res://_probe/PlayProbe.gd" id="1_tkjst"]
-
-[node name="PlayProbe" type="Node" unique_id=376324234]
-script = ExtResource("1_tkjst")
