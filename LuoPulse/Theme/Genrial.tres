@@ -25,9 +25,6 @@ texture = ExtResource("1_uegkn")
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d2g8x"]
-bg_color = Color(0.952941, 0.933333, 0.866667, 1)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b2up6"]
 bg_color = Color(1, 1, 1, 0)
 
@@ -76,7 +73,6 @@ Label/constants/shadow_offset_y = 1
 Label/constants/shadow_outline_size = 1
 Label/font_sizes/font_size = 45
 LineEdit/font_sizes/font_size = 25
-PanelContainer/styles/panel = SubResource("StyleBoxFlat_d2g8x")
 ProgressBar/styles/background = SubResource("StyleBoxFlat_b2up6")
 ProgressBar/styles/fill = SubResource("StyleBoxTexture_lqs8k")
 RichTextLabel/colors/font_outline_color = Color(0, 0, 0, 1)

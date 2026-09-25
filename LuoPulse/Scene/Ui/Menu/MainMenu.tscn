@@ -10,6 +10,7 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cwtva"]
 shader = ExtResource("2_cwtva")
 shader_parameter/gray_scale = 0.0
+shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_circle"]
 shader = ExtResource("6_circle")
@@ -86,7 +87,6 @@ size_flags_vertical = 3
 
 [node name="Button" parent="MenuContainer/MenuButtons/Note" index="0" unique_id=45460652]
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 0.3137255)
-disabled = true
 text = "= 笔记"
 
 [node name="Separator" parent="MenuContainer/MenuButtons/Note" index="1" unique_id=483453183]

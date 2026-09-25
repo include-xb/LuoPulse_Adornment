@@ -107,7 +107,7 @@ _data = {
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist")]
+[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist", "note_button", "setting_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -132,6 +132,8 @@ title = NodePath("Control/VBoxContainer/Title")
 producer = NodePath("Control/VBoxContainer/Producer")
 creator = NodePath("Control/VBoxContainer/Creator")
 vocalist = NodePath("Control/VBoxContainer/Vocalist")
+note_button = NodePath("MarginContainer/Option/PopCard/Card")
+setting_button = NodePath("MarginContainer/Option/PopSetting/Setting")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1136130409]
 material = SubResource("ShaderMaterial_558w5")
@@ -361,7 +363,6 @@ size_flags_horizontal = 8
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 10
-disabled = true
 text = "= 笔记"
 alignment = 0
 
@@ -453,3 +454,4 @@ text = "> 确定"
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton" to="." method="_on_autoplay_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/PVButton" to="." method="_on_pv_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/VBoxContainer/OKButton" to="." method="_on_ok_button_pressed"]
+[connection signal="pressed" from="MarginContainer/Option/PopCard/Card" to="." method="_on_note_pressed"]

@@ -380,6 +380,13 @@ func _bgm_target_volume() -> float:
 ## @param target: 目标线性音量
 ## @param duration: 补间时长 (秒), 为 0 则立刻生效
 func _fade_bgm_to(target: float, duration: float) -> void:
+	# INFO: bgm_player 由 @onready 解析, 而自动加载节点的 _ready 传播要等主场景 add_child 之后 ——
+	#       所以把某个会调本函数的场景当主场景单独运行时 (例如在编辑器里 F6 直接跑 Sympathy),
+	#       在它的 _enter_tree 里这里拿到的还是 null。直接返回即可 ——
+	#       那种情况下背景音乐本来也还没开始播, 没有"淡出/淡入"可言
+	if bgm_player == null:
+		return
+
 	# 先掐掉正在进行的淡变, 否则两条 tween 会抢同一个音量属性
 	if _bgm_tween and _bgm_tween.is_valid():
 		_bgm_tween.kill()
