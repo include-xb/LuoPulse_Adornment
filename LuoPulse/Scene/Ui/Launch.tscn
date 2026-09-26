@@ -60,6 +60,7 @@ loading_panel = NodePath("LoadingPanel")
 download_progress_bar = NodePath("LoadingPanel/VBoxContainer/DownloadProgressBar")
 download_label = NodePath("LoadingPanel/VBoxContainer/DownloadLabel")
 background = NodePath("LoadingPanel/Background")
+is_test = true
 
 [node name="Background" type="ColorRect" parent="." unique_id=964636709]
 layout_mode = 1

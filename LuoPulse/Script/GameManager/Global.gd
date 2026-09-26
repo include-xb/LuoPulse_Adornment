@@ -162,6 +162,9 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 	},
 }
 
+const normal_background: Texture2D = preload("res://Asset/Image/main.png")
+
+
 
 # ---------- 变量 ----------
 

@@ -5,8 +5,8 @@
 ##
 ## 资料卡的数据来自全部曲包 (.lpz): 侧栏列出每首的标题 (chart.lp 的 General.Title),
 ## 未解锁的条目只显示 ??? 且点不动; 点已解锁的条目会把全屏背景换成该曲的曲绘封面 (cover.png)
-## 正文里"收录专辑 / 发布时间 / 创作背景 / P主简介"来自 res://Asset/NoteBook/<序号>.json,
-## 第 n 首读 n.json (n 从 1 开始)
+## 正文里"收录专辑 / 发布时间 / 创作背景 / P主简介"来自 res://Asset/NoteBook/cards.json,
+## 它和故事碎片表一样是按序号索引的对象, 第 n 首取键 "n" (n 从 1 开始)
 ## 故事碎片的数据来自 res://Asset/NoteBook/fragments.json,
 ## 侧栏列出每条碎片的 title, 未解锁的只显示 ??? 且点不动;
 ## 解锁进度看 Global.story_fragments_unlocked 里记的碎片序号
@@ -20,20 +20,33 @@ extends Control
 
 
 # ---------- 节点引用 ----------
-## 标签栏
-@onready var cards_tab: Button = $TabBar/CardsTab
-@onready var fragments_tab: Button = $TabBar/FragmentsTab
-@onready var cards_underline: ColorRect = $TabBar/CardsTab/Underline
-@onready var fragments_underline: ColorRect = $TabBar/FragmentsTab/Underline
+## 资料卡标签栏
+@export var cards_tab: Button # = $TabBar/CardsTab
+
+## 故事碎片标签栏
+@export var fragments_tab: Button # = $TabBar/FragmentsTab
+
+## 资料卡下划线
+@export var cards_underline: ColorRect # = $TabBar/CardsTab/Underline
+
+## 故事碎片下划线
+@export var fragments_underline: ColorRect # = $TabBar/FragmentsTab/Underline
 
 ## 左侧索引列表 (两个标签共用, 切换时清空重建)
-@onready var sidebar: VBoxContainer = $Layout/Sidebar/Scroll/SidebarList
+@export var sidebar: VBoxContainer # = $Layout/Sidebar/Scroll/SidebarList
 
 ## 右侧内容 (RichTextLabel, 显示 BBCode)
-@onready var content_label: RichTextLabel = $Layout/Main/Scroll/Content/Paper/PaperMargin/ContentLabel
+@export var content_label: RichTextLabel # = $Layout/Main/Scroll/Content/Paper/PaperMargin/ContentLabel
 
 ## 全屏背景上的曲绘, 跟随侧栏选中项切换
-@onready var cover: TextureRect = $Cover
+@export var cover: TextureRect # = $Cover
+
+## 用于暗色过度背景
+@export var color_rect: ColorRect # = $ColorRect
+
+## 切换背景图时的黑场过渡时长 (单向, 秒)
+## 一次完整过渡是 压黑 → 换图 → 淡回来, 所以实际耗时是它的两倍
+@export var cover_fade_duration: float = 0.25
 
 
 ## 侧栏每一行的最小高度 (够到移动端触摸区的最低要求)
@@ -45,8 +58,9 @@ const PLAYLIST_DIR_NAME: String = "CustomizedPlaylist"
 ## 曲包扩展名
 const SONG_PACKAGE_EXTENSION: String = "lpz"
 
-## 资料卡补充文本所在目录: 第 n 首读 <NOTE_JSON_DIR>/n.json (n 从 1 开始)
-const NOTE_JSON_DIR: String = "res://Asset/NoteBook"
+## 资料卡补充文本表: 以曲目序号 (从 1 开始) 为键的对象
+## 结构与故事碎片表一样, 只是每项装的是 收录专辑 / 发布时间 / 创作背景 / P主简介
+const CARDS_JSON_PATH: String = "res://Asset/NoteBook/cards.json"
 
 ## 故事碎片表: 以碎片序号为键的对象
 const FRAGMENTS_JSON_PATH: String = "res://Asset/NoteBook/fragments.json"
@@ -58,7 +72,10 @@ const TEXT_PLACEHOLDER: String = "——"
 const LOCKED_PLACEHOLDER: String = "???"
 
 
+## 当前状态(资料卡/故事碎片)
 var current_tab: String = "cards"
+
+## 选中的标签索引
 var selected_card_index: int = -1
 
 ## 资料卡列表: 每项 { "path": String, "general": Dictionary, "note": Dictionary },
@@ -70,6 +87,24 @@ var _songs: Array[Dictionary] = [ ]
 ## 进故事碎片页时读一次缓存下来
 var _fragments: Dictionary = { }
 
+## color_rect 原本的透明度 —— 黑场过渡结束要回到这个值, 而不是回到透明
+## INFO: 在 _ready 里从节点上读一次, 不硬编码, 这样在场景里改透明度, 过渡终值就跟着变
+var _color_rect_base_alpha: float = 0.0
+
+## 正在进行中的黑场过渡
+var _cover_tween: Tween = null
+
+## 当前背景图的来源: 曲目下标, 或 -1 表示默认背景 (Global.normal_background)
+## 用它避免"重复点同一首"时白白重读一次 png、以及白闪一下黑场
+var _cover_source_index: int = -1
+
+## 本次进入是否还没设置过背景图 —— 是的话第一次换图直接生效, 不播过渡
+## INFO: 进本场景时 SceneManager 已经做过一次整屏淡入, 曲绘再淡入一次就是重复的,
+##       所以首次换图藏在那次淡入底下直接完成即可
+## INFO: 本场景每次进入都是新实例 (SceneManager 离开时会把旧实例 queue_free),
+##       所以这个字段每次进入都会重置回 true, 不需要额外复位
+var _is_first_cover_set: bool = true
+
 
 # ---------- 节点重载函数 ----------
 ## 进入时把背景音乐淡回来 (选歌页为了试听会把背景音乐淡掉)
@@ -79,6 +114,8 @@ var _fragments: Dictionary = { }
 ##       反过来 _enter_tree 会踩坑: 它早于自动加载的 _ready 传播, 那时 Global 的
 ##       @onready bgm_player 还是 null, 单独把本场景当主场景运行会直接报错
 func _ready() -> void:
+	# 先记下 color_rect 本来的透明度, 必须在任何过渡发生之前读
+	_color_rect_base_alpha = color_rect.color.a
 	Global.fade_in_bgm()
 	switch_tab("cards", _read_requested_card_index())
 	pass
@@ -97,7 +134,9 @@ func _read_requested_card_index() -> int:
 	return -1
 
 
+## 返回按钮
 func _on_back_pressed() -> void:
+	Global.play_ui_click_audio()
 	if Global.notebook_return_scene == "results":
 		$"..".start_scene_by_path("res://Scene/Ui/SongSelect/Sympathy.tscn")
 	else:
@@ -107,12 +146,16 @@ func _on_back_pressed() -> void:
 
 
 # ---------- 标签页 ----------
+## 资料卡
 func _on_cards_tab_pressed() -> void:
+	Global.play_ui_click_audio()
 	switch_tab("cards")
 	pass
 
 
+## 故事碎片
 func _on_fragments_tab_pressed() -> void:
+	Global.play_ui_click_audio()
 	switch_tab("fragments")
 	pass
 
@@ -127,7 +170,9 @@ func switch_tab(tab: String, card_index: int = -1) -> void:
 
 	cards_underline.visible = is_cards
 	fragments_underline.visible = not is_cards
-
+	
+	_show_normal_background()
+	
 	# 清左侧
 	# INFO: 必须先 remove_child 再 queue_free —— queue_free 是延迟到帧末执行的,
 	#       若只调 queue_free, 紧接着重建列表时这些旧条目还挂在 sidebar 下,
@@ -139,8 +184,10 @@ func switch_tab(tab: String, card_index: int = -1) -> void:
 
 	if is_cards:
 		_build_card_list(card_index)
+		pass
 	else:
 		_build_fragment_list()
+		pass
 	pass
 
 
@@ -176,8 +223,10 @@ func _build_card_list(card_index: int = -1) -> void:
 		if _is_song_locked(i):
 			btn.text = LOCKED_PLACEHOLDER
 			btn.disabled = true
+			pass
 		else:
 			btn.text = _song_title(_songs[i])
+			pass
 		btn.pressed.connect(_on_card_selected.bind(i))
 		sidebar.add_child(btn)
 		pass
@@ -216,8 +265,10 @@ func _build_fragment_list() -> void:
 		if _is_fragment_locked(fragment_id):
 			btn.text = LOCKED_PLACEHOLDER
 			btn.disabled = true
+			pass
 		else:
 			btn.text = _fragment_title(fragment_id)
+			pass
 		btn.pressed.connect(_on_fragment_selected.bind(fragment_id))
 		sidebar.add_child(btn)
 		pass
@@ -232,8 +283,10 @@ func _build_fragment_list() -> void:
 		pass
 	if first_unlocked_id.is_empty():
 		content_label.text = "[center]（尚未解锁任何故事碎片）[/center]"
+		pass
 	else:
 		_on_fragment_selected(first_unlocked_id)
+		pass
 	pass
 
 
@@ -244,6 +297,10 @@ func _make_sidebar_button() -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.add_theme_font_size_override("font_size", 35)
 	btn.custom_minimum_size = Vector2(0, SIDEBAR_ROW_HEIGHT)
+	# 点击音效单独接一条, 不写进 _on_card_selected / _on_fragment_selected ——
+	# 那两个函数在"进入场景自动选中"和"从 Sympathy 的笔记按钮进来"时也会被调用,
+	# 写在那里会让玩家什么都没点也响一声
+	btn.pressed.connect(Global.play_ui_click_audio)
 	return btn
 
 
@@ -261,11 +318,11 @@ func _on_card_selected(index: int) -> void:
 	selected_card_index = index
 	var song: Dictionary = _songs[index]
 
-	# 曲绘切到这一首
-	# 读取失败时返回 null, 此时保持当前画面, 不把背景清空
-	var song_cover: ImageTexture = Global._read_cover_from_lpz(song["path"])
-	if song_cover:
-		cover.texture = song_cover
+	# 曲绘切到这一首 —— 同一首重复点就什么都不做, 免得白闪一下黑场
+	# 曲绘的实际读取交给 _fade_to_cover 在黑场中间做 (见那里的说明)
+	if _cover_source_index != index:
+		_cover_source_index = index
+		_fade_to_cover(_read_song_cover.bind(song["path"]))
 		pass
 
 	content_label.text = _format_data_card(_song_card_data(song))
@@ -278,21 +335,85 @@ func _on_fragment_selected(fragment_id: String) -> void:
 	pass
 
 
+# ---------- 背景图切换 ----------
+## 背景图切回默认图 (切到故事碎片页时用)
+func _show_normal_background() -> void:
+	if _cover_source_index == -1:
+		return
+	_cover_source_index = -1
+	_fade_to_cover(_read_normal_background)
+	pass
+
+
+## 黑场过渡: 把 color_rect 压到全黑 → 黑透了才取图并换上 → 淡回它原本的透明度
+## @param texture_provider: 无参、返回 Texture2D 的可调用对象, 在黑场中间才被调用
+## INFO: 取图要放在黑场中间的回调里, 不能在过渡开始前先取好 ——
+##       从 .lpz 里解一张曲绘要几十上百毫秒, 放在变黑之前玩家会先卡一下才看到变黑;
+##       挪到黑幕底下就完全看不见了
+## INFO: 终值是 _color_rect_base_alpha 而不是 0 —— color_rect 是常驻的压暗层,
+##       场景里给了它一个非 0 的透明度, 过渡完必须回到那个值
+func _fade_to_cover(texture_provider: Callable) -> void:
+	# 本次进入的第一次换图直接生效: SceneManager 已经在做整屏淡入了, 不必再来一次
+	if _is_first_cover_set:
+		_is_first_cover_set = false
+		_apply_cover_texture(texture_provider)
+		return
+
+	# 时长为 0 就退化成直接换图, 不做黑场
+	if cover_fade_duration <= 0.0:
+		_apply_cover_texture(texture_provider)
+		return
+
+	# 先掐掉正在进行的过渡, 否则两条 tween 会抢 color_rect 的 alpha。
+	# 连点侧栏时上一轮可能还没黑完, 这时从当前透明度接着走, 画面是连着的
+	if _cover_tween and _cover_tween.is_valid():
+		_cover_tween.kill()
+		pass
+
+	_cover_tween = create_tween()
+	_cover_tween.set_trans(Tween.TRANS_CUBIC)
+	_cover_tween.set_ease(Tween.EASE_OUT)
+	_cover_tween.tween_property(color_rect, "color:a", 1.0, cover_fade_duration)
+	# 黑透了才换图, 这一下突变玩家看不到
+	_cover_tween.tween_callback(_apply_cover_texture.bind(texture_provider))
+	_cover_tween.tween_property(color_rect, "color:a", _color_rect_base_alpha, cover_fade_duration)
+	pass
+
+
+## tween_callback 的目标: 取出图并换上。取到的图是 null 就保持原样, 不清空背景
+func _apply_cover_texture(texture_provider: Callable) -> void:
+	var texture: Texture2D = texture_provider.call()
+	if texture:
+		cover.texture = texture
+		pass
+	pass
+
+
+## 默认背景图 (已在 Global 里 preload 好, 不用现读)
+func _read_normal_background() -> Texture2D:
+	return Global.normal_background
+
+
+## 读出某一首曲包的曲绘 (供黑场过渡在途中调用)
+func _read_song_cover(lpz_path: String) -> Texture2D:
+	return Global._read_cover_from_lpz(lpz_path)
+
+
 # ---------- 内容格式 ----------
 func _format_data_card(song: Dictionary) -> String:
-	var bbcode: String = "[center][font_size=36]♪ %s[/font_size][/center]\n\n" % song.get("title", "???")
+	var bbcode: String = "[center][font_size=50]& %s[/font_size][/center]\n\n" % song.get("title", "???")
 	bbcode += "[center]P主: %s\n" % song.get("producer", "——")
 	bbcode += "歌手: %s\n" % song.get("vocalist", "——")
 	bbcode += "BPM: %s\n" % str(song.get("bpm", "——"))
 	bbcode += "收录专辑: %s\n" % song.get("album", "——")
 	bbcode += "发布时间: %s[/center]\n\n" % song.get("release_date", "——")
 	bbcode += "[center]── 创作背景 ──[/center]\n\n"
-	bbcode += "%s\n\n" % song.get("background", "（待补充）")
+	bbcode += "%s\n\n" % song.get("background", "(待补充)")
 	bbcode += "[center]── P主简介 ──[/center]\n\n"
-	bbcode += "%s\n" % song.get("producer_intro", "（待补充）")
+	bbcode += "%s\n" % song.get("producer_intro", "(待补充)")
 
-	if Global.notebook_return_scene != "home" and Global.notebook_return_song_title != "":
-		bbcode += "\n\n[center][url=close]关闭[/url][/center]"
+	# if Global.notebook_return_scene != "home" and Global.notebook_return_song_title != "":
+	# 	bbcode += "\n\n[center][url=close]关闭[/url][/center]"
 	return bbcode
 
 
@@ -308,7 +429,7 @@ func _format_diary_entry(fragment: Dictionary) -> String:
 		date.get("weather", "??"),
 	]
 	var bbcode: String = "[right]%s[/right]\n" % header
-	bbcode += "[center]—————————————————————————————[/center]\n\n"
+	bbcode += "[center]———————————————————————————————[/center]\n\n"
 	bbcode += str(fragment.get("text", ""))
 	return bbcode
 
@@ -334,35 +455,18 @@ func _song_card_data(song: Dictionary) -> Dictionary:
 	return data
 
 
-# ---------- 曲包数据 ----------
-## 读取全部曲包, 抽出每首的 chart.General, 并配上同序号的补充文本 json
-## 每个曲包只读 chart.lp —— 它在包里是压缩过的几 KB, 不碰同包的音频与视频
-func _load_song_cards() -> Array[Dictionary]:
-	var cards: Array[Dictionary] = [ ]
-	var paths: Array[String] = _get_song_packages()
-	for i: int in paths.size():
-		var chart: Dictionary = Global._read_chart_from_lpz(paths[i])
-		var general: Dictionary = chart.get("General", { })
-		cards.append({
-			"path": paths[i],
-			"general": general,
-			"note": _read_note_json(i + 1),
-		})
-		pass
-	print("资料卡曲包读取完成, 共 %d 首" % cards.size())
-	return cards
-
-
-## 读第 number 首 (从 1 开始) 的资料卡补充文本
-## 文件缺失或格式不对都返回空字典, 正文就退回 _format_data_card 的缺省占位文字
-func _read_note_json(number: int) -> Dictionary:
-	var path: String = NOTE_JSON_DIR.path_join("%d.json" % number)
+# ---------- 数据文件读取 ----------
+## 读一个"以字符串为键的 JSON 对象"文件 (资料卡表与故事碎片表都是这个形状)
+## 文件缺失 / 打不开 / 解析结果不是对象, 一律返回空字典, 调用方据此退回占位文字
+## @param path: res:// 路径
+## @param label: 出错时打印用的中文名, 便于一眼看出是哪个表出了问题
+func _read_json_object(path: String, label: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return { }
 
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_error("无法打开资料卡文本: %s" % path)
+		push_error("无法打开%s: %s" % [label, path])
 		return { }
 	var text: String = file.get_as_text()
 	file.close()
@@ -370,7 +474,42 @@ func _read_note_json(number: int) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(text)
 	if parsed is Dictionary:
 		return parsed
-	push_error("资料卡文本解析失败 (应为 JSON 对象): %s" % path)
+	push_error("%s解析失败 (应为 JSON 对象): %s" % [label, path])
+	return { }
+
+
+# ---------- 曲包数据 ----------
+## 读取全部曲包, 抽出每首的 chart.General, 并配上同序号的资料卡补充文本
+## 每个曲包只读 chart.lp —— 它在包里是压缩过的几 KB, 不碰同包的音频与视频
+func _load_song_cards() -> Array[Dictionary]:
+	var cards: Array[Dictionary] = [ ]
+	var paths: Array[String] = _get_song_packages()
+	# 补充文本整表读一次就够, 不要在循环里按序号反复读同一个文件
+	var notes: Dictionary = _get_card_data()
+	for i: int in paths.size():
+		var chart: Dictionary = Global._read_chart_from_lpz(paths[i])
+		var general: Dictionary = chart.get("General", { })
+		cards.append({
+			"path": paths[i],
+			"general": general,
+			"note": _card_note(notes, i + 1),
+		})
+		pass
+	print("资料卡曲包读取完成, 共 %d 首" % cards.size())
+	return cards
+
+
+## 读资料卡补充文本表
+func _get_card_data() -> Dictionary:
+	return _read_json_object(CARDS_JSON_PATH, "资料卡文本表")
+
+
+## 取第 number 首 (从 1 开始) 的资料卡补充文本
+## 表里没有这个序号 (或那一项不是对象) 就返回空字典, 正文退回 _format_data_card 的缺省占位文字
+func _card_note(notes: Dictionary, number: int) -> Dictionary:
+	var entry: Variant = notes.get(str(number), { })
+	if entry is Dictionary:
+		return entry
 	return { }
 
 
@@ -422,21 +561,7 @@ func _scan_song_package_dir() -> Array[String]:
 ## 结构是 { "序号": { "title": String, "text": String, "data": { 年/月/日/周/天气 } } }
 ## 文件缺失或格式不对都返回空字典, 侧栏与正文就退回"暂无数据"
 func _get_fragment_data() -> Dictionary:
-	if not FileAccess.file_exists(FRAGMENTS_JSON_PATH):
-		return { }
-
-	var file: FileAccess = FileAccess.open(FRAGMENTS_JSON_PATH, FileAccess.READ)
-	if file == null:
-		push_error("无法打开故事碎片表: %s" % FRAGMENTS_JSON_PATH)
-		return { }
-	var text: String = file.get_as_text()
-	file.close()
-
-	var parsed: Variant = JSON.parse_string(text)
-	if parsed is Dictionary:
-		return parsed
-	push_error("故事碎片表解析失败 (应为 JSON 对象): %s" % FRAGMENTS_JSON_PATH)
-	return { }
+	return _read_json_object(FRAGMENTS_JSON_PATH, "故事碎片表")
 
 
 ## 取碎片序号的显示顺序

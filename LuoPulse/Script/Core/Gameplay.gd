@@ -530,7 +530,8 @@ var default_chart: Array = [
 			"column": 3
 		}]
 ## 是否处于测试模式, 若为 true, 则可以直接运行 Gameplay 场景
-var is_test: bool = !true
+@export var is_test: bool = false
+
 
 ## 测试画面
 func test() -> void:

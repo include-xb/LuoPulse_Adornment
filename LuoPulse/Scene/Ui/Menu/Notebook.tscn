@@ -8,7 +8,7 @@
 shader = ExtResource("3_qbuod")
 shader_parameter/blur_amount = 2.50000011875
 
-[node name="Notebook" type="Control" unique_id=1068100127]
+[node name="Notebook" type="Control" unique_id=1068100127 node_paths=PackedStringArray("cards_tab", "fragments_tab", "cards_underline", "fragments_underline", "sidebar", "content_label", "cover", "color_rect")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,6 +16,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+cards_tab = NodePath("VBoxContainer/HBoxContainer/CardsTab")
+fragments_tab = NodePath("VBoxContainer/HBoxContainer/FragmentsTab")
+cards_underline = NodePath("VBoxContainer/HBoxContainer/CardsTab/Underline")
+fragments_underline = NodePath("VBoxContainer/HBoxContainer/FragmentsTab/Underline")
+sidebar = NodePath("VBoxContainer/Layout/MarginContainer/SideBar/SidebarList")
+content_label = NodePath("VBoxContainer/Layout/Content/Main/ContentLabel")
+cover = NodePath("Cover")
+color_rect = NodePath("ColorRect")
 
 [node name="Cover" type="TextureRect" parent="." unique_id=614334663]
 layout_mode = 0
@@ -35,45 +43,62 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TopBar" type="Control" parent="." unique_id=1718482481]
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1955622068]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 64.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.78431374)
 
-[node name="BackButton" type="Button" parent="TopBar" unique_id=1875153704]
-layout_mode = 0
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 50.0
-offset_top = -22.0
-offset_right = 196.0
-offset_bottom = 34.0
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=439921667]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="TopBar" type="HBoxContainer" parent="VBoxContainer" unique_id=431898473]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/TopBar" unique_id=1610253764]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+
+[node name="BackButton" type="Button" parent="VBoxContainer/TopBar/MarginContainer" unique_id=1875153704]
+layout_mode = 2
 text = "< 返回"
 
-[node name="TabBar" type="Control" parent="." unique_id=882092593]
-anchors_preset = 0
-anchor_right = 1.0
-offset_top = 64.0
-offset_bottom = 128.0
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/TopBar" unique_id=1660373825]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/margin_right = 100
 
-[node name="Border" type="ColorRect" parent="TabBar" unique_id=911291493]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -1.0
-color = Color(0, 0, 0, 0.1)
+[node name="Label" type="Label" parent="VBoxContainer/TopBar/MarginContainer2" unique_id=1963809536]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "NOTEBOOK"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="CardsTab" type="Button" parent="TabBar" unique_id=623737011]
-layout_mode = 0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_bottom = -1.0
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=415129160]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer" unique_id=1529659570]
+layout_mode = 2
+theme_override_constants/margin_left = 80
+
+[node name="CardsTab" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=623737011]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 40
 text = "资料卡"
 
-[node name="Underline" type="ColorRect" parent="TabBar/CardsTab" unique_id=1433812374]
+[node name="Underline" type="ColorRect" parent="VBoxContainer/HBoxContainer/CardsTab" unique_id=1433812374]
 layout_mode = 0
 anchor_left = 0.25
 anchor_top = 1.0
@@ -83,16 +108,13 @@ offset_top = -2.0
 mouse_filter = 2
 color = Color(0.176, 0.176, 0.176, 1)
 
-[node name="FragmentsTab" type="Button" parent="TabBar" unique_id=962232136]
-layout_mode = 0
-anchor_left = 0.5
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_bottom = -1.0
+[node name="FragmentsTab" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=962232136]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 40
 text = "故事碎片"
 
-[node name="Underline" type="ColorRect" parent="TabBar/FragmentsTab" unique_id=1935293909]
+[node name="Underline" type="ColorRect" parent="VBoxContainer/HBoxContainer/FragmentsTab" unique_id=1935293909]
 visible = false
 layout_mode = 0
 anchor_left = 0.25
@@ -103,90 +125,55 @@ offset_top = -2.0
 mouse_filter = 2
 color = Color(0.176, 0.176, 0.176, 1)
 
-[node name="Layout" type="HBoxContainer" parent="." unique_id=2021932044]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 128.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/HBoxContainer" unique_id=65455313]
+layout_mode = 2
+theme_override_constants/margin_right = 80
+
+[node name="Layout" type="HBoxContainer" parent="VBoxContainer" unique_id=2021932044]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/separation = 0
 
-[node name="Sidebar" type="Control" parent="Layout" unique_id=1302367488]
-custom_minimum_size = Vector2(180, 0)
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/Layout" unique_id=711603367]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 50
+
+[node name="SideBar" type="ScrollContainer" parent="VBoxContainer/Layout/MarginContainer" unique_id=519533527]
 layout_mode = 2
 
-[node name="SidebarBg" type="ColorRect" parent="Layout/Sidebar" unique_id=351627084]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.02)
-
-[node name="RightBorder" type="ColorRect" parent="Layout/Sidebar" unique_id=579953094]
-layout_mode = 0
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -1.0
-color = Color(0, 0, 0, 0.08)
-
-[node name="Scroll" type="ScrollContainer" parent="Layout/Sidebar" unique_id=519533527]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 50.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="SidebarList" type="VBoxContainer" parent="Layout/Sidebar/Scroll" unique_id=1443704997]
+[node name="SidebarList" type="VBoxContainer" parent="VBoxContainer/Layout/MarginContainer/SideBar" unique_id=1443704997]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 20
 
-[node name="Main" type="Control" parent="Layout" unique_id=789772123]
+[node name="Content" type="MarginContainer" parent="VBoxContainer/Layout" unique_id=1532365251]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 60
+
+[node name="Main" type="ScrollContainer" parent="VBoxContainer/Layout/Content" unique_id=1313258144]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Scroll" type="ScrollContainer" parent="Layout/Main" unique_id=1313258144]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -41.0
-offset_bottom = -54.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Content" type="MarginContainer" parent="Layout/Main/Scroll" unique_id=1532365251]
+[node name="ContentLabel" type="RichTextLabel" parent="VBoxContainer/Layout/Content/Main" unique_id=1084048440]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 20
-
-[node name="Paper" type="PanelContainer" parent="Layout/Main/Scroll/Content" unique_id=674378611]
-self_modulate = Color(1, 1, 1, 0.75)
-layout_mode = 2
-
-[node name="PaperMargin" type="MarginContainer" parent="Layout/Main/Scroll/Content/Paper" unique_id=1835179452]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
-
-[node name="ContentLabel" type="RichTextLabel" parent="Layout/Main/Scroll/Content/Paper/PaperMargin" unique_id=1084048440]
-layout_mode = 2
+size_flags_vertical = 3
 bbcode_enabled = true
 text = "jhuknygjbjk"
 fit_content = true
 scroll_active = false
 
-[connection signal="pressed" from="TopBar/BackButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="TabBar/CardsTab" to="." method="_on_cards_tab_pressed"]
-[connection signal="pressed" from="TabBar/FragmentsTab" to="." method="_on_fragments_tab_pressed"]
-[connection signal="meta_clicked" from="Layout/Main/Scroll/Content/Paper/PaperMargin/ContentLabel" to="." method="_on_content_meta_clicked"]
+[connection signal="pressed" from="VBoxContainer/TopBar/MarginContainer/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/CardsTab" to="." method="_on_cards_tab_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/FragmentsTab" to="." method="_on_fragments_tab_pressed"]
+[connection signal="meta_clicked" from="VBoxContainer/Layout/Content/Main/ContentLabel" to="." method="_on_content_meta_clicked"]

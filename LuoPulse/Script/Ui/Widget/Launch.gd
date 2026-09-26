@@ -31,6 +31,9 @@ extends Control
 @export var background: TextureRect
 
 
+@export var is_test: bool = false
+
+
 ## 正在下载曲包 (期间禁止切换场景)
 var _is_downloading: bool = false
 
@@ -43,9 +46,10 @@ var _download_total: int = 0
 func _ready() -> void:
 	Engine.max_fps = 50
 	load_config()
-	$Downloader.download_progress.connect(_on_download_progress)
-	# 进入场景立刻开始下载缺失的曲包, 全部结束后才进入后续流程
-	await _download_all_song_packages()
+	if !is_test:
+		$Downloader.download_progress.connect(_on_download_progress)
+		# 进入场景立刻开始下载缺失的曲包, 全部结束后才进入后续流程
+		await _download_all_song_packages()
 	
 	load_sympathy_song()
 	if Global.if_play_start_animation:
