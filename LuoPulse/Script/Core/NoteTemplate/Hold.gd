@@ -391,11 +391,12 @@ func _complete_hold() -> void:
 		Global.combo += 1
 
 		# 结算反馈: 按头部准度还原等级, 与普通音符共用同一套参数
+		# INFO: 尾判不再出打击音和粒子 —— 这两样在头判 (judge_head) 时已经出过一遍,
+		#       尾判再来一次会让"按住一条长条"这一个动作重复反馈两次。
+		#       轨道闪光与背景脉冲保留: 它们是按住期间的节奏反馈, 不是"命中"的反馈
 		var level: String = HitFeedback.level_from_accuracy(a)
 		_flash_track_feedback(HitFeedback.flash_of(level))
-		_play_hit_sound()
 		_flash_background()
-		emit_particles(level)
 		pass
 
 	is_hold_completed = true

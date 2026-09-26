@@ -60,8 +60,8 @@ radial_accel_min = 3.9999976
 radial_accel_max = 4.9999976
 damping_min = 0.05
 damping_max = 0.1
-scale_min = 0.049999997
-scale_max = 0.099999994
+scale_min = 0.1
+scale_max = 0.2
 scale_curve = SubResource("CurveTexture_os6cd")
 
 [sub_resource type="Gradient" id="Gradient_46tx6"]

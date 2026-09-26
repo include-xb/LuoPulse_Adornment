@@ -14,9 +14,9 @@ class_name HitFeedback
 
 ## 判定等级 → 粒子数量 (和一级最饱满, 漏键最稀疏)
 const AMOUNTS: Dictionary = {
-	"harmonious": 34,
-	"sympathetic": 24,
-	"aware": 16,
+	"harmonious": 30,
+	"sympathetic": 20,
+	"aware": 15,
 	"lost": 8,
 }
 

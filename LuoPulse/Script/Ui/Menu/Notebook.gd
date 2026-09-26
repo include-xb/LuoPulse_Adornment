@@ -297,6 +297,10 @@ func _make_sidebar_button() -> Button:
 	btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.add_theme_font_size_override("font_size", 35)
 	btn.custom_minimum_size = Vector2(0, SIDEBAR_ROW_HEIGHT)
+	# mouse_filter 用 PASS 而不是默认的 STOP: 条目铺满整列, STOP 会把触摸拖拽
+	# 整个吃掉, 侧栏条目一多就滚不动了 (正文那个 RichTextLabel 也是同样的处理)。
+	# 用 PASS 而非 IGNORE: 条目自己还要收点击, IGNORE 会让它点不动
+	btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	# 点击音效单独接一条, 不写进 _on_card_selected / _on_fragment_selected ——
 	# 那两个函数在"进入场景自动选中"和"从 Sympathy 的笔记按钮进来"时也会被调用,
 	# 写在那里会让玩家什么都没点也响一声

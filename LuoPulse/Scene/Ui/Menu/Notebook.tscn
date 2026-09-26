@@ -21,7 +21,7 @@ fragments_tab = NodePath("VBoxContainer/HBoxContainer/FragmentsTab")
 cards_underline = NodePath("VBoxContainer/HBoxContainer/CardsTab/Underline")
 fragments_underline = NodePath("VBoxContainer/HBoxContainer/FragmentsTab/Underline")
 sidebar = NodePath("VBoxContainer/Layout/MarginContainer/SideBar/SidebarList")
-content_label = NodePath("VBoxContainer/Layout/Content/Main/ContentLabel")
+content_label = NodePath("VBoxContainer/Layout/Content/Main/VBoxContainer/ContentLabel")
 cover = NodePath("Cover")
 color_rect = NodePath("ColorRect")
 
@@ -164,8 +164,14 @@ theme_override_constants/margin_bottom = 60
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ContentLabel" type="RichTextLabel" parent="VBoxContainer/Layout/Content/Main" unique_id=1084048440]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Layout/Content/Main" unique_id=624813964]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ContentLabel" type="RichTextLabel" parent="VBoxContainer/Layout/Content/Main/VBoxContainer" unique_id=1084048440]
+layout_mode = 2
+mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
 bbcode_enabled = true
@@ -176,4 +182,4 @@ scroll_active = false
 [connection signal="pressed" from="VBoxContainer/TopBar/MarginContainer/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/CardsTab" to="." method="_on_cards_tab_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/FragmentsTab" to="." method="_on_fragments_tab_pressed"]
-[connection signal="meta_clicked" from="VBoxContainer/Layout/Content/Main/ContentLabel" to="." method="_on_content_meta_clicked"]
+[connection signal="meta_clicked" from="VBoxContainer/Layout/Content/Main/VBoxContainer/ContentLabel" to="." method="_on_content_meta_clicked"]

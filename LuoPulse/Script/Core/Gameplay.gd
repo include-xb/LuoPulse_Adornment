@@ -180,9 +180,9 @@ const LATE_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
 ## 显示反馈词时长
 const FEEDBACK_DURATION: float = 0.2
 ## 显示反馈词的 Y 轴偏移
-const FEEDBACK_FLOAT_Y: float = 30.0
+const FEEDBACK_FLOAT_Y: float = 35.0
 ## 显示反馈词的字体大小
-const FEEDBACK_FONT_SIZE: int = 32
+const FEEDBACK_FONT_SIZE: int = 40
 
 ## 桌面键盘按键映射 (开发调试用)
 const KEY_COLUMN_MAP: Dictionary = {
@@ -203,6 +203,11 @@ var _max_feedback_labels: int = 8
 
 
 ## ---- 打击音效 ----
+## 打击音效 (Asset/Audio/note.wav)
+## INFO: 原来是 HitSoundFactory 现场合成的占位音, 现在换成正式素材;
+##       共享同一个 AudioStream 给池里所有播放器, 各播放器各自持有播放位置
+const HIT_SOUND: AudioStream = preload("res://Asset/Audio/note.wav")
+
 ## 打击音播放池大小 (要能盖住最密的连打: 200BPM 的 16 分音符约 13 次/秒)
 const HIT_SOUND_POOL_SIZE: int = 8
 
@@ -774,10 +779,10 @@ func play_hit_sound() -> void:
 
 ## 建立打击音播放池
 func _setup_hit_sound_pool() -> void:
-	var stream: AudioStreamWAV = HitSoundFactory.make_hit_sound()
 	for i: int in HIT_SOUND_POOL_SIZE:
 		var player: AudioStreamPlayer = AudioStreamPlayer.new()
-		player.stream = stream
+		player.name = "HitSound%d" % i
+		player.stream = HIT_SOUND
 		add_child(player)
 		_hit_sound_players.append(player)
 		pass
@@ -1178,7 +1183,7 @@ func show_judgment_feedback(time_offset: int, judgment_level: String, column: in
 	lbl.add_theme_color_override("font_color", text_color)
 
 	var screen_x: float = _get_column_screen_x(column)
-	lbl.position = Vector2(screen_x - 60.0, _get_judgment_line_y())
+	lbl.position = Vector2(0.8 * screen_x + 60.0, _get_judgment_line_y() * 0.7)
 	lbl.size = Vector2(120, 50)
 	lbl.visible = true
 	lbl.modulate.a = 1.0
