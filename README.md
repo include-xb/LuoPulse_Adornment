@@ -1,18 +1,16 @@
-![1714709371529](https://github.com/include-xb/LuoPulse_from_git/blob/main/ReadmeAssets/1714709371529.jpg)
+![1714709371529](https://github.com/include-xb/LuoPulse_Adornment/blob/main/ReadmeAssets/1714709371529.jpg)
 
 ---
 
 \| **简体中文** | **[English](README_en.md)** |
 
-# Luo Pulse 🩺
+# Luo Pulse: Adornment 🩺
 
 > 机械的心率带动血肉的共鸣        —— COPY《为了你唱下去》
 > 
 > 艺术家与 ta 们的爱万岁！              —— 雨狸《塔与少女的无题诗》
 
-洛之动脉（Luo Pulse）是一款中文虚拟歌手同人、非商业音乐游戏。
-
-
+洛之动脉：缤纷繁饰（Luo Pulse: Adornment）是一款中文虚拟歌手同人、非商业音乐游戏。
 
 ## 游戏主题 🎞️
 
@@ -58,7 +56,9 @@ title.lpz    # .zip
         "Difficulty": "EZ",        // 难度: EZ (简单), NM (普通), HD (困难)
         "Version": "1.0",        // 暂时可忽略
         "BPM": 80,
-        "Preview": 3000        // 预览时从 3000ms 位置开始播放
+        "Preview": 3000,        // 预览时从 3000ms 位置开始播放
+        "PreviewEnd": 10000,    // 预览至 10000ms 位置结束
+        "Crystal": 40            // 解锁该曲包需要的水晶数量
     },
     "HitObjects": [
         {
@@ -90,6 +90,35 @@ title.lpz    # .zip
 
 > 未实现
 
+用户数据格式如下：
+
+```javascript
+{
+	"crystal": 25,            // 水晶数量
+	"main_line_unlocked": 1,  // 已经解锁的主线曲目数量
+	"story_fragments_unlocked": [    // 已经解锁的故事碎片 id
+		"1",
+		"3"
+	],
+	"username": "源来是小白"    // 用户名
+}
+```
+
+游戏配置数据格式如下：
+
+```javascript
+{
+	"if_play_start_animation": true,    // 是否播放开始动画
+	"offset": 0,                        // 谱面偏移量
+	"speed": 15,                        // 音符流速
+	"version": "0.0.0.1",               // 版本号
+	"volume_bg": 60,                    // 背景音乐音量
+	"volume_note": 55,                  // 音符打击音量
+	"volume_song": 65,                  // 歌曲音量
+	"volume_ui": 60                     // UI 音量
+}
+```
+
 ## 讨论 📅
 
 填写此[问卷](https://www.wjx.top/vm/wpPPzRs.aspx)，添加至游戏感谢名单。
@@ -98,11 +127,15 @@ title.lpz    # .zip
 
 ### 游戏曲目投稿 📄📌
 
-> 暂未开放
+请使用[洛之动脉谱面编辑器](https://github.com/Thirhythm/LPEditor)。创作完成后，你可以通过以下途径向我们投稿：
+
+- 将曲包发送至邮箱 1330625393@qq.com
+
+- 联系源来是小白，直接向我发送。后文提供了联系方式。
 
 ### 支持我们 💌
 
-如果你喜欢我们的项目，请为我们点击`star`
+如果你喜欢我们的项目，请为我们点击`star`⭐
 
 bilibili 关注开发者：
 

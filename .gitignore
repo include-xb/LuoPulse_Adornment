@@ -1,11 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
-/android/
+android/
 .vscode/
 .claude/
 LuoPulse/addons/godot_mcp/cache/
 .tmp
-LuoPulse/.vscode
-LuoPulse/.godot
-LuoPulse/.claude
-LuoPulse/Android
