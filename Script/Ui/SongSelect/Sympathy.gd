@@ -68,6 +68,9 @@ extends Control
 ## 演唱
 @export var vocalist: Label # = $Control/VBoxContainer/Vocalist
 
+## 章节 (显示为 "ChapterⅠ. 序曲")
+@export var chapter: Label # = $Chapter
+
 ## 笔记按钮 (未解锁时禁用)
 @export var note_button: Button # = $MarginContainer/Option/PopCard/Card
 
@@ -105,6 +108,26 @@ const AUDIO_FADE_OUT_TIME: float = 2.0
 
 ## 最小音量
 const AUDIO_SILENCE_DB: float = -80.0
+
+
+# ---------- 章节 ----------
+## 章节序号 → 罗马数字 —— 谱面里的 Chapter 字段存的是序号, 标签上要显示成罗马数字
+const CHAPTER_ROMAN: Dictionary = {
+	1: "Ⅰ",
+	2: "Ⅱ",
+	3: "Ⅲ",
+	4: "Ⅳ",
+	5: "Ⅴ",
+}
+
+## 章节序号 → 章节名
+const CHAPTER_NAMES: Dictionary = {
+	1: "序曲",
+	2: "暗涌",
+	3: "挣扎",
+	4: "反思",
+	5: "破晓",
+}
 
 
 # ---------- 节点函数重载 ----------
@@ -238,6 +261,14 @@ func unlock() -> void:
 	pass
 
 
+## 把谱面的 Chapter 序号拼成 "ChapterⅠ. 序曲" 这样的标签文字
+## 序号不在已知章节里时返回空串, 标签就留白
+func _format_chapter(chapter_number: int) -> String:
+	if not CHAPTER_NAMES.has(chapter_number):
+		return ""
+	return "Chapter%s. %s" % [ CHAPTER_ROMAN[chapter_number], CHAPTER_NAMES[chapter_number] ]
+
+
 # ---------- 加载 ----------
 ## 加载曲包中的内容
 func load_song_info() -> void:
@@ -266,6 +297,10 @@ func load_song_info() -> void:
 	vocalist.text 	= general.get("Vocalist", "-") 	if not is_locked else "???"
 	needed_crystal_num = general.get("Crystal", 10)
 	
+	# 章节标签 —— 未解锁时和其余曲目信息一样藏起来
+	var chapter_number: int = int(general.get("Chapter", 0))
+	chapter.text = _format_chapter(chapter_number) if not is_locked else "Chapter?. ???"
+
 	# 加载歌曲音频
 	var song_audio_stream: AudioStream = Global._read_audio_from_lpz(song_package_path)
 	audio_stream_player.stream = song_audio_stream

@@ -225,9 +225,6 @@ var notebook_return_song_title: String = ""
 ## 当前歌曲的索引 (从 0 开始计数)
 var current_song_index: int = 0
 
-## 最后一次解锁的歌曲索引 (从 0 开始计数)
-var current_unlocked_song_index: int = 0
-
 # 四类判定等级
 ## 和一
 var harmonious: int = 0

@@ -107,7 +107,7 @@ _data = {
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist", "note_button", "setting_button")]
+[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist", "chapter", "note_button", "setting_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -132,6 +132,7 @@ title = NodePath("Control/VBoxContainer/Title")
 producer = NodePath("Control/VBoxContainer/Producer")
 creator = NodePath("Control/VBoxContainer/Creator")
 vocalist = NodePath("Control/VBoxContainer/Vocalist")
+chapter = NodePath("Chapter")
 note_button = NodePath("MarginContainer/Option/PopCard/Card")
 setting_button = NodePath("MarginContainer/Option/PopSetting/Setting")
 
@@ -167,7 +168,7 @@ offset_right = 147.5
 offset_bottom = 150.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 50
-text = "ChapterⅠ 序章 "
+text = "ChapterⅠ. 序曲"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1790863430]
 layout_mode = 1
@@ -449,9 +450,9 @@ text = "> 确定"
 [connection signal="pressed" from="Select/Left" to="." method="_on_left_pressed"]
 [connection signal="pressed" from="Select/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="Select/Right" to="." method="_on_right_pressed"]
+[connection signal="pressed" from="MarginContainer/Option/PopCard/Card" to="." method="_on_note_pressed"]
 [connection signal="pressed" from="MarginContainer/Option/PopSetting/Setting" to="." method="_on_setting_pressed"]
 [connection signal="pressed" from="MarginContainer/Option/UnlockButton" to="." method="_on_unlock_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/AutoplayButton" to="." method="_on_autoplay_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/Body/PVButton" to="." method="_on_pv_button_pressed"]
 [connection signal="pressed" from="SettingPanel/CenterContainer/VBoxContainer/VBoxContainer/OKButton" to="." method="_on_ok_button_pressed"]
-[connection signal="pressed" from="MarginContainer/Option/PopCard/Card" to="." method="_on_note_pressed"]

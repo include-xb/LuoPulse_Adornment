@@ -1,20 +1,116 @@
 {
-    "春风来": {
-        "album": "奇爱人生",
-        "release_date": "2017",
-        "background": "春风来 创作背景",
-        "producer_intro": "阿良良木健是一位 VOCALOID 原创曲作者，擅长电子流行与摇滚曲风。在 2012 年使用洛天依创作的《末日DISCO》和《明日DISCO》凭借世界末日话题与一贯高质量荣获著名 VC 曲的一席之地。"
+    "心印": {
+        "album": "",
+        "release_date": "2012",
+        "background": "\n\n\t\t《心印》是LunaSafari制作，洛天依演唱的VOCALOID中文原创歌曲，2012年6月6日于VOCALOID™ CHINA PROJECT官网初次公开。\n\n\t\t本曲是洛天依声库发售之前VOCALOID CHINA中文音源第一首试听曲目（亦即洛天依的第一首试听曲），也是VOCALOID™ CHINA PROJECT宣传PV中的中文主题曲。",
+        "producer_intro": "\n\n\t\tLuna（Luna Safari）是中国的一名音乐家，是最早参与VOCALOID CHINA的音乐家\n\n\t\t目前播放数、收藏数最高的虚拟歌手作品是《月华舞》"
     },
-    "绝体绝命": {
-        "album": "奇爱人生",
-        "release_date": "2018",
-        "background": "绝体绝命 创作背景",
-        "producer_intro": "P主简介"
+    "镜的绮想": {
+        "album": "万华依绘",
+        "release_date": "2023年7月12",
+        "background": "",
+        "producer_intro": ""
+    },
+    "T.A.O.": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "code:TY712": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "注入式": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "黑鸟": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "那些我恐惧至极的事": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "不老不死": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
     },
     "四重罪孽": {
         "album": "妄想症",
         "release_date": "2019",
         "background": "四重罪孽 创作背景",
+        "producer_intro": "P主简介"
+    },
+    "葬歌": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "塔与少女的无题诗": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "白鸟过河滩": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "走马灯": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "九重现实": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "昨日之声": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "蝴蝶": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "光与影的对白": {
+        "album": "",
+        "release_date": "",
+        "background": "",
+        "producer_intro": ""
+    },
+    "春风来": {
+        "album": "奇爱人生",
+        "release_date": "2017",
+        "background": "\t\t以下是阿良良木健在视频下方的评论原文：\n\n\t\t「春风来」是一首脱胎自「守望先锋」游戏角色小美的歌曲，但绝不是她的同人曲。大家可以把这首歌当做一个长得像小美的女孩发生的故事来看待，但绝不要认为这就是小美的故事。因为「春风来」的故事比小美的故事还要黑暗许多。\n\n\t\t真正的故事我不会告诉大家，但我可以给你们一些提示。\n\n\t\t众人被困在检测站，与总部失去联系，真的仅仅是因为气候原因吗？\n\n\t\t阿绫与言和的死是因为互相残杀？还是天依失手杀死的？又或者是因为不明生物的袭击导致了这场惨剧？\n\n\t\t最后出现的直升飞机是派来的救援还是前来赶尽杀绝的敌人？\n\n\t\t天依最后是活下来了？还是微笑着死去了？\n\n\t\t——一切剧情发展都有可能，看你怎么理解。",
+        "producer_intro": "\t\t阿良良木健是一位 VOCALOID 原创曲作者，擅长电子流行与摇滚曲风。在 2012 年使用洛天依创作的《末日DISCO》和《明日DISCO》凭借世界末日话题与一贯高质量荣获著名 VC 曲的一席之地。"
+    },
+    "绝体绝命": {
+        "album": "奇爱人生",
+        "release_date": "2018",
+        "background": "绝体绝命 创作背景",
         "producer_intro": "P主简介"
     }
 }

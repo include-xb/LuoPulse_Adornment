@@ -1252,9 +1252,6 @@ func _on_finish_button_pressed() -> void:
 		"crystal_earned": crystal_earned,
 	}
 
-	# 更新最后一次解锁的歌曲索引
-	Global.current_unlocked_song_index = maxi(Global.current_unlocked_song_index, Global.current_song_index + 1)
-
 	# 同步本地计数
 	harmonious = Global.harmonious
 	sympathetic = Global.sympathetic

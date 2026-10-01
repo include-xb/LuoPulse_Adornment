@@ -138,9 +138,9 @@ theme_override_constants/separation = 0
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 20
+theme_override_constants/margin_top = 40
 theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 50
+theme_override_constants/margin_bottom = 60
 
 [node name="SideBar" type="ScrollContainer" parent="VBoxContainer/Layout/MarginContainer" unique_id=519533527]
 layout_mode = 2
@@ -171,9 +171,10 @@ size_flags_vertical = 3
 
 [node name="ContentLabel" type="RichTextLabel" parent="VBoxContainer/Layout/Content/Main/VBoxContainer" unique_id=1084048440]
 layout_mode = 2
-mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 1
+theme_override_constants/line_separation = 5
 bbcode_enabled = true
 text = "jhuknygjbjk"
 fit_content = true
