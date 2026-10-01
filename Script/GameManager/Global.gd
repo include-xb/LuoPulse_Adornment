@@ -323,11 +323,37 @@ var max_combo: int = 0
 
 # ---------- 工具函数 ----------
 
-## 计算获取当前主线的界面灰度
+## U 形曲线: 进度在两端 (0 和 1) 时对应的饱和度
+const PROGRESS_SATURATION_EDGE: float = 0.8
+
+## U 形曲线: 进度过半时对应的谷底饱和度
+const PROGRESS_SATURATION_VALLEY: float = 0.2
+
+
+## 把主线进度 (0~1) 换算成界面灰度
+## INFO: 这条曲线不是线性的, 而是 U 形 —— 两端最鲜艳、过半时最灰, 对应
+##       "压抑 → 崩溃 → 蜕变"的情绪走向: 越接近故事中段, 颜色掉得越厉害。
+##       背景 shader 只吃一个数, 所以这里返回灰度, 饱和度 = 1 - 返回值
+func get_progress_gray_scale(progress: float) -> float:
+	var p: float = clampf(progress, 0.0, 1.0)
+	# (p - 0.5)^2 在两端恰为 0.25, 乘 4 归一化成 0~1 的"离中点有多远"
+	var shape: float = 4.0 * pow(p - 0.5, 2.0)
+	var saturation: float = PROGRESS_SATURATION_VALLEY + (PROGRESS_SATURATION_EDGE - PROGRESS_SATURATION_VALLEY) * shape
+	return 1.0 - saturation
+
+
+## 主菜单背景的灰度 —— 进度按"已解锁的曲目数量"算
 func get_current_gray_scale() -> float:
-	var progress: float = float(current_unlocked_song_index) / float(sympath_song_num)
-	var gray_scale: float = 1.0 - progress
-	return gray_scale
+	var total: float = float(maxi(sympath_song_num, 1))
+	return get_progress_gray_scale(float(main_line_unlocked) / total)
+
+
+## 选歌界面某一首的背景灰度 —— 进度按"这是第几首"算
+## INFO: 与上面那个的区别是它看的是单曲在主线的位置, 而不是总解锁进度,
+##       所以同一时刻主菜单与选歌页的背景成色是不一样的
+func get_song_gray_scale(song_index: int) -> float:
+	var total: float = float(maxi(sympath_song_num, 1))
+	return get_progress_gray_scale(float(song_index + 1) / total)
 
 
 ## ui 点击音效

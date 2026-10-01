@@ -112,9 +112,7 @@ func _ready() -> void:
 	Global.game_mode = Global.GameMode.Sympathy
 	setting_panel.visible = false
 	setting_panel.modulate.a = 0.0
-	# 页面背景色彩变化并非线性, 而是 U 形变化
-	# background.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
-	# cover.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	# 背景灰度不在这里设 —— 它跟着当前选中的曲目走, 由 load_song_info() 按 U 形曲线算
 	
 	# 水晶数值显示
 	update_crystal_num()
@@ -251,14 +249,13 @@ func load_song_info() -> void:
 	background.texture = song_cover
 	cover.texture = song_cover
 	
-	if is_locked:
-		background.material.set_shader_parameter("gray_scale", 1.0)
-		cover.material.set_shader_parameter("gray_scale", 1.0)
+	# 已解锁的曲子按"这是第几首"做 U 形变化, 未解锁的一律全灰
+	var gray_scale: float = 1.0
+	if not is_locked:
+		gray_scale = Global.get_song_gray_scale(Global.current_song_index)
 		pass
-	else:
-		background.material.set_shader_parameter("gray_scale", 0.0)
-		cover.material.set_shader_parameter("gray_scale", 0.0)
-		pass
+	background.material.set_shader_parameter("gray_scale", gray_scale)
+	cover.material.set_shader_parameter("gray_scale", gray_scale)
 	
 	# 加载歌曲信息
 	var song_chart: Dictionary = Global._read_chart_from_lpz(song_package_path)
