@@ -483,23 +483,35 @@ func _read_json_object(path: String, label: String) -> Dictionary:
 
 
 # ---------- 曲包数据 ----------
-## 读取全部曲包, 抽出每首的 chart.General, 并配上同序号的资料卡补充文本
+## 读取全部曲包, 抽出每首的 chart.General, 并配上同名曲目的资料卡补充文本
 ## 每个曲包只读 chart.lp —— 它在包里是压缩过的几 KB, 不碰同包的音频与视频
 func _load_song_cards() -> Array[Dictionary]:
 	var cards: Array[Dictionary] = [ ]
 	var paths: Array[String] = _get_song_packages()
-	# 补充文本整表读一次就够, 不要在循环里按序号反复读同一个文件
+	# 补充文本整表读一次就够, 不要在循环里按曲名反复读同一个文件
 	var notes: Dictionary = _get_card_data()
+	var missing_titles: Array[String] = [ ]
 	for i: int in paths.size():
 		var chart: Dictionary = Global._read_chart_from_lpz(paths[i])
 		var general: Dictionary = chart.get("General", { })
+		var title: String = _raw_title(general)
+		var note: Dictionary = _card_note(notes, general)
+		# 曲名写错一个字 (全角空格、标点差异) 资料卡就会静默少掉两块内容, 攒起来一次报全
+		if not title.is_empty() and note.is_empty():
+			missing_titles.append(title)
+			pass
 		cards.append({
 			"path": paths[i],
 			"general": general,
-			"note": _card_note(notes, i + 1),
+			"note": note,
 		})
 		pass
 	print("资料卡曲包读取完成, 共 %d 首" % cards.size())
+	if not missing_titles.is_empty():
+		print("以下曲名在%s里没有条目, 请核对键名: %s" % [
+			CARDS_JSON_PATH,
+			", ".join(missing_titles),
+		])
 	return cards
 
 
@@ -508,10 +520,23 @@ func _get_card_data() -> Dictionary:
 	return _read_json_object(CARDS_JSON_PATH, "资料卡文本表")
 
 
-## 取第 number 首 (从 1 开始) 的资料卡补充文本
-## 表里没有这个序号 (或那一项不是对象) 就返回空字典, 正文退回 _format_data_card 的缺省占位文字
-func _card_note(notes: Dictionary, number: int) -> Dictionary:
-	var entry: Variant = notes.get(str(number), { })
+## 曲包里的原始曲名 (chart.General 的 Title), 取不到就是空字符串
+## INFO: 与 _song_title() 的区别是这里不做文件名兜底 —— 文件名是服务器链接末段的
+##       数字 ID (1.lpz / 3.lpz), 只配用来显示, 拿来当 cards.json 的键毫无意义
+func _raw_title(general: Dictionary) -> String:
+	return str(general.get("Title", ""))
+
+
+## 取曲名对应的那一份资料卡补充文本
+## INFO: 键是曲名而不是"第几首" —— 下标来自未排序的目录枚举, 曲包一增删就整体错位,
+##       曲名是曲目的固有属性, 不受目录顺序影响
+## 曲名为空、表里没有这个曲名 (或那一项不是对象) 都返回空字典, 正文退回缺省占位文字
+func _card_note(notes: Dictionary, general: Dictionary) -> Dictionary:
+	var title: String = _raw_title(general)
+	if title.is_empty():
+		return { }
+
+	var entry: Variant = notes.get(title, { })
 	if entry is Dictionary:
 		return entry
 	return { }

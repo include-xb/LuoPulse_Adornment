@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="2_558w5"]
 [ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_cwtva"]
 [ext_resource type="PackedScene" uid="uid://bifeqp1xtt7v3" path="res://Scene/Ui/Widget/UnderlineButton.tscn" id="3_ubtn"]
+[ext_resource type="PackedScene" uid="uid://r07edpdgjye1" path="res://Scene/Ui/Widget/Pulse.tscn" id="4_6a3fd"]
 [ext_resource type="Texture2D" uid="uid://bnx5llv6j70ya" path="res://Asset/Image/Godot-headimg.png" id="5_cwtva"]
 [ext_resource type="Shader" uid="uid://c3jlu0sqnjppg" path="res://Shader/circular_mask.gdshader" id="6_circle"]
 
@@ -39,6 +40,9 @@ grow_vertical = 2
 texture = ExtResource("2_558w5")
 expand_mode = 5
 stretch_mode = 6
+
+[node name="Pulse" parent="." unique_id=2053408266 instance=ExtResource("4_6a3fd")]
+layout_mode = 1
 
 [node name="MenuContainer" type="MarginContainer" parent="." unique_id=871574102]
 layout_mode = 1
