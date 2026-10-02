@@ -1,13 +1,11 @@
 [gd_scene format=3 uid="uid://cit22tbr0bvx8"]
 
 [ext_resource type="Script" uid="uid://bpujobp6ug4v5" path="res://Script/Core/InputProcesser.gd" id="1_ogl7y"]
-[ext_resource type="Shader" uid="uid://dtrackedge001" path="res://Shader/track_edge.gdshader" id="2_8ks2l"]
+[ext_resource type="Shader" uid="uid://dtrackedge001" path="res://Shader/track.gdshader" id="2_8ks2l"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8ks2l"]
 render_priority = 0
 shader = ExtResource("2_8ks2l")
-shader_parameter/edge_color = Color(0, 0, 0, 0.7647059)
-shader_parameter/edge_width = 0.0
 shader_parameter/track_color = Color(0, 0, 0, 0.5882353)
 shader_parameter/highlight = 0.0
 shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
@@ -19,8 +17,6 @@ size = Vector2(0.98, 22)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m7grc"]
 render_priority = 0
 shader = ExtResource("2_8ks2l")
-shader_parameter/edge_color = Color(0, 0, 0, 0)
-shader_parameter/edge_width = 0.0
 shader_parameter/track_color = Color(1, 1, 1, 0.13725491)
 shader_parameter/highlight = 0.0
 shader_parameter/highlight_color = Color(1, 1, 1, 0.35)

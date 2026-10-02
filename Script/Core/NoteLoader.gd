@@ -55,6 +55,8 @@ func load_note(
 	note_template.time = time
 	note_template.duration = duration
 	note_template.column = column
+	# 按列错开透明排序层级, 理由见 Global.SORT_LAYER_STEP
+	note_template.sorting_offset = float(column) * Global.SORT_LAYER_STEP
 
 	# 初始位置: 音符将在 _physics_process 中通过 master_time 自行定位
 	# 这里设置初始 z 以配合 _physics_process 的定位公式

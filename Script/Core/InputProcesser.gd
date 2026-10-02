@@ -80,6 +80,10 @@ func _ready() -> void:
 	# 会把音符颜色染歪 (黄键会偏绿)。这里把贴图的 RGB 中和成白色、
 	# 只保留它的透明度衰减, 让材质色单独决定色相。
 	_neutralize_particle_texture()
+
+	# 按列错开透明排序层级, 理由见 Global.SORT_LAYER_STEP
+	single_track.sorting_offset = float(column) * Global.SORT_LAYER_STEP
+	_judging_strip.sorting_offset = float(column) * Global.SORT_LAYER_STEP
 	pass
 
 

@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="LuoPulse_Adornment"
-config/tags=PackedStringArray("初始化后的lp仓库")
+config/tags=PackedStringArray("洛之动脉_缤纷繁饰")
 run/main_scene="uid://cwgd5663wpeft"
 config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "Forward Plus")

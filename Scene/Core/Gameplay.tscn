@@ -10,6 +10,7 @@
 [ext_resource type="VideoStream" uid="uid://cld83q83c3sub" path="res://Asset/Test/video.ogv" id="6_qalqs"]
 [ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="7_46tx6"]
 [ext_resource type="AudioStream" uid="uid://cryyhdkor01jm" path="res://Asset/Test/audio.ogg" id="9_46tx6"]
+[ext_resource type="Script" uid="uid://bfsciob2nrhl" path="res://Script/Core/EffectManager.gd" id="11_8ls4n"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_j17h8"]
 shader = ExtResource("2_j17h8")
@@ -33,7 +34,7 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 0.50000002375
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_sc0u0"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_2bmra"]
 viewport_path = NodePath("UI/TextureRect/SubViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
@@ -47,7 +48,7 @@ size = Vector2(4, 22)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,6 +58,7 @@ grow_vertical = 2
 script = ExtResource("1_i27d6")
 audio_system = NodePath("AudioSystem")
 note_loader = NodePath("NoteLoader")
+effect_manager = NodePath("EffectManager")
 progress_bar = NodePath("UI/ProgressBar")
 background = NodePath("UI/Background")
 video_stream_player = NodePath("UI/VideoStreamPlayer")
@@ -73,6 +75,7 @@ speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxCo
 speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
 tick = NodePath("UI/Tick")
 finish_button_mask = NodePath("UI/Mask")
+is_test = true
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1
@@ -139,7 +142,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_sc0u0")
+texture = SubResource("ViewportTexture_2bmra")
 expand_mode = 3
 
 [node name="SubViewport" type="SubViewport" parent="UI/TextureRect" unique_id=731722823]
@@ -406,6 +409,9 @@ script = ExtResource("2_ovtvy")
 
 [node name="AudioSystem" type="AudioStreamPlayer" parent="." unique_id=1667507616]
 stream = ExtResource("9_46tx6")
+
+[node name="EffectManager" type="Node" parent="." unique_id=801934140]
+script = ExtResource("11_8ls4n")
 
 [connection signal="pressed" from="UI/Mask/FinishButton" to="." method="_on_finish_button_pressed"]
 [connection signal="pressed" from="UI/PauseButton" to="." method="_on_pause_button_pressed"]

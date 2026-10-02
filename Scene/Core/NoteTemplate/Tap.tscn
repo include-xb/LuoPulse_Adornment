@@ -1,14 +1,11 @@
 [gd_scene format=3 uid="uid://co5vpdhh35rbk"]
 
-[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note_edge.gdshader" id="1_r723p"]
+[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note.gdshader" id="1_r723p"]
 [ext_resource type="Script" uid="uid://bdc2ytkbescnv" path="res://Script/Core/NoteTemplate/Tap.gd" id="1_yt8n7"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yt8n7"]
 render_priority = 0
 shader = ExtResource("1_r723p")
-shader_parameter/edge_color = Color(0, 0, 0, 0)
-shader_parameter/edge_width_y = 0.0
-shader_parameter/edge_width_x = 0.0
 shader_parameter/original_color = Color(0.4, 0.8, 1, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]

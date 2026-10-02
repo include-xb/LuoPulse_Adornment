@@ -21,6 +21,9 @@ extends Control
 ## 谱面音符加载器
 @export var note_loader: NoteLoader # = $NoteLoader
 
+## 谱面效果管理器 (轨道换位等)
+@export var effect_manager: EffectManager # = $EffectManager
+
 ## 进度条
 @export var progress_bar: ProgressBar # = $UI/ProgressBar
 
@@ -72,6 +75,9 @@ extends Control
 
 ## 解析完成的谱面数据
 var chart: Array = [ ]
+
+## 谱面效果列表 (chart.lp 的 Effects 段)
+var effect_list: Array = [ ]
 
 ## 主时间 (ms), 基于音频播放位置, 是判定和音符定位的唯一时钟源
 var master_time: float = -3000.0
@@ -140,8 +146,13 @@ var _countdown_label: Label = null
 ## 各列的 InputProcesser 引用
 var input_processers: Array = [ ]
 
-## 触屏状态追踪 (touch_index -> column)
+## 触屏状态追踪 (touch_index -> 轨道号)
 var active_touches: Dictionary = { }
+
+## 键盘按住状态追踪 (keycode -> 轨道号)
+## INFO: 必须记下按下时的轨道号 —— 换位效果会在按住期间改变槽位归属, 松手时若重新查一次,
+##       会打到被换过来的那根轨道上, 而原来那根就永远卡在按下态 (一直亮着, hold 也不结算)
+var _active_keys: Dictionary = { }
 
 ## 轨道在屏幕空间的 X 范围 (通过摄像机投影计算)
 var _track_screen_min: float = 0.0
@@ -537,6 +548,15 @@ var default_chart: Array = [
 ## 是否处于测试模式, 若为 true, 则可以直接运行 Gameplay 场景
 @export var is_test: bool = false
 
+## 测试用的谱面效果 —— default_chart 里没有 Effects 段, 单跑本场景时靠这条看换位
+var default_effects: Array = [
+		{
+			"type": "change",
+			"time": 3000,
+			"changed": [ 2, 3, 4, 1 ],
+			"duration": 4000,
+		}]
+
 
 ## 测试画面
 func test() -> void:
@@ -544,6 +564,7 @@ func test() -> void:
 	audio_length = int(audio_stream.get_length() * 1000)
 	print("audio_stream: " + str(audio_system.stream == null))
 	chart = default_chart
+	effect_list = default_effects
 	total_notes = len(chart)
 	pass
 
@@ -585,6 +606,9 @@ func _ready() -> void:
 		pass
 	# 获取头尾音符时间
 	get_first_last_note_time()
+
+	# 谱面效果 —— 必须在 _collect_input_processers 之后, 它要复用那个数组
+	_setup_effects()
 	
 	# 若第一个音符到达判定线所需时间超过 2500ms, 则显示
 	if first_note_time >= 1000:
@@ -606,6 +630,11 @@ func _process(delta: float) -> void:
 			_countdown_tick(delta)
 			pass
 		return
+
+	# 谱面效果 (轨道换位) —— 与音符共用 master_time, 所以暂停与倒计时期间会自动冻结
+	if effect_manager:
+		effect_manager.tick(master_time)
+		pass
 
 	# 音视频启动
 	if is_audio_start == false && master_time >= 0.0:
@@ -729,6 +758,8 @@ func _input(event: InputEvent) -> void:
 			return
 		var col: int = _get_column_from_key(event)
 		if col >= 0:
+			# 记下按下时命中的轨道 —— 松手时它可能已被换位效果挪到别处
+			_active_keys[event.keycode] = col
 			_on_column_touch_pressed(col, input_time)
 			pass
 		pass
@@ -736,9 +767,11 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and not event.echo and not event.pressed:
 		if is_track_input_blocked:
 			return
-		var col: int = _get_column_from_key(event)
-		if col >= 0:
-			_on_column_touch_released(col, input_time)
+		# INFO: 用按下时记下的轨道号, 不能重新查一次 —— 理由见 _active_keys 的说明
+		if _active_keys.has(event.keycode):
+			var released_col: int = _active_keys[event.keycode]
+			_active_keys.erase(event.keycode)
+			_on_column_touch_released(released_col, input_time)
 			pass
 		pass
 	pass
@@ -913,6 +946,16 @@ func _collect_input_processers() -> void:
 	pass
 
 
+## 把当前谱面的效果列表交给 EffectManager (同时让它记下轨道的初始槽位)
+## INFO: 轨道数组复用 input_processers, 而不是让 EffectManager 自己按名字再找一遍 ——
+##       "下标 ↔ 轨道" 这个不变量是判定能打中的前提, 不能存在第二份
+func _setup_effects() -> void:
+	if effect_manager == null:
+		return
+	effect_manager.setup(input_processers, effect_list)
+	pass
+
+
 ## 计算轨道在屏幕上的边界
 func _calculate_track_screen_bounds() -> void:
 	var col_count: int = Global.COLUMN_NUM
@@ -938,36 +981,58 @@ func _calculate_track_screen_bounds() -> void:
 	pass
 
 
-## 根据点击位置的 X 坐标获取被点击的轨道编号
+## 根据点击位置的 X 坐标获取被点击的轨道编号 (0-based)
+## INFO: 换位效果生效时返回的是"此刻实际占据该位置"的那根轨道, 而不是槽位号 ——
+##       按下哪里就判定哪里, 与玩家眼睛看到的画面一致
 func _get_column_from_x(x: float) -> int:
 	var col_count: int = Global.COLUMN_NUM
+	var half_width: float = float(col_count) / 2.0
 	var _range: float = _track_screen_max - _track_screen_min
 	if _range <= 0.0:
 		_range = get_viewport().get_visible_rect().size.x
 	var normalized: float = (x - _track_screen_min) / _range
-	var col: int = int(normalized * float(col_count))
-	if col >= 0 and col < col_count:
-		return col
-	return -1
+
+	# 越界判断沿用旧写法: 略微超出左边界仍算第 1 条, 免得改变边缘点击的手感
+	var slot: int = int(normalized * float(col_count))
+	if slot < 0 or slot >= col_count:
+		return -1
+
+	if effect_manager == null:
+		return slot
+
+	# 用连续的位置而不是槽位号换算 —— 换位动画途中轨道不在槽心上, 先量化到槽位会判错
+	var world_x: float = -half_width + normalized * float(col_count)
+	return effect_manager.track_index_for_world_x(world_x)
 
 
-## 根据键盘按键获取被点击的轨道编号
+## 根据键盘按键获取被点击的轨道编号 (0-based)
+## INFO: D/F/J/K 对应的是四个固定槽位, 具体由谁响应交给 EffectManager 按当前位置决定
 func _get_column_from_key(event: InputEventKey) -> int:
-	if KEY_COLUMN_MAP.has(event.keycode):
-		return KEY_COLUMN_MAP[event.keycode]
-	return -1
+	if not KEY_COLUMN_MAP.has(event.keycode):
+		return -1
+	var slot: int = KEY_COLUMN_MAP[event.keycode]
+	if effect_manager == null:
+		return slot
+	return effect_manager.track_index_for_slot(slot)
 
 
-## 这个函数在干嘛?
+## 取得某条轨道当前在屏幕上的 x (判定反馈文字用它定位)
+## INFO: 换位效果下轨道会离开原槽位, 所以必须问"这根轨道现在在哪", 不能再按序号均分
 func _get_column_screen_x(column: int) -> float:
 	var col_count: int = Global.COLUMN_NUM
+	var half_width: float = float(col_count) / 2.0
 	var viewport_width: float = get_viewport().get_visible_rect().size.x
 	var track_width: float = _track_screen_max - _track_screen_min
 	if track_width <= 0.0:
 		track_width = viewport_width * 0.5
 		_track_screen_min = (viewport_width - track_width) * 0.5
 		pass
-	var col_norm: float = (float(column) - 0.5) / float(col_count)
+
+	var processor: Node3D = get_input_processor(column - 1)
+	if processor == null:
+		return _track_screen_min
+	# 没有换位效果时 position.x 就是槽心, 结果与旧公式逐像素相同
+	var col_norm: float = (processor.position.x + half_width) / float(col_count)
 	return _track_screen_min + col_norm * track_width
 
 
@@ -1042,6 +1107,7 @@ func load_list() -> void:
 	audio_system.stream = lpz["audio"]
 	audio_length = int(lpz["audio"].get_length() * 1000)
 	chart = lpz["chart"].get("HitObjects")
+	effect_list = lpz["chart"].get("Effects", [ ])
 	video_stream_player.stream = lpz["video"]
 
 	# 顺手把曲目信息存进 Global
@@ -1218,6 +1284,7 @@ func show_finish_btn() -> void:
 ## 清空所有轨道的进行中状态 (触摸计数 / 长按 / 高亮)
 func _release_all_track_input() -> void:
 	active_touches.clear()
+	_active_keys.clear()
 
 	for i: int in Global.COLUMN_NUM:
 		var processor: Node3D = get_input_processor(i)
@@ -1317,6 +1384,12 @@ func _on_pause_button_pressed() -> void:
 	for col in active_touches.values():
 		_on_column_touch_released(col, pause_time)
 	active_touches.clear()
+
+	# 按住的键也要一并松开: _input 开头 "not is_gaming 就 return" 会吞掉暂停期间的所有
+	# 松键事件, 不在这里释放的话, 那个键会一直卡在按下态 (轨道长亮, hold 也不结算)
+	for col in _active_keys.values():
+		_on_column_touch_released(col, pause_time)
+	_active_keys.clear()
 
 	is_gaming = false
 	_pause_playback_position = audio_system.get_playback_position()
@@ -1461,6 +1534,7 @@ func _restart_game() -> void:
 	_reset_judging_stats()
 
 	chart = [ ]
+	effect_list = [ ]
 	time_list = [ ]
 	type_list = [ ]
 	duration_list = [ ]
@@ -1479,6 +1553,9 @@ func _restart_game() -> void:
 		test()
 		write_in_list()
 		pass
+
+	# 效果要重头再放一遍, 同时把所有轨道放回原位
+	_setup_effects()
 
 	start_time = Time.get_ticks_msec()
 

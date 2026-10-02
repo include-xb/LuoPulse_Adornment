@@ -1,14 +1,11 @@
 [gd_scene format=3 uid="uid://d0gvdpfjskg7a"]
 
-[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note_edge.gdshader" id="1_r723p"]
+[ext_resource type="Shader" uid="uid://cnojln1e37nv8" path="res://Shader/note.gdshader" id="1_r723p"]
 [ext_resource type="Script" uid="uid://dxsxrh4hcmijk" path="res://Script/Core/NoteTemplate/Drag.gd" id="1_script"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_drag"]
 render_priority = 0
 shader = ExtResource("1_r723p")
-shader_parameter/edge_color = Color(0, 0, 0, 0)
-shader_parameter/edge_width_y = 0.0
-shader_parameter/edge_width_x = 0.0
 shader_parameter/original_color = Color(1, 1, 0, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]

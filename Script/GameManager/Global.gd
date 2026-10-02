@@ -22,6 +22,12 @@ const NOTICE_PACKED_SCENE: PackedScene = preload("res://Scene/Ui/Widget/Notice.t
 ## 轨道数
 const COLUMN_NUM: int = 4
 
+## 透明物体的排序层级步长
+## INFO: 换位动画时两根轨道会在同一 x 重合。透明物体不写深度, 彼此不做遮挡, 先后只按
+##       "相机距离 - sorting_offset" 排序, 距离相等时先后不稳定, 高亮的那根会忽上忽下地闪。
+##       给每一列一个固定的微小偏移就能打破这个并列 —— 它只参与排序, 不改变渲染位置
+const SORT_LAYER_STEP: float = 0.001
+
 ## 轨道1对应键盘按键
 const KEY_1: String = "D"
 
