@@ -34,7 +34,7 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 0.50000002375
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_2bmra"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_iqgc2"]
 viewport_path = NodePath("UI/TextureRect/SubViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
@@ -75,7 +75,6 @@ speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxCo
 speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
 tick = NodePath("UI/Tick")
 finish_button_mask = NodePath("UI/Mask")
-is_test = true
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1
@@ -142,7 +141,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_2bmra")
+texture = SubResource("ViewportTexture_iqgc2")
 expand_mode = 3
 
 [node name="SubViewport" type="SubViewport" parent="UI/TextureRect" unique_id=731722823]

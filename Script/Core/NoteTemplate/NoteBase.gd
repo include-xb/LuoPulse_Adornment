@@ -52,11 +52,13 @@ func _ready() -> void:
 	if is_mulit_tap:
 		_apply_multi_tap_color()
 		pass
+	var mt: float = root_node.master_time
+	position.z = Global.note_speed * (mt - float(time)) / 1000.0
 	pass
 
 
 @warning_ignore("unused_parameter")
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	#if gameplay == null:
 		#return
 
@@ -64,7 +66,14 @@ func _process(delta: float) -> void:
 
 	# 音符定位: z = speed * (master_time - time) / 1000
 	# 使得在 master_time == time 时, 音符刚好到达 z=0 (判定线)
-	position.z = Global.note_speed * (mt - float(time)) / 1000.0
+	# INFO 不再使用上面的方式下落音符, 而是改回旧版使用 delta 计算每帧位移
+	# 优点: 与 _physics_process 高度一致, 下落时更加流畅.
+	# 缺点: 长时间 delta 的累加会造成浮点数的误差被放大, 但是由于音符被创建到判定只有 3 秒时间, 这段时间内的浮点数误差可以忽略
+	var correct_pos = Global.note_speed * (mt - float(time)) / 1000.0
+	position.z += Global.note_speed * delta
+	if abs(position.z - correct_pos) >= 0.01:
+		# position.z = correct_pos
+		pass
 
 	# 自动播放
 	if Global.is_autoplay:

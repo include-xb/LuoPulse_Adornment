@@ -1,8 +1,14 @@
 [gd_scene format=3 uid="uid://ugbjmikkunw0"]
 
 [ext_resource type="Script" uid="uid://df35kyc648f2q" path="res://Script/Ui/Menu/SettingsMenu.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://dgy3ill5ibejf" path="res://Shader/gray_scale.gdshader" id="2_7irqm"]
 [ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="2_fvmli"]
 [ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="3_7irqm"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_js4ww"]
+shader = ExtResource("2_7irqm")
+shader_parameter/gray_scale = 0.0
+shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
 shader = ExtResource("3_7irqm")
@@ -26,6 +32,7 @@ script = ExtResource("1_script")
 settings_list = NodePath("MarginContainer/ScrollContainer/VBoxContainer")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=2078991447]
+material = SubResource("ShaderMaterial_js4ww")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -35,6 +42,15 @@ grow_vertical = 2
 texture = ExtResource("2_fvmli")
 expand_mode = 5
 stretch_mode = 6
+
+[node name="Dark" type="ColorRect" parent="." unique_id=1414066485]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.78431374)
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=245158989]
 material = SubResource("ShaderMaterial_s4y3q")

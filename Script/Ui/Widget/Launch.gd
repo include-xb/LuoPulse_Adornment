@@ -25,7 +25,7 @@ extends Control
 @export var background: TextureRect
 
 
-@export var is_test: bool = false
+# @export var is_test: bool = false
 
 
 ## 正在下载曲包 (期间禁止切换场景)
@@ -40,10 +40,15 @@ var _download_total: int = 0
 func _ready() -> void:
 	Engine.max_fps = 50
 	load_config()
-	if !is_test:
+	if Global.is_auto_update_package:
 		$Downloader.download_progress.connect(_on_download_progress)
 		# 进入场景立刻开始下载缺失的曲包, 全部结束后才进入后续流程
 		await _download_all_song_packages()
+		pass
+	else:
+		# 玩家关闭了"自动更新曲包", 跳过下载, 直接进入后续流程
+		loading_panel.visible = false
+		pass
 	
 	load_sympathy_song()
 	if Global.if_play_start_animation:
@@ -97,6 +102,10 @@ func _download_all_song_packages() -> void:
 			_apply_download_progress(float(index + 1) / float(_download_total))
 			pass
 		pass
+
+	# 进度条已满, 先把提示语换成"下载完成", 并停留 1 秒让玩家看清
+	download_label.text = "正在下载曲包, 请不要退出游戏 (100%)"
+	await get_tree().create_timer(1.0).timeout
 
 	loading_panel.visible = false
 	_is_downloading = false
@@ -238,11 +247,11 @@ func _load_user_data() -> void:
 	var user_path: String = OS.get_user_data_dir().path_join("user.json")
 	# 默认数据
 	var default_data: Dictionary = {
-		"username": "小白",	# 用户名
+		"username": "源小白",	# 用户名
 		"is_first_open": true,
 		"main_line_unlocked": 1,	# 主线中已经解锁的曲目数量
 		"crystal": 25,	# 水晶数
-		"story_fragments_unlocked": [], 	# 已解锁的故事碎片id
+		"story_fragments_unlocked": ["1"], 	# 已解锁的故事碎片id
 	}
 
 	var data: Dictionary = default_data.duplicate()
@@ -299,13 +308,14 @@ func _load_game_config() -> void:
 	# 默认数据
 	var default_data: Dictionary = {
 		"version": "0.0.0.1",
-		"volume_song": 90,
+		"volume_song": 70,
 		"volume_note": 70,
 		"volume_ui": 60,
 		"volume_bg": 60,
 		"offset": 0,
 		"speed": 10,
-		"if_play_start_animation": true
+		"if_play_start_animation": true,
+		"is_auto_update_package": true
 	}
 
 	var data: Dictionary = default_data.duplicate()
@@ -352,6 +362,7 @@ func _load_game_config() -> void:
 	Global.chart_offset 			= data["offset"]
 	Global.note_flow_speed 			= data["speed"]
 	Global.if_play_start_animation 	= data["if_play_start_animation"]
+	Global.is_auto_update_package 	= data["is_auto_update_package"]
 
 	# 背景音乐在 Global._ready() 里就已经开始播放了, 那时读到的还是 volume_bg 的默认值;
 	# 配置加载完之后立刻刷一次, 让启动时的音量就是玩家实际设定的值

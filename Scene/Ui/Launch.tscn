@@ -61,7 +61,6 @@ loading_panel = NodePath("LoadingPanel")
 download_progress_bar = NodePath("LoadingPanel/VBoxContainer/DownloadProgressBar")
 download_label = NodePath("LoadingPanel/VBoxContainer/DownloadLabel")
 background = NodePath("LoadingPanel/Background")
-is_test = true
 
 [node name="Background" type="ColorRect" parent="." unique_id=964636709]
 layout_mode = 1
@@ -176,13 +175,13 @@ grow_vertical = 0
 [node name="DownloadLabel" type="Label" parent="LoadingPanel/VBoxContainer" unique_id=414873825]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 35
 text = "正在下载曲包, 请不要退出游戏 (0%)"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DownloadProgressBar" type="ProgressBar" parent="LoadingPanel/VBoxContainer" unique_id=819977280]
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
 size_flags_vertical = 3
 step = 0.1

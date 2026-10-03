@@ -123,7 +123,7 @@ layout_mode = 2
 size_flags_vertical = 0
 theme_override_colors/font_color = Color(0.40705615, 0.40705618, 0.40705615, 0.5019608)
 theme_override_font_sizes/font_size = 30
-text = "V0.1 alpha"
+text = "V0.2 alpha"
 
 [node name="Currency" type="MarginContainer" parent="." unique_id=256023867]
 layout_mode = 1

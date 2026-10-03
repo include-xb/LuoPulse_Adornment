@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://ln3jo1lexkx5"]
+
+[ext_resource type="Script" uid="uid://c1kmmd16jhcgp" path="res://_verify_tmp/verify_null_close.gd" id="1_3pp45"]
+
+[node name="VerifyNullClose" type="Node" unique_id=1000471485]
+script = ExtResource("1_3pp45")

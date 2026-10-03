@@ -150,13 +150,17 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"step": 1,
 			"suffix": "",
 		},
+		"自动更新曲包": {
+			"key": "is_auto_update_package",
+			"config_key": "is_auto_update_package",
+			"node_type": "ToggleButton",
+		},
 	},
 	"外观": {
 		"开始动画": {
 			"key": "if_play_start_animation",
 			"config_key": "if_play_start_animation",
 			"node_type": "ToggleButton",
-			"suffix": "%",
 		},
 	},
 	"数据": {
@@ -305,6 +309,9 @@ var note_flow_speed: int = 0
 
 ## 是否播放开始动画
 var if_play_start_animation: bool = true
+
+## 是否自动更新曲包
+var is_auto_update_package: bool = true
 
 
 ## 最后一场游戏的结果数据

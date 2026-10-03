@@ -9,13 +9,26 @@ extends Control
 
 @export var settings_list: VBoxContainer # = $MarginContainer/ScrollContainer/VBoxContainer
 
+@onready var texture_rect: TextureRect = $TextureRect
+
 
 ## 用户名长度上限
 const USER_NAME_MAX_LENGTH: int = 6
 
 
 func _ready() -> void:
+	if texture_rect == null or texture_rect.material == null:
+		return
+	texture_rect.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
 	_build_settings()
+	pass
+
+
+func _enter_tree() -> void:
+	if texture_rect == null or texture_rect.material == null:
+		return
+	texture_rect.material.set_shader_parameter("gray_scale", Global.get_current_gray_scale())
+	pass
 
 
 func _build_settings() -> void:
