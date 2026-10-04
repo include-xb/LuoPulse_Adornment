@@ -68,6 +68,11 @@ const MULTI_TAP_BRIGHTEN: float = 0.6
 ## 尾部松手容差 (毫秒): 允许玩家提前这么长时间松手, 仍按完全按完结算
 const HOLD_RELEASE_TOLERANCE: float = 40.0
 
+## 长键收尾后延迟多久清理 (毫秒)
+## INFO: 原先借用的是"判定窗口的结束时间", 但那个窗口现在会被 heart 特效收紧 ——
+##       清理时机不该跟着判定参数一起漂移, 所以独立成常量
+const HOLD_TAIL_LINGER: float = 240.0
+
 
 # ---------- 节点重载函数 ----------
 func _ready() -> void:
@@ -137,20 +142,26 @@ func _process(delta: float) -> void:
 	# 判定区间管理 (仅在头部未判定时)
 	if not is_head_judged:
 		var time_offset: float = mt - float(time)
-		var in_judging_area: bool = time_offset >= float(Global.START_JUDGE_TIME) and time_offset <= float(Global.END_JUDGE_TIME)
+		var in_judging_area: bool = time_offset >= float(Global.start_judge_time) and time_offset <= float(Global.end_judge_time)
 
 		if in_judging_area and not _was_in_judging_area:
 			Global.judging_area.append(self)
 			pass
 
 		if not in_judging_area and _was_in_judging_area:
-			# 头部错过判定窗口 → 丢失
-			_lose()
+			# INFO: 判定窗口会被 heart 特效整体收窄 —— 还没越过判定线的头部"被动"离开
+			#       判定区不算漏键, 只把它从判定区摘掉 (与 NoteBase 同一套处理);
+			#       越过判定线之后离开, 才是头部错过判定窗口
+			if time_offset > 0.0:
+				_lose()
+			else:
+				_remove_from_judging()
+				pass
 			pass
 
 		_was_in_judging_area = in_judging_area
 
-		if time_offset > float(Global.END_JUDGE_TIME) and not is_removed:
+		if time_offset > float(Global.end_judge_time) and not is_removed:
 			_lose()
 			pass
 		pass
@@ -170,7 +181,7 @@ func _process(delta: float) -> void:
 			pass
 		pass
 	# 完全按住 (排除提前松手, 提前松手只由上方 is_hold_interrupted 分支处理)
-	elif is_head_judged and not is_hold_interrupted and mt >= float(time) + float(duration) + float(Global.END_JUDGE_TIME):
+	elif is_head_judged and not is_hold_interrupted and mt >= float(time) + float(duration) + HOLD_TAIL_LINGER:
 		if not is_hold_completed:
 			_complete_hold()
 			pass
@@ -303,15 +314,15 @@ func judge_head(master_time: float) -> void:
 
 	var abs_offset: int = abs(time_offset)
 
-	if abs_offset <= Global.HARMONIOUS_TIME:
+	if abs_offset <= Global.harmonious_time:
 		a = 1.0
 		level = "harmonious"
 		pass
-	elif abs_offset <= Global.SYMPATHETIC_TIME:
+	elif abs_offset <= Global.sympathetic_time:
 		a = 0.7
 		level = "sympathetic"
 		pass
-	elif abs_offset <= Global.AWARE_TIME:
+	elif abs_offset <= Global.aware_time:
 		a = 0.5
 		level = "aware"
 		pass
@@ -434,6 +445,17 @@ func _lose() -> void:
 
 
 # ---------- 清除 ----------
+## 只把长键从判定区摘掉, 保留它在渲染区 —— 判定窗口被 heart 特效收窄时用
+## INFO: 不能用 _remove_from_judging_and_rendering() —— 那会连 rendering_area 一起摘掉,
+##       而 Gameplay.reset_speed() 是靠 rendering_area 给长键重算长度的
+func _remove_from_judging() -> void:
+	var idx: int = Global.judging_area.find(self)
+	if idx >= 0:
+		Global.judging_area.remove_at(idx)
+		pass
+	pass
+
+
 ## 清理对象池中的引用
 func _remove_from_judging_and_rendering() -> void:
 	var idx: int = Global.judging_area.find(self)

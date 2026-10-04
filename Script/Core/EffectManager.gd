@@ -1,10 +1,16 @@
 ## EffectManager 谱面效果管理器
 ##
-## 负责 chart.lp 的 Effects 段。目前只有一种效果:
+## 负责 chart.lp 的 Effects 段。目前支持两种效果 (参数与校验完全一致):
 ##   change —— 轨道换位: 把整根 Column 沿 x 挪到别的槽位, duration 到期后复原。
+##   heart  —— change 的超集: 换位之外, 还整组收紧判定窗口并淡入心电图 (HeartLine)。
+##             changed 传恒等排列 (如 [ 1, 2, 3, 4 ]) 就是"只收紧判定 + 心电图, 不换位"。
 ##
 ## 换位挪的是 Column 节点本身; 轨道面 / 判定线 / 粒子 / 音符 (NotePool) 都是它的子节点,
 ## 会整体跟着走, 所以"看到的轨道在哪"与"音符在哪"永远是同一处。
+##
+## INFO: 换位与 heart 是两条独立的时间线 —— 换位槽会被后来的效果顶掉并提前收尾
+##       (见 _active_index), 而 heart 的判定收紧 / 心电图必须跑到它自己的结束时间
+##       (见 _heart_start_ms / _heart_end_ms)。少任何一条都会留下"判定窗口永久收紧"。
 
 extends Node
 
@@ -34,6 +40,14 @@ var _cursor: int = 0
 ## 当前生效的效果下标 (-1 表示没有)
 var _active_index: int = -1
 
+## 心电图折线节点 (Gameplay 注入; 没接上时为 null, 此时 heart 只收紧判定窗口)
+var _heart_line: HeartLine = null
+
+## 当前 heart 效果的起止时刻 (毫秒), _heart_end_ms < 0 表示没有 heart 生效
+## INFO: 特意只记时刻、不记下标 —— 效果在 _effects 里的生命周期与它的存续时间无关
+var _heart_start_ms: float = -1.0
+var _heart_end_ms: float = -1.0
+
 ## 当前效果: 各轨道在触发瞬间的 x (上升段的起点)
 var _from_x: PackedFloat32Array = PackedFloat32Array()
 
@@ -45,8 +59,10 @@ var _to_x: PackedFloat32Array = PackedFloat32Array()
 ## 载入效果列表并复位 (Gameplay 在 _ready 与重开时调用)
 ## @param tracks: Column 节点数组, 下标必须与 Gameplay.get_input_processor 一致
 ## @param raw_effects: chart.lp 的 Effects 段原文 (缺失或非法时传空数组)
-func setup(tracks: Array, raw_effects: Variant) -> void:
+## @param heart_line: 心电图节点; 不传则 heart 只收紧判定窗口
+func setup(tracks: Array, raw_effects: Variant, heart_line = null) -> void:
 	_tracks = tracks
+	_heart_line = heart_line
 
 	# 槽位坐标只记一次: 重开时轨道可能正被效果挪着, 那时读到的不是原位
 	if _origin_x.size() != _tracks.size():
@@ -68,6 +84,15 @@ func reset() -> void:
 			track.position.x = _origin_x[i]
 			pass
 		pass
+
+	# heart 的状态必须一起复位: 收紧的判定窗口是静默的全局状态, 泄漏了不会有任何报错
+	_heart_start_ms = -1.0
+	_heart_end_ms = -1.0
+	Global.apply_judge_window(false)
+	if _heart_line:
+		_heart_line.modulate.a = 0.0
+		_heart_line.reset_now()
+		pass
 	pass
 
 
@@ -83,10 +108,15 @@ func tick(master_time: float) -> void:
 		_cursor += 1
 		pass
 
-	if _active_index < 0:
-		return
+	# INFO: 两个槽位各推进各的, 不能因为换位槽空了就提前 return ——
+	#       换位会被后来的效果顶掉并先收尾, 而 heart 必须跑到它自己的结束时间
+	if _active_index >= 0:
+		_apply_positions(master_time)
+		pass
 
-	_apply_positions(master_time)
+	if _heart_end_ms >= 0.0:
+		_apply_heart(master_time)
+		pass
 	pass
 
 
@@ -139,6 +169,11 @@ func _activate(index: int) -> void:
 		pass
 
 	_active_index = index
+
+	# heart = change 的超集: 换位之外, 再收紧判定窗口并点亮心电图
+	if str(effect["type"]) == "heart":
+		_start_heart(start, float(effect["duration"]))
+		pass
 	pass
 
 
@@ -176,6 +211,50 @@ func _finish_active() -> void:
 		if is_instance_valid(track):
 			track.position.x = _origin_x[i]
 			pass
+		pass
+	pass
+
+
+# ---------- 内部: heart ----------
+## 开始 heart: 整组收紧判定窗口 + 点亮心电图 (换位部分已由 _activate 完成)
+## @param start: 效果触发时刻 (毫秒)
+## @param duration: 效果持续时间 (毫秒)
+func _start_heart(start: float, duration: float) -> void:
+	_heart_start_ms = start
+	# 结束时刻与换位一致: 复原 ramp 的时长也算在持续时间内
+	_heart_end_ms = start + duration + _change_time_ms()
+	Global.apply_judge_window(true)
+	if _heart_line:
+		_heart_line.set_beat(true)
+		pass
+	pass
+
+
+## 每帧推进 heart: 心电图按与换位同款的一对 ramp 淡入淡出, 到期收尾
+func _apply_heart(master_time: float) -> void:
+	if master_time >= _heart_end_ms:
+		_finish_heart()
+		return
+
+	var change: float = _change_time_ms()
+	var up: float = clampf((master_time - _heart_start_ms) / change, 0.0, 1.0)
+	var down: float = clampf((_heart_end_ms - master_time) / change, 0.0, 1.0)
+	if _heart_line:
+		# 取两条 ramp 的较小值: 开头淡入、结尾淡出, 中段恒为 1
+		_heart_line.modulate.a = minf(_ease(up), _ease(down))
+		pass
+	pass
+
+
+## 结束 heart: 恢复常规判定窗口 + 收起心电图
+## INFO: 心电图置 false 后不会立刻消失 —— 它会画完当前这一趟再清空 (见 HeartLine)
+func _finish_heart() -> void:
+	_heart_start_ms = -1.0
+	_heart_end_ms = -1.0
+	Global.apply_judge_window(false)
+	if _heart_line:
+		_heart_line.modulate.a = 0.0
+		_heart_line.set_beat(false)
 		pass
 	pass
 
@@ -253,8 +332,9 @@ func _parse_effects(raw_effects: Variant) -> Array:
 		# 不同谱面效果
 		var type: String = str((raw as Dictionary).get("type", ""))
 		match type:
-			"change":
-				var parsed: Dictionary = _parse_change(raw, order)
+			"change", "heart":
+				# heart 是 change 的超集: 参数与校验完全一致, 差别只在 _activate 的额外行为
+				var parsed: Dictionary = _parse_change(raw, order, type)
 				if parsed.is_empty():
 					continue
 				result.append(parsed)
@@ -268,23 +348,24 @@ func _parse_effects(raw_effects: Variant) -> Array:
 	return result
 
 
-## 解析一条 change 效果; 非法时返回空字典
+## 解析一条换位类效果 (change / heart); 非法时返回空字典
 ## @param order: 原文顺序, 用于 time 相同时的稳定排序
-func _parse_change(raw: Dictionary, order: int) -> Dictionary:
+## @param type_name: 效果类型名, 只用于报错文案与结果字典的 "type" 字段
+func _parse_change(raw: Dictionary, order: int, type_name: String) -> Dictionary:
 	if not raw.has("time") or not raw.has("duration") or not raw.has("changed"):
-		push_error("change 效果缺少 time / duration / changed 字段: %s" % str(raw))
+		push_error("%s 效果缺少 time / duration / changed 字段: %s" % [ type_name, str(raw) ])
 		return { }
 
 	# JSON 里的数字解析出来全是 float, 这里统一转成 int
 	var time: int = int(raw.get("time"))
 	var duration: int = int(raw.get("duration"))
 	if time < 0 or duration < 0:
-		push_error("change 效果的 time / duration 不能为负: %s" % str(raw))
+		push_error("%s 效果的 time / duration 不能为负: %s" % [ type_name, str(raw) ])
 		return { }
 
 	var raw_changed: Variant = raw.get("changed")
 	if not raw_changed is Array:
-		push_error("change 效果的 changed 必须是数组: %s" % str(raw))
+		push_error("%s 效果的 changed 必须是数组: %s" % [ type_name, str(raw) ])
 		return { }
 
 	var count: int = _tracks.size()
@@ -294,20 +375,20 @@ func _parse_change(raw: Dictionary, order: int) -> Dictionary:
 		pass
 
 	if changed.size() != count:
-		push_error("change 效果的 changed 长度必须是 %d, 实际是 %d" % [ count, changed.size() ])
+		push_error("%s 效果的 changed 长度必须是 %d, 实际是 %d" % [ type_name, count, changed.size() ])
 		return { }
 
 	# 必须是 1~count 的一个排列: 有重复会让两条轨道抢同一个槽位, 另一个槽位空着
 	var seen: Dictionary = { }
 	for slot: int in changed:
 		if slot < 1 or slot > count or seen.has(slot):
-			push_error("change 效果的 changed 必须是 1~%d 的排列: %s" % [ count, str(raw_changed) ])
+			push_error("%s 效果的 changed 必须是 1~%d 的排列: %s" % [ type_name, count, str(raw_changed) ])
 			return { }
 		seen[slot] = true
 		pass
 
 	return {
-		"type": "change",
+		"type": type_name,
 		"time": time,
 		"duration": duration,
 		"changed": changed,

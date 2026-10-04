@@ -69,11 +69,15 @@ func _physics_process(delta: float) -> void:
 	# INFO 不再使用上面的方式下落音符, 而是改回旧版使用 delta 计算每帧位移
 	# 优点: 与 _physics_process 高度一致, 下落时更加流畅.
 	# 缺点: 长时间 delta 的累加会造成浮点数的误差被放大, 但是由于音符被创建到判定只有 3 秒时间, 这段时间内的浮点数误差可以忽略
-	var correct_pos = Global.note_speed * (mt - float(time)) / 1000.0
-	position.z += Global.note_speed * delta
-	if abs(position.z - correct_pos) >= 0.01:
-		# position.z = correct_pos
+	# var correct_pos = Global.note_speed * (mt - float(time)) / 1000.0
+	# 位移按 delta 累加, 与 master_time 无关, 所以必须自己判断能否推进:
+	# 暂停 / 继续倒计时期间 master_time 冻结, 这里若照常累加, 音符会在暂停面板后面继续下落
+	if root_node.is_gaming:
+		position.z += Global.note_speed * delta
 		pass
+	# if abs(position.z - correct_pos) >= 0.01:
+	# 	# position.z = correct_pos
+	# 	pass
 
 	# 自动播放
 	if Global.is_autoplay:
@@ -82,7 +86,7 @@ func _physics_process(delta: float) -> void:
 
 	# 判定区间管理
 	var time_offset: float = mt - float(time)
-	var in_judging_area: bool = time_offset >= float(Global.START_JUDGE_TIME) and time_offset <= float(Global.END_JUDGE_TIME)
+	var in_judging_area: bool = time_offset >= float(Global.start_judge_time) and time_offset <= float(Global.end_judge_time)
 
 	if in_judging_area and not _was_in_judging_area and not is_removed:
 		is_added = true
@@ -90,12 +94,20 @@ func _physics_process(delta: float) -> void:
 		pass
 
 	if not in_judging_area and _was_in_judging_area and not is_removed:
-		_on_miss(mt)
+		# INFO: 判定窗口会被 heart 特效整体收窄。收窄的瞬间, 还没越过判定线的音符会
+		#       "被动"离开判定区 —— 那不是漏键 (它本该有机会走进收紧后的区间),
+		#       只把它从判定区摘掉即可, 窗口放宽或它自己走进来时还会重新入区;
+		#       只有越过判定线之后离开, 才算丢失
+		if time_offset > 0.0:
+			_on_miss(mt)
+		else:
+			_remove_from_judging()
+			pass
 		pass
 
 	_was_in_judging_area = in_judging_area
 
-	if time_offset > float(Global.END_JUDGE_TIME) and not is_removed:
+	if time_offset > float(Global.end_judge_time) and not is_removed:
 		_on_miss(mt)
 		pass
 	pass
@@ -145,17 +157,17 @@ func judge(master_time: float) -> void:
 
 	var abs_offset: int = abs(time_offset)
 
-	if abs_offset <= Global.HARMONIOUS_TIME:
+	if abs_offset <= Global.harmonious_time:
 		Global.harmonious += 1
 		a = 1.0
 		level = "harmonious"
 		pass
-	elif abs_offset <= Global.SYMPATHETIC_TIME:
+	elif abs_offset <= Global.sympathetic_time:
 		Global.sympathetic += 1
 		a = 0.7
 		level = "sympathetic"
 		pass
-	elif abs_offset <= Global.AWARE_TIME:
+	elif abs_offset <= Global.aware_time:
 		Global.aware += 1
 		a = 0.5
 		level = "aware"
@@ -270,6 +282,17 @@ func _flash_background() -> void:
 
 
 # ---------- 清除 ----------
+## 只把音符从判定区摘掉, 保留它在渲染区 —— 判定窗口被 heart 特效收窄时用
+## INFO: 不能用 _remove_from_judging_and_rendering() —— 那会连 rendering_area 一起摘掉,
+##       而 Gameplay.reset_speed() 是靠 rendering_area 给长键重算长度的
+func _remove_from_judging() -> void:
+	var idx: int = Global.judging_area.find(self)
+	if idx >= 0:
+		Global.judging_area.remove_at(idx)
+		pass
+	pass
+
+
 ## 清理对象池中的引用
 func _remove_from_judging_and_rendering() -> void:
 	var idx: int = Global.judging_area.find(self)

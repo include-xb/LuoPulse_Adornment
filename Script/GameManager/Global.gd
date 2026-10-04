@@ -43,23 +43,45 @@ const KEY_4: String = "K"
 ## 按键列表
 const KEY_LIST: Array[String] = [ KEY_1, KEY_2, KEY_3, KEY_4 ]
 
-## 开始判定时间 (单位: 毫秒)
-const START_JUDGE_TIME: int = -240
+## 判定窗口预设: 常规 (毫秒)
+## INFO: 判定窗口会被 heart 特效整组收紧, 所以六个值必须成组切换 —— 只改其中几个
+##       会让相邻判定等级之间出现空洞 (例如 aware 收到 120 而 sympathetic 还是 120)
+const JUDGE_WINDOW_NORMAL: Dictionary = {
+	"start": -240,
+	"end": 240,
+	"harmonious": 60,
+	"sympathetic": 120,
+	"aware": 180,
+	"lost": 240,
+}
 
-## 结束判定时间 (单位: 毫秒)
-const END_JUDGE_TIME: int = 240
+## 判定窗口预设: heart 特效期间 (整体收紧)
+const JUDGE_WINDOW_HEART: Dictionary = {
+	"start": -180,
+	"end": 180,
+	"harmonious": 40,
+	"sympathetic": 80,
+	"aware": 120,
+	"lost": 180,
+}
 
-## 和一 (Harmonious) 判定区间: [-60, 60]
-const HARMONIOUS_TIME: int = 60
+## 开始判定时间 (毫秒) —— 当前生效值, 由 apply_judge_window() 整组写入
+var start_judge_time: int = -240
 
-## 共鸣 (Sympathetic) 判定区间: [-120, -60) and (60, 120]
-const SYMPATHETIC_TIME: int = 120
+## 结束判定时间 (毫秒)
+var end_judge_time: int = 240
 
-## 觉醒 (Aware) 判定区间: [-180, -120) and (120, 180]
-const AWARE_TIME: int = 180
+## 和一 (Harmonious) 判定区间: 常规 [-60, 60], heart 期间 [-40, 40]
+var harmonious_time: int = 60
 
-## 丢失 (Lost) 判定区间: [-240, -180) and (180, 240]
-const LOST_TIME: int = 240
+## 共鸣 (Sympathetic) 判定区间: 常规 [-120, -60) and (60, 120]
+var sympathetic_time: int = 120
+
+## 觉醒 (Aware) 判定区间: 常规 [-180, -120) and (120, 180]
+var aware_time: int = 180
+
+## 丢失 (Lost) 判定区间: 常规 [-240, -180) and (180, 240]
+var lost_time: int = 240
 
 ## 调节音量时的音量缩放因子
 const VOLUME_FACTOR: float = 0.02
@@ -440,6 +462,22 @@ func _fade_bgm_to(target: float, duration: float) -> void:
 	_bgm_tween.set_trans(Tween.TRANS_CUBIC)
 	_bgm_tween.set_ease(Tween.EASE_OUT)
 	_bgm_tween.tween_property(bgm_player, "volume_linear", target, duration)
+	pass
+
+
+# ---------- 判定窗口 ----------
+## 整组切换判定窗口 (heart 特效开始 / 结束时由 EffectManager 调用)
+## INFO: 收紧的窗口是静默的全局状态 —— 泄漏了不会报错, 只会一直难打。所以
+##       EffectManager 的结束 / 复位路径与 Gameplay._reset_judging_stats() 都会调它
+## @param is_strict: true = heart 的收紧窗口, false = 常规窗口
+func apply_judge_window(is_strict: bool) -> void:
+	var preset: Dictionary = JUDGE_WINDOW_HEART if is_strict else JUDGE_WINDOW_NORMAL
+	start_judge_time = int(preset["start"])
+	end_judge_time = int(preset["end"])
+	harmonious_time = int(preset["harmonious"])
+	sympathetic_time = int(preset["sympathetic"])
+	aware_time = int(preset["aware"])
+	lost_time = int(preset["lost"])
 	pass
 
 

@@ -99,7 +99,9 @@ Per design doc — **4 timing windows** based on ms offset from ideal hit time:
 | ±180ms | **Aware（觉醒）**       | 0.5                 | —             |
 | ±240ms | **Lost（丢失）**        | 0.0                 | —             |
 
-> **Code status**: `Global.gd` 已实现 4 档边界 —— `HARMONIOUS_TIME=60`, `SYMPATHETIC_TIME=120`, `AWARE_TIME=180`, `LOST_TIME=240`;判定窗 `START_JUDGE_TIME=-240` / `END_JUDGE_TIME=240`,与上表一致。
+> **Code status**: `Global.gd` 已实现 4 档边界, 且判定窗口是**运行时可变的** —— 六个值有 `JUDGE_WINDOW_NORMAL` / `JUDGE_WINDOW_HEART` 两组预设, 由 `apply_judge_window()` 整组切换;当前生效值在 `start_judge_time` / `end_judge_time` / `harmonious_time` / `sympathetic_time` / `aware_time` / `lost_time`,与上表一致。
+>
+> **heart 谱面特效期间窗口整体收紧**: Harmonious ±40、Sympathetic ±80、Aware ±120、Lost ±180(`start_judge_time` / `end_judge_time` = ∓180), 特效结束自动恢复。见下方 Chart Effects。
 
 **Accuracy formula** (代码实现, `NoteBase._update_accuracy`):
 
@@ -233,6 +235,27 @@ A `.lpz` file is a ZIP archive:
 
 > **Code status**: 读取逻辑在 `Global._read_lpz` / `_read_audio_from_lpz`(读 `audio.ogg`, `AudioStreamOggVorbis.load_from_buffer`), 封面读 `cover.png`, 视频读 `video.ogv`。与上表一致。
 
+### Chart Effects（谱面效果: chart.lp 的 `Effects` 段）
+
+`Effects` 与 `HitObjects` 并列, 由 `Script/Core/EffectManager.gd` 消费。两种效果的参数与校验完全一致:
+
+| type     | 行为                                                                                                              |
+| -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `change` | 轨道换位: 把整根 Column 沿 x 挪到别的槽位, `duration` 到期后复原                                                    |
+| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入心电图 `Scene/Ui/Widget/HeartLine.tscn`  |
+
+```json
+"Effects": [
+	{ "type": "change", "time": 3000, "duration": 4000, "changed": [ 2, 3, 4, 1 ] },
+	{ "type": "heart",  "time": 5000, "duration": 3000, "changed": [ 3, 4, 1, 2 ] }
+]
+```
+
+- `changed`: 1~轨道数的排列, 语义是 `changed[槽位] = 轨道号`(1-based);`heart` 传恒等排列 `[ 1, 2, 3, 4 ]` 就等于"只收紧判定 + 心电图, 不换位"。
+- 换位与心电图淡入淡出的动画时长都用 `EffectManager.effect_change_time`(默认 0.2s)。
+- `heart` 的换位与它的判定收紧 / 心电图是**两条独立时间线**: 换位槽会被后来的效果顶掉, 而收紧与心电图一定会跑到 `heart` 自己的结束时间。
+- ⚠ `Effects` 里的 `"heart"` 是**效果类型**, 与 `HitObjects` 里的 `"heart"`(心键) 同名但不同段。
+
 ### Economic System
 
 **Crystal（水晶）** — virtual currency:
@@ -363,8 +386,8 @@ From `README.md` — follow these strictly:
 | Issue               | 现状 (以代码为准)                                                    |
 | ------------------- | --------------------------------------------------------------------- |
 | Judging boundaries  | ✅ 已实现 4 档, max ±240ms                                           |
-| Judging constant names | ✅ `HARMONIOUS_TIME` / `SYMPATHETIC_TIME` / `AWARE_TIME` / `LOST_TIME` |
-| Lost boundary       | ✅ `START_JUDGE_TIME` / `END_JUDGE_TIME` = ±240                        |
+| Judging constant names | ✅ 已改为运行时变量 (snake_case): `harmonious_time` / `sympathetic_time` / `aware_time` / `lost_time` |
+| Lost boundary       | ✅ `start_judge_time` / `end_judge_time` = ∓240 (heart 特效期间收紧为 ∓180) |
 | 断章命名             | 代码保留 `Album` (场景/脚本/变量); UI 显示「断章」                        |
 | Audio in .lpz       | ✅ 已读 `audio.ogg` (`AudioStreamOggVorbis.load_from_buffer`)           |
 | Cover in .lpz       | ✅ `cover.png`                                                         |

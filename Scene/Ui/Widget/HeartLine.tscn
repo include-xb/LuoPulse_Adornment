@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://d1gy1m1a3xlpc"]
+
+[ext_resource type="Script" uid="uid://eeu65uxtt22l" path="res://Script/Ui/Widget/HeartLine.gd" id="1_nox7l"]
+
+[node name="HeartLine" type="Control" unique_id=263587982]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_nox7l")
+amplitude_ratio = 0.25
+sweep_duration = 0.30000000000000004
+rest_duration = 0.2
+beat_count = 2

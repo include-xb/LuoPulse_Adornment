@@ -211,7 +211,9 @@ func press_judge(master_time: float) -> void:
 		if note.has_method("is_judgable") and not note.is_judgable():
 			continue
 		var offset: float = abs(master_time - float(note.get("time")))
-		if offset < best_offset and offset <= float(Global.LOST_TIME):
+		# INFO: 候选只看得出如今还在当前判定窗口内 —— 窗口被 heart 特效收紧时,
+		#       窗口外的音符早已被音符自己从 judging_area 摘掉了
+		if offset < best_offset and offset <= float(Global.lost_time):
 			best_offset = offset
 			best_note = note
 			pass

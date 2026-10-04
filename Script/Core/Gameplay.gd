@@ -24,6 +24,9 @@ extends Control
 ## 谱面效果管理器 (轨道换位等)
 @export var effect_manager: EffectManager # = $EffectManager
 
+## 心电图折线 (heart 谱面效果期间淡入)
+@export var heart_line: HeartLine # = $UI/HeartLine
+
 ## 进度条
 @export var progress_bar: ProgressBar # = $UI/ProgressBar
 
@@ -548,12 +551,20 @@ var default_chart: Array = [
 ## 是否处于测试模式, 若为 true, 则可以直接运行 Gameplay 场景
 @export var is_test: bool = false
 
-## 测试用的谱面效果 —— default_chart 里没有 Effects 段, 单跑本场景时靠这条看换位
+## 测试用的谱面效果 —— default_chart 里没有 Effects 段, 单跑本场景时靠这两条看效果
+## INFO: heart 故意安排得比 change 晚开始、晚结束 —— 覆盖"换位槽先收尾、heart 仍在
+##       收紧判定"那条路径 (那条路径要是被 tick 的早退拦住, 判定窗口会永久留在收紧状态)
 var default_effects: Array = [
 		{
 			"type": "change",
 			"time": 3000,
 			"changed": [ 2, 3, 4, 1 ],
+			"duration": 4000,
+		},
+		{
+			"type": "heart",
+			"time": 6000,
+			"changed": [ 1, 3, 2, 4 ],
 			"duration": 4000,
 		}]
 
@@ -952,7 +963,15 @@ func _collect_input_processers() -> void:
 func _setup_effects() -> void:
 	if effect_manager == null:
 		return
-	effect_manager.setup(input_processers, effect_list)
+
+	# 心电图节点: 优先用导出变量, 没在检视器里接上就按名字找一次
+	# (它只影响视觉, 找不到也不影响本局照常进行)
+	var line: HeartLine = heart_line
+	if line == null and _ui:
+		line = _ui.get_node_or_null("HeartLine") as HeartLine
+		pass
+
+	effect_manager.setup(input_processers, effect_list, line)
 	pass
 
 
@@ -1129,7 +1148,13 @@ func _store_song_general(general: Dictionary) -> void:
 
 
 ## 将谱面数据写入到各数组中
+## INFO: 先按 time 升序排序 —— 整套流程 (顺序加载音符 / 取头尾音符时间 / 同时间音符的
+##       批量加载) 都假定 time_list 是升序的, 而谱面编辑器可能把后加的音符直接追加在末尾。
+##       实际曲包里就出现过: 226641 之后还挂着 time 6000 与 11125 的两条心键 ——
+##       于是 last_note_time 被算成 11125, 结束提示在开曲 12 秒时就弹了出来
 func write_in_list() -> void:
+	chart.sort_custom(_sort_note_by_time)
+
 	total_notes = len(chart)
 	for i: Dictionary in chart:
 		var time: int = i.get("time")
@@ -1144,6 +1169,11 @@ func write_in_list() -> void:
 	pass
 
 
+## 音符按 time 升序 (供 chart.sort_custom 使用)
+static func _sort_note_by_time(a: Dictionary, b: Dictionary) -> bool:
+	return float(a.get("time", 0)) < float(b.get("time", 0))
+
+
 ## 获取头尾音符时间
 func get_first_last_note_time() -> void:
 	first_note_time = time_list[0]
@@ -1153,6 +1183,9 @@ func get_first_last_note_time() -> void:
 
 ## 重置各类判定数据
 func _reset_judging_stats() -> void:
+	# 判定窗口是全局状态, 会被 heart 特效收紧 —— 本局开始必定回到常规
+	Global.apply_judge_window(false)
+
 	Global.harmonious = 0
 	Global.sympathetic = 0
 	Global.aware = 0

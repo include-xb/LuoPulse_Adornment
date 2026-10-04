@@ -6,6 +6,3 @@ extends NoteBase
 
 
 var type: String = "heart"
-
-
-# TODO: 触发 ECG 动画 + 扰乱后续 4 个音符的列映射
