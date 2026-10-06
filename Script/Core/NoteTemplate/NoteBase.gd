@@ -192,13 +192,9 @@ func judge(master_time: float) -> void:
 	pass
 
 
-## 被触摸判定为 Lost (release 覆写为触摸即丢失)
-func lose(master_time: float) -> void:
-	_lose(master_time)
-	pass
-
-
 ## 离开判定区间且未被判定时的处理 (子类可覆写)
+## INFO: 红键也不再例外 —— 它必须由玩家在判定线处松手结算, 一直按住不放或从头没按
+##       都会走到这里, 与其它音符一样算 Lost
 func _on_miss(master_time: float) -> void:
 	_lose(master_time)
 	pass
@@ -344,12 +340,5 @@ func emit_particles(level: String = "harmonious") -> void:
 ## @param level: 判定等级, 决定粒子配色与数量
 func explode(level: String = "harmonious") -> void:
 	emit_particles(level)
-	queue_free()
-	pass
-
-
-## 静默移除自身 (无粒子、无反馈)
-## 用于"做对了但不该有打击反馈"的场合, 例如红键被正确忽略
-func remove_silently() -> void:
 	queue_free()
 	pass

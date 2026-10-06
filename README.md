@@ -72,7 +72,7 @@ title.lpz    # .zip
             "column": 2
         },
         {
-            "type": "release",     // release (红键)
+            "type": "release",     // release (红键: 按住本轨, 在判定线处松手)
             "time": 1000,
             "column": 3
         },

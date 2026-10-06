@@ -1,5 +1,8 @@
 ## InputProcesser.gd 输入处理器
 ## 每个 Column 节点挂载一个实例, 处理该轨道的触屏/按键输入判定
+##
+## 两条判定时机: 按下 (press_judge: tap / drag / hold 头判) 与 松手
+## (_release_judge: release 的判定时刻 —— 见 Script/Core/NoteTemplate/Release.gd)
 
 
 extends Node3D
@@ -149,6 +152,12 @@ func _get_column_notes() -> Array:
 	return result
 
 
+## 本轨道当前是否被玩家按住
+## 供 release 音符判断"是否已接管" —— 判据与 _process 里的轨道高亮保持一致
+func is_pressed() -> bool:
+	return _touch_count > 0
+
+
 # ---------- 触屏输入 ----------
 ## 被按下
 func on_touch_pressed(master_time: float) -> void:
@@ -166,7 +175,10 @@ func on_touch_pressed(master_time: float) -> void:
 
 
 ## 被释放
-func on_touch_released(master_time: float) -> void:
+## @param is_synthetic: 暂停等内部路径合成的"松手" —— 只收拾长按状态, 不结算红键
+## INFO: 能走到这里说明本轨的触摸计数刚好归零, 也就是"松手的那一刻本轨确实按着" ——
+##       红键结算需要的条件天然成立, 不需要额外判断玩家是否接管过它
+func on_touch_released(master_time: float, is_synthetic: bool = false) -> void:
 	_touch_time = master_time
 	_touch_count = maxi(0, _touch_count - 1)
 
@@ -179,6 +191,11 @@ func on_touch_released(master_time: float) -> void:
 			pass
 		is_holding = false
 		current_hold_note = null
+		pass
+
+	# 暂停合成的松手只用来收拾长按状态: 玩家手指其实还按着, 不能拿它结算红键
+	if not is_synthetic:
+		_release_judge(master_time)
 		pass
 	pass
 
@@ -210,6 +227,11 @@ func press_judge(master_time: float) -> void:
 			continue
 		if note.has_method("is_judgable") and not note.is_judgable():
 			continue
+		# INFO: 红键不参与"按下"判定 —— 它要等玩家松手时才结算 (见 _release_judge)。
+		#       必须在这里把它排除出候选, 否则它会占住本列唯一的"最近"名额,
+		#       把稍远处的 tap / drag / hold 挡掉, 那次按下就白按了
+		if str(note.get("type")) == "release":
+			continue
 		var offset: float = abs(master_time - float(note.get("time")))
 		# INFO: 候选只看得出如今还在当前判定窗口内 —— 窗口被 heart 特效收紧时,
 		#       窗口外的音符早已被音符自己从 judging_area 摘掉了
@@ -236,10 +258,7 @@ func press_judge(master_time: float) -> void:
 				pass
 			pass
 		"release":
-			# 红键: 触摸即判定为 Lost
-			if best_note.has_method("lose"):
-				best_note.lose(master_time)
-				pass
+			# 不会走到这里: 红键在候选扫描时就被排除了 (见上面的 continue)
 			pass
 		"hold":
 			if best_note.has_method("is_head_judgable") and best_note.is_head_judgable():
@@ -256,6 +275,40 @@ func press_judge(master_time: float) -> void:
 					pass
 				pass
 			pass
+		pass
+	pass
+
+
+## 松手判定: 结算本列判定区内最近的 release 音符
+## INFO: 松手的时刻就是这次判定的时刻, 具体分级交给音符自己的 judge() (与 tap 同一套)
+## INFO: 只认 release 类型 —— 长条的尾判走 on_touch_released 里 current_hold_note 那条路,
+##       这里若不限类型, 会把同列长条的尾判一起结算掉
+func _release_judge(master_time: float) -> void:
+	var column_notes: Array = _get_column_notes()
+	if column_notes.is_empty():
+		return
+
+	var best_note: Variant = null
+	var best_offset: float = INF
+
+	for note in column_notes:
+		if not is_instance_valid(note):
+			continue
+		if str(note.get("type")) != "release":
+			continue
+		if note.has_method("is_judgable") and not note.is_judgable():
+			continue
+		var offset: float = abs(master_time - float(note.get("time")))
+		if offset < best_offset and offset <= float(Global.lost_time):
+			best_offset = offset
+			best_note = note
+			pass
+		pass
+
+	if best_note == null:
+		return
+	if best_note.has_method("on_released"):
+		best_note.on_released(master_time)
 		pass
 	pass
 

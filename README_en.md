@@ -76,7 +76,7 @@ The chart file format is structured as follows:
             "column": 2
         },
         {
-            "type": "release",    // release (red key)
+            "type": "release",    // release (red key: hold the track, release at the judgment line)
             "time": 1000,
             "column": 3
         },

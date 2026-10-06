@@ -289,7 +289,7 @@ const BACKGROUND_FLASH_COMBO_FULL: float = 150.0
 ## 用于测试
 var default_chart: Array = [
 		{
-			"type": "tap",
+			"type": "release",
 			"time": 1071,
 			"column": 2
 		},
@@ -319,22 +319,22 @@ var default_chart: Array = [
 			"column": 4
 		},
 		{
-			"type": "tap",
+			"type": "release",
 			"time": 1861,
 			"column": 1
 		},
 		{
-			"type": "tap",
+			"type": "release",
 			"time": 2058,
 			"column": 3
 		},
 		{
-			"type": "tap",
+			"type": "drag",
 			"time": 2256,
 			"column": 2
 		},
 		{
-			"type": "tap",
+			"type": "drag",
 			"time": 2453,
 			"column": 4
 		},
@@ -1071,10 +1071,11 @@ func _on_column_touch_pressed(column: int, input_time: float) -> void:
 
 
 ## 触屏事件: 释放
-func _on_column_touch_released(column: int, input_time: float) -> void:
+## @param is_synthetic: 内部合成的松手 (暂停路径) —— 转发给 processor 用于跳过红键结算
+func _on_column_touch_released(column: int, input_time: float, is_synthetic: bool = false) -> void:
 	var processor: Node3D = get_input_processor(column)
 	if processor and processor.has_method("on_touch_released"):
-		processor.on_touch_released(input_time)
+		processor.on_touch_released(input_time, is_synthetic)
 		pass
 	pass
 
@@ -1414,14 +1415,16 @@ func _on_pause_button_pressed() -> void:
 		return
 
 	var pause_time: float = _compute_master_time()
+	# INFO: 这两处是"合成"的松手 (玩家手指其实还按着), 所以传 true —— 只用来收拾长按
+	#       状态, 不能拿它结算红键, 否则暂停一下就会把一个正在等的红键判掉
 	for col in active_touches.values():
-		_on_column_touch_released(col, pause_time)
+		_on_column_touch_released(col, pause_time, true)
 	active_touches.clear()
 
 	# 按住的键也要一并松开: _input 开头 "not is_gaming 就 return" 会吞掉暂停期间的所有
 	# 松键事件, 不在这里释放的话, 那个键会一直卡在按下态 (轨道长亮, hold 也不结算)
 	for col in _active_keys.values():
-		_on_column_touch_released(col, pause_time)
+		_on_column_touch_released(col, pause_time, true)
 	_active_keys.clear()
 
 	is_gaming = false

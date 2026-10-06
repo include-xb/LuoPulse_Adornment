@@ -76,6 +76,7 @@ speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxCo
 speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
 tick = NodePath("UI/Tick")
 finish_button_mask = NodePath("UI/Mask")
+is_test = true
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1
