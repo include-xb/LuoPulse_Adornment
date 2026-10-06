@@ -328,13 +328,15 @@ func press_judge(master_time: float) -> void:
 			# 不会走到这里: 红键在候选扫描时就被排除了 (见上面的 continue)
 			pass
 		"hold":
+			# INFO: 能不能"接住"这条长键, 判据是它的头部有没有真的被判定为**命中**。
+			#       头判也可能是"丢失" (按下时刻偏出 ±aware_time) —— 那条长键已经废了,
+			#       只会半透明继续下落。若不看这一眼就进入按住状态, 松手时会被
+			#       Hold._complete_hold 当成一次成功结算, 冒出背景闪光与连击 +1
 			if best_note.has_method("is_head_judgable") and best_note.is_head_judgable():
 				best_note.judge_head(master_time)
-				is_holding = true
-				current_hold_note = best_note
 				pass
-			elif best_note.has_method("is_head_judgable") and not best_note.is_head_judgable():
-				# 头部已判定, 开始 hold
+
+			if best_note.get("is_head_judged") == true:
 				is_holding = true
 				current_hold_note = best_note
 				if best_note.has_method("on_hold_start"):

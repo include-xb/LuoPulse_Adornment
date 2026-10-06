@@ -50,7 +50,7 @@ var _processor: Node = null
 var _is_processor_resolved: bool = false
 
 ## 多压提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
-const MULTI_TAP_BRIGHTEN: float = 0.6
+const MULTI_TAP_BRIGHTEN: float = 0.4
 
 
 # ---------- 节点重载函数 ----------

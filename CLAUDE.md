@@ -140,7 +140,7 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 | 心键 (Heart)   | `heart`   | #701010 | Like tap, but triggers special hit effect + ECG animation across background. Scrambles column mapping of next 4 notes. |
 | 长键 (Hold)    | `hold`    | #90B070 | Head judgment like tap, must hold until end; tail settled from the head's accuracy. See `release` for a true tail judgment.                                                         |
 
-> **碎裂反馈 (代码现状)**: 非 hold 音符 (tap / drag / heart / release) 命中后**原地消失、不发射粒子** —— 唯一的反馈是对应轨道判定线上一个**迅速变大变淡的矩形**: 0.1s, 从音符尺寸的 0.8 倍放大到 1.5 倍, 颜色取音符自身颜色 (见 `InputProcesser.show_hit_burst`; 时长与倍率都是该文件顶部的 `BURST_*` 常量)。漏键、以及"打到丢失档的点击"连矩形也不给, 只留灰色飘字。长键仍用粒子: 头部命中打一次爆发, **按住期间持续发射** (`InputProcesser._update_hold_particles` 每帧看着"是否正被按住", 松手 / 按满 / 长键被移除时自动收掉); 该粒子发射器 (`Column/GPUParticles3D`) 被约束成**只能背离相机散开** (`direction = (0,0,-1)` / `spread = 90` / 盒体 z 跨度归零), 不再有糊到玩家眼前的粒子。
+> **碎裂反馈 (代码现状)**: 非 hold 音符 (tap / drag / heart / release) 命中后**原地消失、不发射粒子** —— 唯一的反馈是对应轨道判定线上一个**迅速变大变淡的矩形**: 颜色取音符自身颜色, 时长与起止倍率见 `InputProcesser` 顶部的 `BURST_*` 常量 (见 `InputProcesser.show_hit_burst`)。漏键、以及"打到丢失档的点击"连矩形也不给, 只留灰色飘字。长键仍用粒子, 但**只有头部命中**才打一次爆发, 按住期间持续发射 (`InputProcesser._update_hold_particles` 每帧看着"是否正被按住", 松手 / 按满 / 长键被移除时自动收掉); **头部漏键则连粒子也不出**, 只把长条转半透明 (表示这条已废) + 灰色飘字 —— miss 就是 miss, 不给任何带"命中感"的反馈。该粒子发射器 (`Column/GPUParticles3D`) 被约束成**只能背离相机散开** (`direction = (0,0,-1)` / `spread = 90` / 盒体 z 跨度归零), 不再有糊到玩家眼前的粒子。
 
 ### Core Gameplay Pipeline
 

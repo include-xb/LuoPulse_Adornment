@@ -63,7 +63,7 @@ var is_mulit_tap: bool = false
 const REST_ALPHA: float = 0.6
 
 ## 多押提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
-const MULTI_TAP_BRIGHTEN: float = 0.6
+const MULTI_TAP_BRIGHTEN: float = 0.4
 
 ## 尾部松手容差 (毫秒): 允许玩家提前这么长时间松手, 仍按完全按完结算
 const HOLD_RELEASE_TOLERANCE: float = 40.0
@@ -274,7 +274,7 @@ func get_note_color() -> Color:
 
 
 ## 发射一次粒子爆发 (不销毁自身)
-## 长键在头部命中与头部判丢时各发一次
+## 只在头部命中时发一次 (头部判丢不出粒子 —— miss 就是 miss)
 ## INFO: 按住期间的持续发射不在这里 —— 由本列 InputProcesser 每帧看着"是否正被按住"
 ##       维护 (见 InputProcesser._update_hold_particles), 松手 / 按满时自动收掉
 ## INFO: 本列共用的粒子发射器现在只服务长键 —— 非 hold 音符改成在判定线上点亮矩形
@@ -445,7 +445,8 @@ func _lose() -> void:
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
 
 	_remove_from_judging_and_rendering()
-	emit_particles("lost")
+	# 头部漏键不出粒子 —— miss 就是 miss, 不给任何带"命中感"的反馈。
+	# 到这里反馈已经够了: 长条转半透明 (表示这条已经废了) + 灰色"丢失"飘字
 	# 不立即释放: 半透明后继续下落, 滚出屏幕后在 _process 中移除
 	pass
 
