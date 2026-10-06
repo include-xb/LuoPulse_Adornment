@@ -520,11 +520,6 @@ var default_chart: Array = [
 		},
 		{
 			"type": "tap",
-			"time": 8177,
-			"column": 1
-		},
-		{
-			"type": "tap",
 			"time": 8374,
 			"column": 3
 		},
@@ -539,15 +534,84 @@ var default_chart: Array = [
 			"column": 4
 		},
 		{
-			"type": "tap",
-			"time": 8966,
+			"type": "drag",
+			"time": 9000,
 			"column": 1
 		},
 		{
-			"type": "tap",
-			"time": 8966,
-			"column": 3
-		}]
+			"type": "drag",
+			"time": 9100,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9200,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9300,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9400,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9500,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9600,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9700,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9800,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 9900,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 10000,
+			"column": 1
+		},
+		{
+			"type": "drag",
+			"time": 10100,
+			"column": 1
+		}
+		,
+		{
+			"type": "drag",
+			"time": 10200,
+			"column": 1
+		}
+		,
+		{
+			"type": "drag",
+			"time": 10300,
+			"column": 1
+		}
+		,
+		{
+			"type": "release",
+			"time": 10400,
+			"column": 1
+		}
+	]
 ## 是否处于测试模式, 若为 true, 则可以直接运行 Gameplay 场景
 @export var is_test: bool = false
 

@@ -23,12 +23,6 @@ var _is_color_captured: bool = false
 ## 当前是否处于"已接管"高亮状态
 var _is_lit: bool = false
 
-## 本列 InputProcesser 的引用 (只为读"是否被按住", 惰性解析一次)
-var _processor: Node = null
-
-## 是否已经尝试解析过 _processor
-var _is_processor_resolved: bool = false
-
 
 # ---------- 节点重载函数 ----------
 func _physics_process(delta: float) -> void:
@@ -65,29 +59,12 @@ func _refresh_takeover_light() -> void:
 		var offset: float = root_node.master_time - float(time)
 		var in_judging_area: bool = offset >= float(Global.start_judge_time) and offset <= float(Global.end_judge_time)
 		if in_judging_area:
-			# 自动播放没有真实触摸, 用"进入判定区 → 判定线"这一段表达"按住"
-			is_lit_now = Global.is_autoplay or _is_column_pressed()
+			is_lit_now = _is_column_held()
 			pass
 		pass
 
 	_set_takeover_light(is_lit_now)
 	pass
-
-
-## 本列当前是否被玩家按住
-func _is_column_pressed() -> bool:
-	if not _is_processor_resolved:
-		_is_processor_resolved = true
-		if root_node and root_node.has_method("get_input_processor"):
-			_processor = root_node.get_input_processor(column - 1)
-			pass
-		pass
-
-	if _processor == null or not is_instance_valid(_processor):
-		return false
-	if not _processor.has_method("is_pressed"):
-		return false
-	return _processor.is_pressed()
 
 
 ## 设置"已接管"外观

@@ -135,7 +135,7 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 | Name         | Code Name | Color   | Behavior                                                                                                               |
 | ------------ | --------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
 | 蓝键 (Tap)     | `tap`     | #66CCFF | Requires precise tap                                                                                                   |
-| 黄键 (Drag)    | `drag`    | #FFFF00 | Touch triggers hit                                                                                                     |
+| 黄键 (Drag)    | `drag`    | #FFFF00 | Hold the track at any time while this note is **inside the judging area** → Harmonious (it explodes at the line, or at once if already past it). Never held → Lost when it leaves the area.                                                                                                     |
 | 红键 (Release) | `release` | #FF0000 | Press the track, release at the judgment line — the release moment is judged by the same windows. Never pressing = Lost.                                                                                         |
 | 心键 (Heart)   | `heart`   | #701010 | Like tap, but triggers special hit effect + ECG animation across background. Scrambles column mapping of next 4 notes. |
 | 长键 (Hold)    | `hold`    | #90B070 | Head judgment like tap, must hold until end; tail settled from the head's accuracy. See `release` for a true tail judgment.                                                         |
@@ -148,7 +148,7 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 
 3. **NoteLoader** (`Script/Core/NoteLoader.gd`): Factory instantiating note scenes from `res://Scene/Core/NoteTemplate/` based on chart `type` string.
 
-4. **InputProcesser** (`Script/Core/InputProcesser.gd`): 每根轨道 (Column 节点) 挂载一个实例, 处理该轨道的触屏/按键判定。触屏输入已在 `Gameplay._input` 实现 (根据屏幕 X 映射到轨道列, 支持多点触控); 键盘 D/F/J/K 保留为桌面调试输入。轨道按下/松开触发 `press_judge` / hold 释放逻辑, 附带轨道高亮 shader 反馈。按下时红键不参与候选, 松手时另走 `_release_judge` 按松手时刻结算 (见 Note Types 的 `release`)。
+4. **InputProcesser** (`Script/Core/InputProcesser.gd`): 每根轨道 (Column 节点) 挂载一个实例, 处理该轨道的触屏/按键判定。触屏输入已在 `Gameplay._input` 实现 (根据屏幕 X 映射到轨道列, 支持多点触控); 键盘 D/F/J/K 保留为桌面调试输入。轨道按下/松开触发 `press_judge` / hold 释放逻辑, 附带轨道高亮 shader 反馈。红键与黄键都不参与按下候选: 红键松手时由 `_release_judge` 按松手时刻结算, 黄键由音符自己在进入判定区时查一次本轨是否被按住 (见 Note Types)。
 
 5. **Note templates** (`Script/Core/NoteTemplate/`, 场景在 `Scene/Core/NoteTemplate/`): 音符为 3D 轨道内的 `MeshInstance3D` (`NoteBase`), 通过 `position.z = note_speed * (master_time - time) / 1000` 定位下落 (到达判定线时 z=0)。进入判定窗时注册到 `Global.judging_area`, 命中调用 `judge()`, 未中 `_lose()`, `explode()` 播放粒子后销毁。
 
@@ -396,6 +396,7 @@ From `README.md` — follow these strictly:
 | 主菜单按钮           | ✅ 路由正确 (共鸣→Sympathy / 断章→Album / 笔记→Notebook / 设置→SettingsMenu) |
 | Input               | ✅ 触屏已实现, 键盘 D/F/J/K 保留为桌面调试                               |
 | Release 机制         | ✅ 已由"不可触摸, 触摸即 Lost"改为"按住本轨 → 判定线处松手, 松手时刻参与常规判定"; 红键现在也计入 `total_judged`(旧版静默通过不计入) |
+| Drag 机制            | ✅ 已由"触摸触发、按按下时刻分级"改为"判定区内任意一帧本轨被按住即算通过 → 恒定判和一(到判定线才碎裂, 越过判定线才按住的则当场碎裂); 一直没按住 → 越过最大判定区间才判 Lost" |
 
 ## Key Script Paths
 

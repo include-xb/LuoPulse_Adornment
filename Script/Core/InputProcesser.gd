@@ -1,8 +1,9 @@
 ## InputProcesser.gd 输入处理器
 ## 每个 Column 节点挂载一个实例, 处理该轨道的触屏/按键输入判定
 ##
-## 两条判定时机: 按下 (press_judge: tap / drag / hold 头判) 与 松手
-## (_release_judge: release 的判定时刻 —— 见 Script/Core/NoteTemplate/Release.gd)
+## 两条判定时机: 按下 (press_judge: tap / hold 头判) 与 松手
+## (_release_judge: release 的判定时刻 —— 见 Script/Core/NoteTemplate/Release.gd)。
+## 黄键两者都不走: 它由音符自己在进入判定区时查一次本轨是否被按住 (见 Drag.gd)
 
 
 extends Node3D
@@ -59,6 +60,11 @@ var current_hold_note: MeshInstance3D = null
 
 ## 当前帧触摸时间 (由 Gameplay 传入)
 var _touch_time: float = -999999.0
+
+## 不参与"按下时刻"判定的音符类型
+## INFO: 红键等松手时结算 (见 _release_judge); 黄键由"进入判定区时本轨是否被按住"决定。
+##       它们若留在候选里, 会占住本列唯一的"最近"名额, 把稍远的 tap / hold 挡掉
+const PRESS_EXEMPT_TYPES: Array[String] = [ "release", "drag" ]
 
 
 # ---------- 节点重载函数 ----------
@@ -227,10 +233,8 @@ func press_judge(master_time: float) -> void:
 			continue
 		if note.has_method("is_judgable") and not note.is_judgable():
 			continue
-		# INFO: 红键不参与"按下"判定 —— 它要等玩家松手时才结算 (见 _release_judge)。
-		#       必须在这里把它排除出候选, 否则它会占住本列唯一的"最近"名额,
-		#       把稍远处的 tap / drag / hold 挡掉, 那次按下就白按了
-		if str(note.get("type")) == "release":
+		# INFO: 红键与黄键都不参与"按下时刻"判定 (见 PRESS_EXEMPT_TYPES 的说明)
+		if PRESS_EXEMPT_TYPES.has(str(note.get("type"))):
 			continue
 		var offset: float = abs(master_time - float(note.get("time")))
 		# INFO: 候选只看得出如今还在当前判定窗口内 —— 窗口被 heart 特效收紧时,
@@ -253,9 +257,7 @@ func press_judge(master_time: float) -> void:
 				pass
 			pass
 		"drag":
-			if best_note.has_method("judge"):
-				best_note.judge(master_time)
-				pass
+			# 不会走到这里: 黄键在候选扫描时就被排除了 (它看的是进入判定区时的轨道状态)
 			pass
 		"release":
 			# 不会走到这里: 红键在候选扫描时就被排除了 (见上面的 continue)

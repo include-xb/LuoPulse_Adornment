@@ -43,6 +43,12 @@ var _was_in_judging_area: bool = false
 ## 是否为多压
 var is_mulit_tap: bool = false
 
+## 本列 InputProcesser 的引用 (只为读"本轨是否被按住", 惰性解析一次)
+var _processor: Node = null
+
+## 是否已经尝试解析过 _processor
+var _is_processor_resolved: bool = false
+
 ## 多压提示亮度增量 (0.0 ~ 1.0, 在原色基础上向白色混合)
 const MULTI_TAP_BRIGHTEN: float = 0.6
 
@@ -267,6 +273,27 @@ func _play_hit_sound() -> void:
 		root_node.play_hit_sound()
 		pass
 	pass
+
+
+## 本列当前是否被玩家按住 (判据由 InputProcesser.is_pressed() 提供)
+## 用途: 释放键看它决定是否"接管", 黄键在进入判定区时看它决定成败
+## INFO: 自动播放没有真实触摸, 一律算作按住
+func _is_column_held() -> bool:
+	if Global.is_autoplay:
+		return true
+
+	if not _is_processor_resolved:
+		_is_processor_resolved = true
+		if root_node and root_node.has_method("get_input_processor"):
+			_processor = root_node.get_input_processor(column - 1)
+			pass
+		pass
+
+	if _processor == null or not is_instance_valid(_processor):
+		return false
+	if not _processor.has_method("is_pressed"):
+		return false
+	return _processor.is_pressed()
 
 
 ## 命中时的背景脉冲 (幅度很小, 主要反馈由连击数驱动)
