@@ -19,7 +19,7 @@ void fragment() {
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_hold"]
 resource_local_to_scene = true
-render_priority = -1
+render_priority = 0
 shader = SubResource("Shader_1lfxb")
 shader_parameter/color = Color(0.5647059, 0.6901961, 0.4392157, 1)
 

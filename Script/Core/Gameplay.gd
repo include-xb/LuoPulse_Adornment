@@ -534,6 +534,12 @@ var default_chart: Array = [
 			"column": 4
 		},
 		{
+			"type": "hold",
+			"time": 9050,
+			"duration": 1000,
+			"column": 1
+		},
+		{
 			"type": "drag",
 			"time": 9000,
 			"column": 1
@@ -1709,6 +1715,7 @@ func reset_speed() -> void:
 	if Global.rendering_area.size() == 0:
 		return
 	for note: MeshInstance3D in Global.rendering_area:
+		note.position.z = Global.note_speed * (master_time - float(note.time)) / 1000.0
 		if not is_instance_valid(note):
 			continue
 		if note.type != "hold":

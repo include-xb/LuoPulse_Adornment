@@ -274,7 +274,13 @@ func get_note_color() -> Color:
 
 
 ## 发射一次粒子爆发 (不销毁自身)
-## 长键在头部命中与尾部结算各发一次
+## 长键在头部命中与头部判丢时各发一次
+## INFO: 按住期间的持续发射不在这里 —— 由本列 InputProcesser 每帧看着"是否正被按住"
+##       维护 (见 InputProcesser._update_hold_particles), 松手 / 按满时自动收掉
+## INFO: 本列共用的粒子发射器现在只服务长键 —— 非 hold 音符改成在判定线上点亮矩形
+##       (见 NoteBase._burst_feedback)。它的 process_material 被约束成"只能背离相机散开"
+##       (Scene/Core/Column.tscn: direction = (0,0,-1) / spread = 90 / 盒体 z 跨度归零),
+##       否则总有一半粒子朝 +z 糊到玩家眼前
 ## @param level: 判定等级, 只决定粒子数量 (颜色取长条本体颜色)
 func emit_particles(level: String = "harmonious") -> void:
 	var particle: GPUParticles3D = get_node_or_null("../../GPUParticles3D")

@@ -43,8 +43,9 @@ curve = SubResource("Curve_m7grc")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sbk8k"]
 emission_shape = 3
-emission_box_extents = Vector3(0.1, 0, 0.1)
-spread = 180.0
+emission_box_extents = Vector3(0.1, 0, 0)
+direction = Vector3(0, 0, -1)
+spread = 90.0
 flatness = 1.0
 initial_velocity_min = 2.0
 initial_velocity_max = 3.0
@@ -56,8 +57,8 @@ radial_accel_min = 3.9999976
 radial_accel_max = 4.9999976
 damping_min = 0.05
 damping_max = 0.1
-scale_min = 0.1
-scale_max = 0.2
+scale_min = 0.19999999
+scale_max = 0.39999998
 scale_curve = SubResource("CurveTexture_os6cd")
 
 [sub_resource type="Gradient" id="Gradient_46tx6"]
@@ -81,10 +82,14 @@ albedo_texture = SubResource("GradientTexture2D_u0bcu")
 [sub_resource type="QuadMesh" id="QuadMesh_fndbt"]
 material = SubResource("StandardMaterial3D_2yv3u")
 
-[node name="Column" type="Node3D" unique_id=1704662228 node_paths=PackedStringArray("single_track", "gpu_particles_3d")]
+[sub_resource type="ArrayMesh" id="ArrayMesh_2bmra"]
+
+[node name="Column" type="Node3D" unique_id=1704662228 node_paths=PackedStringArray("single_track", "gpu_particles_3d", "_judging_strip", "_hit_burst")]
 script = ExtResource("1_ogl7y")
 single_track = NodePath("SingleTrack")
 gpu_particles_3d = NodePath("GPUParticles3D")
+_judging_strip = NodePath("Judging")
+_hit_burst = NodePath("HitBurst")
 
 [node name="NotePool" type="Node3D" parent="." unique_id=270649043]
 
@@ -93,15 +98,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
 mesh = SubResource("PlaneMesh_s4y3q")
 
 [node name="Judging" type="MeshInstance3D" parent="." unique_id=185629654]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
 mesh = SubResource("PlaneMesh_in2dp")
 
 [node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=869510]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.022740126, 0.15707707, 0.084050596)
 emitting = false
-amount = 30
-lifetime = 0.18000000000000002
-explosiveness = 0.9
+amount = 18
+lifetime = 0.3
 transform_align = 1
 transform_align_channel_filter = 1
 process_material = SubResource("ParticleProcessMaterial_sbk8k")
 draw_pass_1 = SubResource("QuadMesh_fndbt")
+
+[node name="HitBurst" type="MeshInstance3D" parent="." unique_id=761452655]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+visible = false
+mesh = SubResource("ArrayMesh_2bmra")

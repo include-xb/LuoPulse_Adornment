@@ -223,7 +223,9 @@ func _lose(master_time: float) -> void:
 
 	_update_accuracy()
 	_remove_from_judging_and_rendering()
-	explode("lost")
+	# 非 hold 音符漏键只原地消失: 不放粒子, 也不点亮判定线上的矩形
+	# (它的反馈只剩上面那句灰色"丢失"飘字)
+	queue_free()
 	pass
 
 
@@ -240,9 +242,11 @@ func _finish_judge(level: String) -> void:
 	if level != "lost":
 		_play_hit_sound()
 		_flash_background()
+		# 判定线上点亮矩形; 打到"丢失"档的点击同样不给 (与上面同一条原则)
+		_burst_feedback()
 		pass
 
-	explode(level)
+	queue_free()
 	pass
 
 
@@ -343,29 +347,13 @@ func get_note_color() -> Color:
 	return HitFeedback.FALLBACK_COLOR
 
 
-## 发射一次粒子爆发 (不销毁自身, 供长键等需要继续存活的音符使用)
-## @param level: 判定等级, 只决定粒子数量 (颜色取音符本体颜色)
-func emit_particles(level: String = "harmonious") -> void:
-	var particle: GPUParticles3D = get_node_or_null("../../GPUParticles3D")
-	if particle == null:
-		return
-
-	var column_node: Node = get_node("../..")
-	# 颜色取音符自身的颜色, 判定等级只体现在粒子数量上
-	if column_node and column_node.has_method("set_particle_style"):
-		column_node.set_particle_style(get_note_color(), HitFeedback.amount_of(level))
+## 命中反馈: 请本列在判定线上点亮一次"迅速变大变淡的矩形"
+## INFO: 粒子的位置会跟着"判定发生在哪一帧"走 (早击时音符还没落到判定线, 粒子就打在了轨道后方),
+##       矩形恒定锚在判定线上, 与轨道闪光是同一个视觉焦点
+## INFO: 本列那个共用的粒子发射器现在只服务长键 (见 Hold.gd), 非 hold 音符不再碰它
+func _burst_feedback() -> void:
+	var column_node: Node = get_node_or_null("../..")
+	if column_node and column_node.has_method("show_hit_burst"):
+		column_node.show_hit_burst(get_note_color())
 		pass
-
-	particle.emitting = false
-	particle.position.z = self.position.z
-	particle.one_shot = true
-	particle.emitting = true
-	pass
-
-
-## 碎裂效果: 发射粒子后销毁自身
-## @param level: 判定等级, 决定粒子配色与数量
-func explode(level: String = "harmonious") -> void:
-	emit_particles(level)
-	queue_free()
 	pass

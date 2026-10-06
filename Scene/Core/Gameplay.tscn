@@ -35,7 +35,7 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 0.50000002375
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_nox7l"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_ge3h2"]
 viewport_path = NodePath("UI/TextureRect/SubViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
@@ -49,7 +49,7 @@ size = Vector2(4, 22)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,6 +60,7 @@ script = ExtResource("1_i27d6")
 audio_system = NodePath("AudioSystem")
 note_loader = NodePath("NoteLoader")
 effect_manager = NodePath("EffectManager")
+heart_line = NodePath("UI/HeartLine")
 progress_bar = NodePath("UI/ProgressBar")
 background = NodePath("UI/Background")
 video_stream_player = NodePath("UI/VideoStreamPlayer")
@@ -76,7 +77,6 @@ speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxCo
 speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
 tick = NodePath("UI/Tick")
 finish_button_mask = NodePath("UI/Mask")
-is_test = true
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1
@@ -146,7 +146,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_nox7l")
+texture = SubResource("ViewportTexture_ge3h2")
 expand_mode = 3
 
 [node name="SubViewport" type="SubViewport" parent="UI/TextureRect" unique_id=731722823]

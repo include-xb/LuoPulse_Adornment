@@ -140,6 +140,8 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 | 心键 (Heart)   | `heart`   | #701010 | Like tap, but triggers special hit effect + ECG animation across background. Scrambles column mapping of next 4 notes. |
 | 长键 (Hold)    | `hold`    | #90B070 | Head judgment like tap, must hold until end; tail settled from the head's accuracy. See `release` for a true tail judgment.                                                         |
 
+> **碎裂反馈 (代码现状)**: 非 hold 音符 (tap / drag / heart / release) 命中后**原地消失、不发射粒子** —— 唯一的反馈是对应轨道判定线上一个**迅速变大变淡的矩形**: 0.1s, 从音符尺寸的 0.8 倍放大到 1.5 倍, 颜色取音符自身颜色 (见 `InputProcesser.show_hit_burst`; 时长与倍率都是该文件顶部的 `BURST_*` 常量)。漏键、以及"打到丢失档的点击"连矩形也不给, 只留灰色飘字。长键仍用粒子: 头部命中打一次爆发, **按住期间持续发射** (`InputProcesser._update_hold_particles` 每帧看着"是否正被按住", 松手 / 按满 / 长键被移除时自动收掉); 该粒子发射器 (`Column/GPUParticles3D`) 被约束成**只能背离相机散开** (`direction = (0,0,-1)` / `spread = 90` / 盒体 z 跨度归零), 不再有糊到玩家眼前的粒子。
+
 ### Core Gameplay Pipeline
 
 1. **Audio Sync** (design doc): Use `AudioStreamPlayer.get_playback_position()` as the **master clock**. Do NOT accumulate `_process(delta)` for timing — causes drift. Check note times against playback position each frame in `_process`. Offset compensation via `config.offset` parameter.
@@ -150,7 +152,7 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 
 4. **InputProcesser** (`Script/Core/InputProcesser.gd`): 每根轨道 (Column 节点) 挂载一个实例, 处理该轨道的触屏/按键判定。触屏输入已在 `Gameplay._input` 实现 (根据屏幕 X 映射到轨道列, 支持多点触控); 键盘 D/F/J/K 保留为桌面调试输入。轨道按下/松开触发 `press_judge` / hold 释放逻辑, 附带轨道高亮 shader 反馈。红键与黄键都不参与按下候选: 红键松手时由 `_release_judge` 按松手时刻结算, 黄键由音符自己在进入判定区时查一次本轨是否被按住 (见 Note Types)。
 
-5. **Note templates** (`Script/Core/NoteTemplate/`, 场景在 `Scene/Core/NoteTemplate/`): 音符为 3D 轨道内的 `MeshInstance3D` (`NoteBase`), 通过 `position.z = note_speed * (master_time - time) / 1000` 定位下落 (到达判定线时 z=0)。进入判定窗时注册到 `Global.judging_area`, 命中调用 `judge()`, 未中 `_lose()`, `explode()` 播放粒子后销毁。
+5. **Note templates** (`Script/Core/NoteTemplate/`, 场景在 `Scene/Core/NoteTemplate/`): 音符为 3D 轨道内的 `MeshInstance3D` (`NoteBase`), 通过 `position.z = note_speed * (master_time - time) / 1000` 定位下落 (到达判定线时 z=0)。进入判定窗时注册到 `Global.judging_area`, 命中调用 `judge()`, 未中 `_lose()`, 两者最后都 `queue_free()` **原地消失** (碎裂反馈见 Note Types 表下方的说明); 长键的粒子由 `Hold.gd` 自己发, 不继承 `NoteBase`。
 
 ### Track Design
 
@@ -175,13 +177,14 @@ The entire game's color saturation is tied to 共鸣 progress. This is the core 
 
 ### Shader System
 
-All `canvas_item` type:
+All `canvas_item` type (except `hit_burst`, which is `spatial`):
 
 | Shader                         | Purpose                                                                                                                                                                                              |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Shader/gray_scale.gdshader`   | Single `gray_scale` uniform (0–1), converts to grayscale by mixing luma with original. Used across all UI backgrounds.                                                                               |
 | `Shader/dark_manager.gdshader` | Colored-pencil art style: Sobel 3×3 edge detection, paper color blending, FBM noise texture, edge fade vignette, saturation/brightness controls, plus `gray_scale`. Applied to gameplay backgrounds. |
 | `Shader/paper.gdshader`        | Paper texture overlay from `paper_texture` uniform.                                                                                                                                                  |
+| `Shader/hit_burst.gdshader`    | 判定线命中矩形用的 `spatial` shader: 只有一个 `burst_color` uniform, 画一块半透明纯色片。放大与淡出由 `InputProcesser` 每帧写 `scale` 与 `burst_color.a` 驱动 (相位取 `Global.master_time`, 所以暂停时会一起冻住)。 |
 
 **Dynamic shader params during gameplay**: 
 

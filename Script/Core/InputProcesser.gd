@@ -18,6 +18,12 @@ extends Node3D
 ## 粒子效果
 @export var gpu_particles_3d: GPUParticles3D # = $GPUParticles3D
 
+## 判定线节点 (与轨道复用同一个 shader, 自己的材质从未被驱动过)
+@export var _judging_strip: MeshInstance3D # = $Judging
+
+## 命中矩形节点 (在判定线上迅速变大变淡, 由本列命中的非 hold 音符点亮)
+@export var _hit_burst: MeshInstance3D # = $HitBurst
+
 
 ## 轨道材质副本 (每列独立, 用于触屏高亮)
 var _track_material: ShaderMaterial = null
@@ -25,11 +31,46 @@ var _track_material: ShaderMaterial = null
 ## 判定线材质副本 (每列独立, 命中时闪光)
 var _judging_material: ShaderMaterial = null
 
-## 判定线节点 (与轨道复用同一个 shader, 自己的材质从未被驱动过)
-@onready var _judging_strip: MeshInstance3D = $Judging
-
 ## 粒子材质副本 (每列独立, 按判定等级染色)
 var _particle_material: StandardMaterial3D = null
+
+## 命中矩形的持续时间 (秒)
+const BURST_DURATION: float = 0.12
+
+## 命中矩形的起止缩放倍率 (迅速变大)
+const BURST_SCALE_FROM: float = 0.9
+const BURST_SCALE_TO: float = 1.5
+
+## 命中矩形的起始透明度 (随即淡到 0)
+const BURST_ALPHA_FROM: float = 1.0
+
+## 命中矩形的网格尺寸 (与音符同尺寸, 见 Scene/Core/NoteTemplate/*.tscn 的 PlaneMesh)
+const BURST_MESH_SIZE: Vector2 = Vector2(0.8, 0.3)
+
+## 命中矩形用的 shader
+const BURST_SHADER: Shader = preload("res://Shader/hit_burst.gdshader")
+
+## 长键按住期间的粒子数量 (随时在飞的粒子数, 想要更浓就调大这个值)
+## INFO: 与命中那一下的爆发数量分开 —— 爆发的"一瞬间 N 颗"和持续的"随时都有 N 颗在飞"
+##       是两种观感。爆发的数量在 HitFeedback.gd 的 AMOUNTS 里按判定等级配
+const HOLD_STREAM_AMOUNT: int = 30
+
+## 命中那一下的爆发形态 (1 = 全部同时炸开, 0 = 铺开在整个 lifetime 里慢慢出)
+const HIT_EXPLOSIVENESS: float = 0.9
+
+## 长键持续发射的爆发形态 (必须是 0)
+## INFO: explosiveness 会让粒子在每隔一个 lifetime 的开头一次性全喷出来 —— 长键按住期间
+##       用那个值就是"一阵一阵"地喷 (lifetime 0.18 即约每 0.18 秒一团)
+const HOLD_EXPLOSIVENESS: float = 0.0
+
+## 命中矩形材质副本 (每列独立)
+var _burst_material: ShaderMaterial = null
+
+## 本次命中矩形的颜色 (音符自身颜色)
+var _burst_color: Color = Color.WHITE
+
+## 本次命中矩形的起始 master_time (毫秒), -INF = 当前无矩形
+var _burst_start_ms: float = -INF
 
 ## 轨道高亮强度 (shader uniform)
 var _highlight: float = 0.0
@@ -51,6 +92,9 @@ var _touch_count: int = 0
 
 ## 自动播放 hold 是否处于按住状态 (用于持续高亮)
 var is_autoplay_holding: bool = false
+
+## 长键按住期间是否正在持续发射粒子 (用来只在状态翻转时写一次发射器)
+var _is_hold_emitting: bool = false
 
 ## 是否正在长按 (hold)
 var is_holding: bool = false
@@ -93,6 +137,19 @@ func _ready() -> void:
 	# 按列错开透明排序层级, 理由见 Global.SORT_LAYER_STEP
 	single_track.sorting_offset = float(column) * Global.SORT_LAYER_STEP
 	_judging_strip.sorting_offset = float(column) * Global.SORT_LAYER_STEP
+
+	# 命中矩形: 网格与材质都在这里建 —— 与上面的粒子网格/材质同一个理由,
+	# 场景里的副本是 4 列共用的, 必须每列自己做一份
+	var burst_mesh: PlaneMesh = PlaneMesh.new()
+	burst_mesh.size = BURST_MESH_SIZE
+	_burst_material = ShaderMaterial.new()
+	_burst_material.shader = BURST_SHADER
+	burst_mesh.material = _burst_material
+	_hit_burst.mesh = burst_mesh
+
+	# 判定线与矩形同在 z≈0: 相机距离相等时排序先后不稳定, 用半个步长打破并列,
+	# 同时仍落在本列的层级带内 (见 Global.SORT_LAYER_STEP)
+	_hit_burst.sorting_offset = float(column) * Global.SORT_LAYER_STEP + Global.SORT_LAYER_STEP * 0.5
 	pass
 
 
@@ -136,10 +193,18 @@ func _process(delta: float) -> void:
 		_judging_material.set_shader_parameter("highlight", _judging_highlight)
 		pass
 
+	# 命中矩形: 相位取 master_time, 所以暂停期间它会一起冻住 (见 _update_hit_burst)
+	if _hit_burst.visible:
+		_update_hit_burst()
+		pass
+
 	if is_holding and not is_instance_valid(current_hold_note):
 		is_holding = false
 		current_hold_note = null
 		pass
+
+	# 长键的持续粒子: 放在上面清理 is_holding 之后, 才能读到本帧最新的按住状态
+	_update_hold_particles()
 	pass
 
 
@@ -330,8 +395,10 @@ func flash_track(strength: float = 1.0) -> void:
 	pass
 
 
-## 设置本列粒子的爆发样式 (染色 + 数量)
+## 设置本列粒子的爆发样式 (染色 + 数量 + 爆发形态)
 ## 材质已在 _ready 中复制过, 这里只改参数, 不会每次命中都分配资源
+## INFO: explosiveness 必须在这里写回爆发值 —— 长键按住期间的持续发射会把它压成 0,
+##       不写回的话下一次头部命中就变成软绵绵地铺开, 而不是"炸一下"
 ## @param color: 粒子颜色 (由判定等级决定)
 ## @param amount: 粒子数量
 func set_particle_style(color: Color, amount: int) -> void:
@@ -339,6 +406,92 @@ func set_particle_style(color: Color, amount: int) -> void:
 		_particle_material.albedo_color = color
 		pass
 	gpu_particles_3d.amount = amount
+	gpu_particles_3d.explosiveness = HIT_EXPLOSIVENESS
+	pass
+
+
+## 长键按住期间持续发射粒子
+## INFO: 非 hold 音符改成在判定线上点亮矩形之后, 本列的粒子发射器就专供长键了 ——
+##       头部命中那一下由 Hold.emit_particles 打一次爆发, 之后按住多久就喷多久,
+##       松手 / 按满 / 长键被移除时都在这里收掉
+func _update_hold_particles() -> void:
+	var is_active: bool = _is_hold_active()
+	if is_active == _is_hold_emitting:
+		return
+
+	_is_hold_emitting = is_active
+
+	if is_active:
+		# 连发: 关掉 one_shot, 并把 explosiveness 压到 0 —— 否则粒子会在每个 lifetime
+		# 周期的开头一次性全喷出来, 看上去就是"一阵一阵"的脉冲而不是连续的一股
+		gpu_particles_3d.one_shot = false
+		gpu_particles_3d.explosiveness = HOLD_EXPLOSIVENESS
+		gpu_particles_3d.amount = HOLD_STREAM_AMOUNT
+		# 固定发在判定线上 (z = 0), 理由同 Hold.emit_particles: 长条的 position 取的是
+		# 被缩放过的中心, 直接用会把粒子打到轨道后方很远
+		gpu_particles_3d.position.z = 0.0
+		gpu_particles_3d.emitting = true
+		pass
+	else:
+		gpu_particles_3d.emitting = false
+		pass
+	pass
+
+
+## 本列当前是否有一条长键正被按住 (手动按下与自动播放两条路径都算)
+## INFO: 不能只看 is_holding —— 头部判成"丢失"时 press_judge 照样会把 is_holding 置位
+##       (那条长键此时已经 is_removed, 只是还要半透明地继续下落), 那不该出持续粒子
+func _is_hold_active() -> bool:
+	if not is_holding and not is_autoplay_holding:
+		return false
+
+	if is_instance_valid(current_hold_note) and current_hold_note.get("is_head_judged") == false:
+		return false
+	pass
+
+	return true
+
+
+## 在判定线上点亮一次"迅速变大变淡的矩形" (由本列命中的非 hold 音符调用)
+## @param color: 矩形颜色 (取音符自身颜色)
+func show_hit_burst(color: Color) -> void:
+	_burst_color = color
+	_burst_start_ms = Global.master_time
+	_hit_burst.visible = true
+	_apply_hit_burst(0.0)
+	pass
+
+
+## 每帧推进命中矩形
+## INFO: 相位取 Global.master_time 而不是 delta —— 项目没有 get_tree().paused, 暂停只靠
+##       is_gaming 门控, 用 delta 驱动的动画在暂停时会自己跑完; 取 master_time 则暂停时
+##       停在半途、继续后接着播 (与 EffectManager / HeartLine 同构)
+func _update_hit_burst() -> void:
+	var now: float = Global.master_time
+	# 时钟倒流 (重开 / 切歌) 时这团矩形已经过期, 直接收掉, 避免残留在判定线上
+	if now < _burst_start_ms:
+		_hit_burst.visible = false
+		return
+
+	var progress: float = (now - _burst_start_ms) / (BURST_DURATION * 1000.0)
+	if progress >= 1.0:
+		_hit_burst.visible = false
+		return
+
+	_apply_hit_burst(progress)
+	pass
+
+
+## 按进度摆放矩形: 缓出放大 + 线性淡出
+## INFO: PlaneMesh 躺在水平的 XZ 平面, 所以放大走 x/z, y 保持 1
+func _apply_hit_burst(progress: float) -> void:
+	var eased: float = 1.0 - (1.0 - progress) * (1.0 - progress)
+	var factor: float = lerpf(BURST_SCALE_FROM, BURST_SCALE_TO, eased)
+	_hit_burst.scale = Vector3(factor, 1.0, factor)
+	_burst_material.set_shader_parameter(
+		"burst_color",
+		Color(_burst_color.r, _burst_color.g, _burst_color.b, BURST_ALPHA_FROM * (1.0 - progress))
+	)
 	pass
 
 
@@ -356,6 +509,17 @@ func reset_input_state() -> void:
 
 	_judging_highlight = 0.0
 	_judging_material.set_shader_parameter("highlight", _judging_highlight)
+
+	# 判定线上的命中矩形: 此后不会再有音符来点亮它, 一并收起
+	_hit_burst.visible = false
+	_burst_start_ms = -INF
+
+	# 长键的持续粒子: 此后不会再有人来按住, 一并停掉。
+	# 自动播放标志也要清 —— 只清 _is_hold_emitting 的话, 下一帧
+	# _update_hold_particles 会以为"还在按住"而把发射器重新点着
+	is_autoplay_holding = false
+	_is_hold_emitting = false
+	gpu_particles_3d.emitting = false
 	pass
 
 

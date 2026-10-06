@@ -13,6 +13,6 @@ material = SubResource("ShaderMaterial_release")
 size = Vector2(0.8, 0.3)
 
 [node name="Release" type="MeshInstance3D" unique_id=1509856158]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
 mesh = SubResource("PlaneMesh_s4y3q")
 script = ExtResource("1_script")
