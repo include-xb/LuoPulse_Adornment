@@ -27,6 +27,9 @@ extends Control
 ## 心电图折线 (heart 谱面效果期间淡入)
 @export var heart_line: HeartLine # = $UI/HeartLine
 
+## 屏幕边缘的血色光晕 (heart 谱面效果期间随心跳闪动, 与心电图同相位)
+@export var heart_vignette: HeartVignette # = $UI/HeartVignette
+
 ## 进度条
 @export var progress_bar: ProgressBar # = $UI/ProgressBar
 
@@ -267,21 +270,14 @@ var _last_combo: int = 0
 var _combo_tween: Tween = null
 
 
-## ---- 背景脉冲 ----
-## 背景高亮瞬时增量 (命中时叠加, 之后快速衰减)
-var _background_flash: float = 0.0
-
-## 瞬时增量的衰减速度
-const BACKGROUND_FLASH_DECAY: float = 6.0
-
-## 每次命中给背景叠加的瞬时增量
-## 必须很小: 密集谱面下逐音符闪光会变成频闪, 既不安全也干扰读谱
-const BACKGROUND_FLASH_ON_HIT: float = 0.03
-
-## 由连击数驱动的背景高亮上限
+## ---- 背景高亮 ----
+## 背景高亮完全由连击数驱动 (连击越高越亮)
+## INFO: 曾经每次命中还会叠加一个很小的瞬时增量, 但那在密集谱面下就是逐音符频闪,
+##       既不安全也干扰读谱, 已去掉
+## 背景高亮的亮度上限
 const BACKGROUND_FLASH_COMBO_MAX: float = 0.10
 
-## 达到背景高亮上限所需的连击数
+## 达到亮度上限所需的连击数
 const BACKGROUND_FLASH_COMBO_FULL: float = 150.0
 
 
@@ -770,13 +766,8 @@ func _process(delta: float) -> void:
 		_on_combo_changed()
 		pass
 
-	# 背景脉冲: 连击基准值 + 命中瞬时增量, 瞬时增量按指数快速衰减
-	# (gray_scale 负责整体灰度, flash 负责高亮, 两者互不影响)
-	_background_flash = maxf(0.0, _background_flash - BACKGROUND_FLASH_DECAY * delta * _background_flash)
-	if _background_flash < 0.001:
-		_background_flash = 0.0
-		pass
-	background.material.set_shader_parameter("flash", _combo_background_level() + _background_flash)
+	# 背景高亮: 只由连击数驱动 (gray_scale 负责整体灰度, flash 负责高亮, 两者互不影响)
+	background.material.set_shader_parameter("flash", _combo_background_level())
 	pass
 
 
@@ -903,11 +894,21 @@ func _setup_hit_sound_pool() -> void:
 	pass
 
 
-# ---------- 背景与画面反馈 ----------
-## 命中时的背景脉冲: 叠加一个很小的瞬时增量, 之后快速衰减
-func flash_background() -> void:
-	var ceiling: float = BACKGROUND_FLASH_COMBO_MAX + BACKGROUND_FLASH_ON_HIT
-	_background_flash = minf(_background_flash + BACKGROUND_FLASH_ON_HIT, ceiling)
+# ---------- 画面反馈 ----------
+## 玩家打中一个音符时的 heart 特效反馈: 屏幕边缘闪动 + 心电图往前画一段
+## INFO: 只有 heart 特效期间才看得见 (由谱面效果的 EffectManager 把关), 漏键不该调它
+## @param strength: 闪动强度 (0 ~ 1), 由判定等级决定
+func on_note_hit(strength: float = 1.0) -> void:
+	if effect_manager:
+		effect_manager.on_note_hit(strength)
+	pass
+
+
+## 玩家漏掉一个音符时的 heart 特效反馈: 心电图往回退半步 + 边缘血色底子暗一下
+## INFO: 只有 heart 特效期间才看得见 (由谱面效果的 EffectManager 把关), 命中路径不该调它
+func on_note_miss() -> void:
+	if effect_manager:
+		effect_manager.on_note_miss()
 	pass
 
 
@@ -1041,7 +1042,15 @@ func _setup_effects() -> void:
 		line = _ui.get_node_or_null("HeartLine") as HeartLine
 		pass
 
-	effect_manager.setup(input_processers, effect_list, line)
+	# 屏幕边缘的血色光晕: 同样的两段式查找。
+	# 查到之后写回导出变量 —— 别处想单独闪一下 (HeartVignette.flash_once) 就靠它取节点
+	var vignette: HeartVignette = heart_vignette
+	if vignette == null and _ui:
+		vignette = _ui.get_node_or_null("HeartVignette") as HeartVignette
+		pass
+	heart_vignette = vignette
+
+	effect_manager.setup(input_processers, effect_list, line, vignette)
 	pass
 
 

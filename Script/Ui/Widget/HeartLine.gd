@@ -1,16 +1,17 @@
 ## HeartLine 心电图折线
 ##
-## heart 谱面效果的视觉载体: 沿一条经典心电图 (P-QRS-T) 折线从左向右"画"出去,
-## 画满整屏后停留片刻, 再清空重画一趟 —— 就这样一趟接一趟地跳动。
-## 停机不是立刻断掉: 等当前这一趟画完才清空, 所以"停止"永远落在折线的末端。
+## heart 谱面效果的视觉载体: 一条经典心电图 (P-QRS-T) 折线, 从最左边起笔,
+## 随玩家的打击一段段往前"画"出去 —— 打不中就不往前画, 心跳是玩家自己踩出来的。
+## 画满整屏后清空, 从头再画。
 ##
 ## 相位取自 Global.master_time —— 与音符判定用的是同一个时钟, 暂停 / 继续倒计时
-## 期间它会一起冻结, 不会在暂停面板后面继续跳。
+## 期间它会一起冻结 (笔尖那一段很短的推进动画也一起冻住)。
 ##
 ## 对外接口 (EffectManager 是当前唯一的主人):
-##   beat = true  (set_beat(true))  —— 开始跳动, 从最左边重新起笔
-##   beat = false (set_beat(false)) —— 等本趟画完再清空停机
-##   reset_now()                    —— 立即清空停机 (重开游戏时用)
+##   beat = true  (set_beat(true))  —— 上场: 清空并从最左边起笔
+##   beat = false (set_beat(false)) —— 退场: 停笔 (整体淡出由 EffectManager 写 modulate.a)
+##   advance()                      —— 玩家打中一个音符, 笔尖往前画一段
+##   reset_now()                    —— 立即清空 (重开游戏时用)
 
 
 extends Control
@@ -46,6 +47,11 @@ const GLOW_WIDTH_SCALE: float = 3.0
 ## 辉光那笔的透明度
 const GLOW_ALPHA: float = 0.25
 
+## 漏掉一个音符时笔尖往回退多少 = advance_step × 这个比例
+## INFO: 半步而不是一整步 —— 一次失误不该把一次命中完全抹平, 否则准度刚好一半的
+##       玩家会让心电图长期贴在零点, 特效等于没画
+const REWIND_RATIO: float = 0.5
+
 
 @export_group("外观")
 ## 折线颜色 (整体亮度由 EffectManager 写 modulate.a 控制)
@@ -68,12 +74,14 @@ const GLOW_ALPHA: float = 0.25
 		_rebuild_points()
 		pass
 
-@export_group("节奏")
-## 一趟画完整屏的时长 (秒)
-@export_range(0.1, 20.0, 0.1) var sweep_duration: float = 3.0
+@export_group("推进")
+## 每次打击让笔尖前进多少 (占屏宽的比例)
+@export_range(0.01, 1.0, 0.01) var advance_step: float = 0.125
 
-## 两趟之间的停留时长 (秒): 停留期间保留画好的整条波形
-@export_range(0.0, 20.0, 0.1) var rest_duration: float = 0.4
+## 笔尖推到新位置的时长 (秒)
+## INFO: 打击是瞬时的, 但笔尖要"走"过去 —— 直接跳过去会像掉帧; 0 就是瞬移。
+##       密集连打时后一次推进是从前一个"目标"接着走的 (见 advance), 所以不会积压
+@export_range(0.0, 0.5, 0.01) var advance_glide: float = 0.08
 
 ## 整屏画几次心跳
 @export_range(1, 32, 1) var beat_count: int = 6:
@@ -83,7 +91,7 @@ const GLOW_ALPHA: float = 0.25
 		pass
 
 @export_group("状态")
-## 是否持续跳动 —— true 时一趟接一趟地画; false 时等本趟画完就清空停机 (什么都不显示)
+## 是否在场 —— true 时笔尖随打击往前走; false 时停笔 (什么都不显示)
 @export var beat: bool = false:
 	set(value):
 		# INFO: 同值早退 —— 两个 heart 效果重叠时 EffectManager 会重复置 true,
@@ -92,9 +100,17 @@ const GLOW_ALPHA: float = 0.25
 			return
 		beat = value
 		if beat:
+			# 上场: 清空, 从最左边起笔
 			_is_running = true
-			_sweep_start_ms = Global.master_time
+			_progress = 0.0
+			_drawn = 0.0
+			_glide_from = 0.0
+			_glide_start_ms = Global.master_time
 			queue_redraw()
+			pass
+		else:
+			# 退场: 停笔 (画面上留着最后那一笔, 整体淡出由 EffectManager 的 modulate.a 负责)
+			_is_running = false
 			pass
 		pass
 
@@ -105,13 +121,19 @@ var _points: PackedVector2Array = PackedVector2Array()
 ## 本帧实际要画的点 —— 复用同一个数组, 避免每帧新建
 var _visible: PackedVector2Array = PackedVector2Array()
 
-## 本趟画到哪 (0~1)
+## 目标进度 (0~1): 每次打击推进一段, 画满就回到 0 重画
 var _progress: float = 0.0
 
-## 本趟的相位起点 (取 Global.master_time)
-var _sweep_start_ms: float = 0.0
+## 实际画到哪 —— 平滑地追 _progress, 不会瞬移
+var _drawn: float = 0.0
 
-## 是否正在跑 —— beat 置 false 后仍会跑到本趟结束
+## 本次推进的起点
+var _glide_from: float = 0.0
+
+## 本次推进的起始时刻 (取 Global.master_time)
+var _glide_start_ms: float = 0.0
+
+## 是否在场 (beat 为真时才画)
 var _is_running: bool = false
 
 
@@ -130,35 +152,28 @@ func _process(_delta: float) -> void:
 		return
 
 	var now: float = Global.master_time
-	# 重开游戏时 master_time 会跳回负数, 相位必须重新锚定, 否则要等很久才会再画
-	if now < _sweep_start_ms:
-		_sweep_start_ms = now
+	# 重开游戏时 master_time 会跳回负数, 锚点必须跟着退, 否则笔尖会僵在半路
+	if now < _glide_start_ms:
+		_glide_start_ms = now
 		pass
 
-	var sweep: float = maxf(sweep_duration, 0.001) * 1000.0
-
-	# 本趟画完且不再重复 —— 清空停机 (什么都不显示)
-	if not beat and now - _sweep_start_ms >= sweep:
-		_is_running = false
-		_progress = 0.0
-		queue_redraw()
-		return
-
-	# 一趟 + 停留跑满, 开新一趟
-	if now - _sweep_start_ms >= sweep + maxf(rest_duration, 0.0) * 1000.0:
-		_sweep_start_ms = now
+	# 笔尖平滑地追到目标进度
+	var glide_ms: float = maxf(advance_glide, 0.0) * 1000.0
+	var t: float = 1.0
+	if glide_ms > 0.0:
+		t = clampf((now - _glide_start_ms) / glide_ms, 0.0, 1.0)
 		pass
+	_drawn = lerpf(_glide_from, _progress, _ease_out(t))
 
-	_progress = clampf((now - _sweep_start_ms) / sweep, 0.0, 1.0)
 	queue_redraw()
 	pass
 
 
 func _draw() -> void:
-	if _progress <= 0.0 or _points.size() < 2:
+	if _drawn <= 0.0 or _points.size() < 2:
 		return
 
-	var visible_x: float = size.x * _progress
+	var visible_x: float = size.x * _drawn
 
 	# _points 的 x 单调递增, 所以"画到哪"就是找最后一个 x 不越界的点
 	var tip: int = 0
@@ -189,22 +204,67 @@ func _draw() -> void:
 
 
 # ---------- 对外接口 ----------
+## 玩家打中一个音符: 笔尖往前画一段 (由 EffectManager 调用)
+func advance() -> void:
+	if not _is_running:
+		return
+
+	# 后一次从前一个"目标"接着走, 而不是从笔尖当前位置 —— 这样密集连打时
+	# 几次推进不会互相拖慢, 笔尖始终平滑地往前滑
+	_glide_from = _progress
+	_glide_start_ms = Global.master_time
+
+	_progress = fposmod(_progress + advance_step, 1.0)
+	if _progress < advance_step:
+		# 画满整屏: 清空, 从头再画
+		# INFO: 这一步不做平滑 —— 否则笔尖会从右往左倒着扫回去
+		_glide_from = 0.0
+		_drawn = 0.0
+		pass
+
+	queue_redraw()
+	pass
+
+
+## 玩家漏掉一个音符: 笔尖往回退半步 (由 EffectManager 调用)
+## INFO: 不能复用 advance() —— 那里靠"结果小于一个步长"判断画满一圈, 倒退也会满足
+##       那个条件, 会被误判成清空、笔尖瞬间归零
+func rewind() -> void:
+	if not _is_running:
+		return
+
+	_glide_from = _progress
+	_glide_start_ms = Global.master_time
+
+	# 退到 0 就打住 (已经空了之后再漏也不会变成负数)
+	_progress = maxf(_progress - advance_step * REWIND_RATIO, 0.0)
+	queue_redraw()
+	pass
+
+
 ## 设置 beat —— 与直接写 beat 属性等价, 给外部调用用
 func set_beat(value: bool) -> void:
 	beat = value
 	pass
 
 
-## 立即清空停机 (重开游戏 / 退出时由 EffectManager 调用)
+## 立即清空 (重开游戏 / 退出时由 EffectManager 调用)
 func reset_now() -> void:
 	beat = false
 	_is_running = false
 	_progress = 0.0
+	_drawn = 0.0
+	_glide_from = 0.0
 	queue_redraw()
 	pass
 
 
-# ---------- 折线 ----------
+# ---------- 内部 ----------
+## 0~1 的缓出映射 (笔尖快起慢收, 看起来像"啪"地一下画出去)
+func _ease_out(t: float) -> float:
+	return 1.0 - (1.0 - t) * (1.0 - t)
+
+
 ## 按当前 size 把心电模板横向平铺 beat_count 次, 生成屏幕坐标的折线
 func _rebuild_points() -> void:
 	_points.resize(0)

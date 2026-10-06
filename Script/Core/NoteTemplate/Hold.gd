@@ -246,10 +246,22 @@ func _play_hit_sound() -> void:
 	pass
 
 
-## 命中时的背景脉冲 (幅度很小, 主要反馈由连击数驱动)
-func _flash_background() -> void:
-	if root_node and root_node.has_method("flash_background"):
-		root_node.flash_background()
+## 命中时的 heart 特效反馈 (屏幕边缘闪动 + 心电图往前画一段; 只在特效期间可见)
+## @param strength: 闪动强度 (0 ~ 1), 沿用判定等级那一张表 —— "丢失"档是 0, 漏键天然不触发
+func _notify_note_hit(strength: float = 1.0) -> void:
+	if strength <= 0.0:
+		return
+	if root_node and root_node.has_method("on_note_hit"):
+		root_node.on_note_hit(strength)
+		pass
+	pass
+
+
+## 漏掉时的 heart 特效反馈 (心电图往回退半步 + 边缘血色底子暗一下; 只在特效期间可见)
+## INFO: 只有"头部漏掉"会调到它 —— 尾判丢失不算 miss (见 _complete_hold 的中断分支)
+func _notify_note_miss() -> void:
+	if root_node and root_node.has_method("on_note_miss"):
+		root_node.on_note_miss()
 		pass
 	pass
 
@@ -346,7 +358,8 @@ func judge_head(master_time: float) -> void:
 	# 头部命中的反馈: 长键此前既不出粒子也不点亮轨道
 	_flash_track_feedback(HitFeedback.flash_of(level))
 	_play_hit_sound()
-	_flash_background()
+	# heart 特效期间的反馈: 打中长键头部也算一次打击
+	_notify_note_hit(HitFeedback.flash_of(level))
 	emit_particles(level)
 
 	is_head_judged = true
@@ -382,6 +395,8 @@ func _complete_hold() -> void:
 		return
 
 	if is_hold_interrupted:
+		# INFO: 尾判丢失**不算 miss** —— 这里刻意不通知 heart 特效倒退。这一条长键的头部
+		#       已经推进过心电图了, 于是"打中头 + 按了一半松手"一条长键净收益仍是 +1
 		Global.lost += 1
 		a = 0.0
 		Global.combo = 0
@@ -410,10 +425,9 @@ func _complete_hold() -> void:
 		# 结算反馈: 按头部准度还原等级, 与普通音符共用同一套参数
 		# INFO: 尾判不再出打击音和粒子 —— 这两样在头判 (judge_head) 时已经出过一遍,
 		#       尾判再来一次会让"按住一条长条"这一个动作重复反馈两次。
-		#       轨道闪光与背景脉冲保留: 它们是按住期间的节奏反馈, 不是"命中"的反馈
+		#       轨道闪光保留: 它算按住期间的节奏反馈, 不是"命中"的反馈
 		var level: String = HitFeedback.level_from_accuracy(a)
 		_flash_track_feedback(HitFeedback.flash_of(level))
-		_flash_background()
 		pass
 
 	is_hold_completed = true
@@ -445,6 +459,8 @@ func _lose() -> void:
 	Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)
 
 	_remove_from_judging_and_rendering()
+	# heart 特效期间: 头部漏掉, 心电图往回退半步
+	_notify_note_miss()
 	# 头部漏键不出粒子 —— miss 就是 miss, 不给任何带"命中感"的反馈。
 	# 到这里反馈已经够了: 长条转半透明 (表示这条已经废了) + 灰色"丢失"飘字
 	# 不立即释放: 半透明后继续下落, 滚出屏幕后在 _process 中移除

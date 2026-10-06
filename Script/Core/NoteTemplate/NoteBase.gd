@@ -223,6 +223,8 @@ func _lose(master_time: float) -> void:
 
 	_update_accuracy()
 	_remove_from_judging_and_rendering()
+	# heart 特效期间: 漏掉一个音符, 心电图往回退半步
+	_notify_note_miss()
 	# 非 hold 音符漏键只原地消失: 不放粒子, 也不点亮判定线上的矩形
 	# (它的反馈只剩上面那句灰色"丢失"飘字)
 	queue_free()
@@ -241,9 +243,13 @@ func _finish_judge(level: String) -> void:
 	_flash_track_feedback(HitFeedback.flash_of(level))
 	if level != "lost":
 		_play_hit_sound()
-		_flash_background()
 		# 判定线上点亮矩形; 打到"丢失"档的点击同样不给 (与上面同一条原则)
 		_burst_feedback()
+		# heart 特效期间的反馈: 玩家打中一个音符, 屏幕边缘闪一下 + 心电图往前画一段
+		_notify_note_hit(HitFeedback.flash_of(level))
+	else:
+		# 打到"丢失"档的点击算漏键 (与"丢失档不给命中反馈"同一条原则)
+		_notify_note_miss()
 		pass
 
 	queue_free()
@@ -300,10 +306,21 @@ func _is_column_held() -> bool:
 	return _processor.is_pressed()
 
 
-## 命中时的背景脉冲 (幅度很小, 主要反馈由连击数驱动)
-func _flash_background() -> void:
-	if root_node and root_node.has_method("flash_background"):
-		root_node.flash_background()
+## 命中时的 heart 特效反馈 (屏幕边缘闪动 + 心电图往前画一段; 只在特效期间可见)
+## @param strength: 闪动强度 (0 ~ 1), 沿用判定等级那一张表 —— "丢失"档是 0, 漏键天然不触发
+func _notify_note_hit(strength: float = 1.0) -> void:
+	if strength <= 0.0:
+		return
+	if root_node and root_node.has_method("on_note_hit"):
+		root_node.on_note_hit(strength)
+		pass
+	pass
+
+
+## 漏掉时的 heart 特效反馈 (心电图往回退半步 + 边缘血色底子暗一下; 只在特效期间可见)
+func _notify_note_miss() -> void:
+	if root_node and root_node.has_method("on_note_miss"):
+		root_node.on_note_miss()
 		pass
 	pass
 

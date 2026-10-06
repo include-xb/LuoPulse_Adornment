@@ -2,8 +2,9 @@
 ##
 ## 负责 chart.lp 的 Effects 段。目前支持两种效果 (参数与校验完全一致):
 ##   change —— 轨道换位: 把整根 Column 沿 x 挪到别的槽位, duration 到期后复原。
-##   heart  —— change 的超集: 换位之外, 还整组收紧判定窗口并淡入心电图 (HeartLine)。
-##             changed 传恒等排列 (如 [ 1, 2, 3, 4 ]) 就是"只收紧判定 + 心电图, 不换位"。
+##   heart  —— change 的超集: 换位之外, 还整组收紧判定窗口, 并淡入两样同相位的视觉反馈:
+##             心电图 (HeartLine) 与屏幕边缘的血色光晕 (HeartVignette, 随心跳闪动)。
+##             changed 传恒等排列 (如 [ 1, 2, 3, 4 ]) 就是"只收紧判定 + 这两样视觉, 不换位"。
 ##
 ## 换位挪的是 Column 节点本身; 轨道面 / 判定线 / 粒子 / 音符 (NotePool) 都是它的子节点,
 ## 会整体跟着走, 所以"看到的轨道在哪"与"音符在哪"永远是同一处。
@@ -18,6 +19,10 @@ class_name EffectManager
 
 ## 换位动画的单程时长 (秒), 换位与复原都用它
 @export var effect_change_time: float = 0.2
+
+## heart 特效期间屏幕边缘血色光晕的底子强度 (0 = 平时全暗, 只在打中音符时才亮)
+## INFO: 底子只表示"这个效果正开着"; 打击闪动是叠加在它上面的, 调得接近 1 就看不见闪了
+@export_range(0.0, 1.0, 0.01) var heart_vignette_base: float = 0.3
 
 ## 动画时长的下限 (秒) —— 防止导出变量被设成 0 导致除零
 const MIN_CHANGE_TIME: float = 0.001
@@ -43,6 +48,11 @@ var _active_index: int = -1
 ## 心电图折线节点 (Gameplay 注入; 没接上时为 null, 此时 heart 只收紧判定窗口)
 var _heart_line: HeartLine = null
 
+## 屏幕边缘的血色光晕节点 (Gameplay 注入; 可缺)
+## INFO: 特效期间它只有一层底子 (heart_vignette_base), 闪动由玩家打中音符时踩出来
+##       (见 on_note_hit)
+var _heart_vignette: HeartVignette = null
+
 ## 当前 heart 效果的起止时刻 (毫秒), _heart_end_ms < 0 表示没有 heart 生效
 ## INFO: 特意只记时刻、不记下标 —— 效果在 _effects 里的生命周期与它的存续时间无关
 var _heart_start_ms: float = -1.0
@@ -60,9 +70,11 @@ var _to_x: PackedFloat32Array = PackedFloat32Array()
 ## @param tracks: Column 节点数组, 下标必须与 Gameplay.get_input_processor 一致
 ## @param raw_effects: chart.lp 的 Effects 段原文 (缺失或非法时传空数组)
 ## @param heart_line: 心电图节点; 不传则 heart 只收紧判定窗口
-func setup(tracks: Array, raw_effects: Variant, heart_line = null) -> void:
+## @param heart_vignette: 屏幕边缘的血色光晕节点; 不传则只出心电图
+func setup(tracks: Array, raw_effects: Variant, heart_line = null, heart_vignette = null) -> void:
 	_tracks = tracks
 	_heart_line = heart_line
+	_heart_vignette = heart_vignette
 
 	# 槽位坐标只记一次: 重开时轨道可能正被效果挪着, 那时读到的不是原位
 	if _origin_x.size() != _tracks.size():
@@ -93,6 +105,9 @@ func reset() -> void:
 		_heart_line.modulate.a = 0.0
 		_heart_line.reset_now()
 		pass
+	if _heart_vignette:
+		_heart_vignette.set_intensity(0.0)
+		pass
 	pass
 
 
@@ -116,6 +131,45 @@ func tick(master_time: float) -> void:
 
 	if _heart_end_ms >= 0.0:
 		_apply_heart(master_time)
+		pass
+	pass
+
+
+## 玩家打中一个音符: 屏幕边缘闪一下, 同时心电图往前画一段
+## INFO: 只在 heart 特效期间起作用 —— 特效没开时这里直接返回, 所以打击路径可以无脑调它。
+##       强度按判定等级给 (与轨道闪光同一张表), "丢失"档是 0, 双重保证 miss 什么都不触发
+## @param strength: 闪动强度 (0 ~ 1)
+func on_note_hit(strength: float = 1.0) -> void:
+	if strength <= 0.0 or _heart_start_ms < 0.0:
+		# 判定为"丢失"的打击不算打中; 或者当前不在 heart 特效期间
+		return
+
+	if _heart_vignette:
+		_heart_vignette.flash_once(strength)
+		pass
+
+	if _heart_line:
+		# 心电图不按判定等级区分 —— 打中了就往前画一段
+		_heart_line.advance()
+		pass
+	pass
+
+
+## 玩家漏掉一个音符: 心电图往回退半步, 屏幕边缘那层血色底子暗一下
+## INFO: 与 on_note_hit 相对 (命中推进, 漏键倒退), 同样只在 heart 特效期间起作用。
+##       注意长键"按了一半松手"的尾判丢失**不走这里** —— 那一条长键的头部已经推进过了,
+##       一条长键的净收益仍是 +1
+func on_note_miss() -> void:
+	if _heart_start_ms < 0.0:
+		# 当前不在 heart 特效期间
+		return
+
+	if _heart_line:
+		_heart_line.rewind()
+		pass
+
+	if _heart_vignette:
+		_heart_vignette.dim_once()
 		pass
 	pass
 
@@ -230,7 +284,7 @@ func _start_heart(start: float, duration: float) -> void:
 	pass
 
 
-## 每帧推进 heart: 心电图按与换位同款的一对 ramp 淡入淡出, 到期收尾
+## 每帧推进 heart: 心电图与血色光晕按与换位同款的一对 ramp 淡入淡出, 到期收尾
 func _apply_heart(master_time: float) -> void:
 	if master_time >= _heart_end_ms:
 		_finish_heart()
@@ -239,9 +293,16 @@ func _apply_heart(master_time: float) -> void:
 	var change: float = _change_time_ms()
 	var up: float = clampf((master_time - _heart_start_ms) / change, 0.0, 1.0)
 	var down: float = clampf((_heart_end_ms - master_time) / change, 0.0, 1.0)
+	# 取两条 ramp 的较小值: 开头淡入、结尾淡出, 中段恒为 1
+	var fade: float = minf(_ease(up), _ease(down))
+
 	if _heart_line:
-		# 取两条 ramp 的较小值: 开头淡入、结尾淡出, 中段恒为 1
-		_heart_line.modulate.a = minf(_ease(up), _ease(down))
+		_heart_line.modulate.a = fade
+		pass
+
+	# 光晕平时只留一层底子, 闪动由玩家打中音符时踩出来 (见 on_note_hit)
+	if _heart_vignette:
+		_heart_vignette.set_intensity(fade * heart_vignette_base)
 		pass
 	pass
 
@@ -255,6 +316,9 @@ func _finish_heart() -> void:
 	if _heart_line:
 		_heart_line.modulate.a = 0.0
 		_heart_line.set_beat(false)
+		pass
+	if _heart_vignette:
+		_heart_vignette.set_intensity(0.0)
 		pass
 	pass
 

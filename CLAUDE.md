@@ -185,6 +185,7 @@ All `canvas_item` type (except `hit_burst`, which is `spatial`):
 | `Shader/dark_manager.gdshader` | Colored-pencil art style: Sobel 3×3 edge detection, paper color blending, FBM noise texture, edge fade vignette, saturation/brightness controls, plus `gray_scale`. Applied to gameplay backgrounds. |
 | `Shader/paper.gdshader`        | Paper texture overlay from `paper_texture` uniform.                                                                                                                                                  |
 | `Shader/hit_burst.gdshader`    | 判定线命中矩形用的 `spatial` shader: 只有一个 `burst_color` uniform, 画一块半透明纯色片。放大与淡出由 `InputProcesser` 每帧写 `scale` 与 `burst_color.a` 驱动 (相位取 `Global.master_time`, 所以暂停时会一起冻住)。 |
+| `Shader/heart_vignette.gdshader` | heart 特效的屏幕边缘血色光晕 (`canvas_item`): 按"到最近屏幕边的距离"算一条四周等厚的带子, **四角再由 `corner_outer` 额外往里铺开一层暗色** (用"靠边程度"两个方向相乘来定位四角, 与宽高比无关 —— 直接用径向距离会把宽屏的左右边误判成角)。整条带子同一个血色 (`#700f0f`, 与 `HeartLine` 的 `line_color` 同色), **只有透明度在渐变**; 浓度再乘一层 FBM 程序化纸纹 (`texture_strength` / `texture_scale`, 与 `dark_manager.gdshader` 同一套噪声, 但只叠 2 层、并在远离带子的像素上整段跳过)。`intensity` = 底子 × 漏键压暗系数 (整体淡入淡出 × `EffectManager.heart_vignette_base`, 再乘 `1 - MISS_DIM_DEPTH × dim`) **加上**玩家打击踩出来的闪动 (`HeartVignette.flash_once()`, 由 `EffectManager.on_note_hit` 把关), 截到 1; `aspect` 在尺寸变化时由 `HeartVignette` 写 (不修正的话 16:9 屏上左右会比上下厚 1.78 倍)。 |
 
 **Dynamic shader params during gameplay**: 
 
@@ -245,7 +246,7 @@ A `.lpz` file is a ZIP archive:
 | type     | 行为                                                                                                              |
 | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `change` | 轨道换位: 把整根 Column 沿 x 挪到别的槽位, `duration` 到期后复原                                                    |
-| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入心电图 `Scene/Ui/Widget/HeartLine.tscn`  |
+| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入两样同相位的视觉: 心电图 `Scene/Ui/Widget/HeartLine.tscn` 与屏幕边缘的血色光晕 `Scene/Ui/Widget/HeartVignette.tscn` |
 
 ```json
 "Effects": [
@@ -255,7 +256,14 @@ A `.lpz` file is a ZIP archive:
 ```
 
 - `changed`: 1~轨道数的排列, 语义是 `changed[槽位] = 轨道号`(1-based);`heart` 传恒等排列 `[ 1, 2, 3, 4 ]` 就等于"只收紧判定 + 心电图, 不换位"。
-- 换位与心电图淡入淡出的动画时长都用 `EffectManager.effect_change_time`(默认 0.2s)。
+- 换位与心电图 / 血色光晕淡入淡出的动画时长都用 `EffectManager.effect_change_time`(默认 0.2s)。
+- heart 特效的两样视觉**都由玩家踩出来**。**命中**: 每打中一个音符 (tap / drag / heart / release / 长键头部) 就走 `Gameplay.on_note_hit(strength)` → `EffectManager.on_note_hit()` → 屏幕边缘闪一下 (`HeartVignette.flash_once`) **并且**心电图笔尖往前画一段 (`HeartLine.advance`, 步长 `advance_step` 默认屏宽 1/8, 用 `advance_glide` 平滑推过去)。强度沿用判定等级那张表 (`HitFeedback.flash_of`), 特效没开时 `EffectManager` 会把所有调用丢掉。
+- **漏键**: 走 `Gameplay.on_note_miss()` → `EffectManager.on_note_miss()` → 心电图**往回退半步** (`HeartLine.rewind`, = `advance_step × REWIND_RATIO` 0.5, 退到 0 就打住) **并且**屏幕边缘那层血色底子**暗一下** (`HeartVignette.dim_once`, 先压到 `MISS_DIM_DEPTH` 0.8, 再按 220ms 恢复)。半步而不是一整步 —— 一次失误不该把一次命中完全抹平, 否则准度刚好一半的玩家会让心电图长期贴在零点、特效等于没画。压暗只作用于底子, 闪动不受影响。
+- 哪些算漏键: `NoteBase._lose` (从头没被点) / `NoteBase` 打到"丢失"档的点击 / `Hold._lose` (长键头部漏掉)。**长键尾判丢失不算** —— 那一条长键的头部已经推进过心电图了, 所以一条长键的净收益仍是 +1。
+- 心电图从此**不再自己一趟趟扫** (`sweep_duration` / `rest_duration` 已删): 上场时清空, 打不中就停在原地 —— 心跳是玩家自己踩出来的; 画满整屏后清空重画。
+- 特效期间光晕平时只有一层底子 (`EffectManager.heart_vignette_base`, 默认 0.3), 闪动叠在它上面; 想做成"只在打击时才亮"把它设成 0 即可, 调得接近 1 则看不见闪动。密集谱面下因为衰减尺度是 260ms (`HeartVignette.FLASH_DECAY_MS`), 连续命中会连成一层持续的涟漪, 而不是一次次明暗。
+- 打击**不再有背景闪光**: 背景高亮现在只由连击数驱动 (`_combo_background_level`), 逐音符的瞬时增量已删除 (密集谱面下那是频闪)。
+- `HeartVignette.flash_once(strength)` 本身仍是公开接口, 别的场合想单独闪一下屏幕边缘可以直接调它。
 - `heart` 的换位与它的判定收紧 / 心电图是**两条独立时间线**: 换位槽会被后来的效果顶掉, 而收紧与心电图一定会跑到 `heart` 自己的结束时间。
 - ⚠ `Effects` 里的 `"heart"` 是**效果类型**, 与 `HitObjects` 里的 `"heart"`(心键) 同名但不同段。
 

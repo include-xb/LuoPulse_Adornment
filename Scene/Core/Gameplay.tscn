@@ -11,6 +11,7 @@
 [ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="7_46tx6"]
 [ext_resource type="PackedScene" uid="uid://d1gy1m1a3xlpc" path="res://Scene/Ui/Widget/HeartLine.tscn" id="8_2bmra"]
 [ext_resource type="AudioStream" uid="uid://cryyhdkor01jm" path="res://Asset/Test/audio.ogg" id="9_46tx6"]
+[ext_resource type="PackedScene" uid="uid://bnewl83jxx6uk" path="res://Scene/Ui/Widget/HeartVignette.tscn" id="10_fcvxv"]
 [ext_resource type="Script" uid="uid://bfsciob2nrhl" path="res://Script/Core/EffectManager.gd" id="11_8ls4n"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_j17h8"]
@@ -35,7 +36,7 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 0.50000002375
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_ge3h2"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_6xqko"]
 viewport_path = NodePath("UI/TextureRect/SubViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
@@ -146,7 +147,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_ge3h2")
+texture = SubResource("ViewportTexture_6xqko")
 expand_mode = 3
 
 [node name="SubViewport" type="SubViewport" parent="UI/TextureRect" unique_id=731722823]
@@ -183,6 +184,9 @@ column = 3
 [node name="Column4" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
 column = 4
+
+[node name="HeartVignette" parent="UI" unique_id=1225533570 instance=ExtResource("10_fcvxv")]
+layout_mode = 1
 
 [node name="Combo" type="Label" parent="UI" unique_id=146666133]
 layout_mode = 1
