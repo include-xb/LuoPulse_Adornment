@@ -31,6 +31,7 @@ expand_mode = 5
 stretch_mode = 6
 
 [node name="QuitPanel" type="ColorRect" parent="CanvasLayer" unique_id=1280101619]
+process_mode = 3
 visible = false
 anchors_preset = 15
 anchor_right = 1.0

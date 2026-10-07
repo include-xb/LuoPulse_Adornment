@@ -35,6 +35,7 @@ func _notification(what: int) -> void:
 		back_to_previous_scene()
 		pass
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		get_tree().paused = true
 		quit_panel.visible = true
 		pass
 	# get_viewport().set_input_as_handled()
@@ -175,5 +176,6 @@ func _on_ok_quit_pressed() -> void:
 
 
 func _on_cancel_quit_pressed() -> void:
+	get_tree().paused = false
 	quit_panel.visible = false
 	return
