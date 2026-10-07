@@ -6,14 +6,17 @@ const LAUNCH_SCENE_PATH: String = "res://Scene/Ui/Launch.tscn"
 
 @export var color_rect: ColorRect # = $CanvasLayer/ColorRect
 @export var texture_rect: TextureRect # = $CanvasLayer/TextureRect
+@export var quit_panel: ColorRect
 
 var _scene_track: Array = [ ]
 var _args: Dictionary = { }
 var _last_animation_name: String = "fade"
 var _launch_scene: Node = null
 var _is_finish: bool = false
+var _is_main: bool = false
 
 func _ready() -> void:
+	get_tree().set_auto_accept_quit(false)
 	color_rect.self_modulate.a = 0
 	color_rect.visible = false
 	texture_rect.visible = false
@@ -26,7 +29,13 @@ func _notification(what: int) -> void:
 		# 当前场景可以拒绝离开 (例如设置页里用户名不合法)
 		if not _can_leave_current_scene():
 			return
+		if _is_main:
+			quit_panel.visible = not quit_panel.visible
+			return
 		back_to_previous_scene()
+		pass
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		quit_panel.visible = true
 		pass
 	# get_viewport().set_input_as_handled()
 	pass
@@ -54,6 +63,13 @@ func _can_leave_current_scene() -> bool:
 func start_scene_by_path(scene_path: String, pass_args: Dictionary = {}, animation_name: String = "fade", img: ImageTexture = null) -> void:
 	if scene_path == "res://Scene/Ui/Menu/FinishMenu.tscn":
 		_is_finish = true
+	
+	if scene_path == "res://Scene/Ui/Menu/MainMenu.tscn":
+		_is_main = true
+		pass
+	else:
+		_is_main = false
+		pass
 	
 	if not _is_launch_scene(scene_path):
 		await _play_enter_animation(animation_name, img)
@@ -151,3 +167,13 @@ func _play_exit_animation(animation_name: String) -> void:
 			tween.tween_property(texture_rect, "modulate:a", 0, 1)
 			await tween.finished
 			texture_rect.visible = false
+
+
+func _on_ok_quit_pressed() -> void:
+	get_tree().quit()
+	return
+
+
+func _on_cancel_quit_pressed() -> void:
+	quit_panel.visible = false
+	return

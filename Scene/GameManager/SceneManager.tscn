@@ -2,10 +2,11 @@
 
 [ext_resource type="Script" uid="uid://bj84hr26lx2bj" path="res://Script/GameManager/SceneManager.gd" id="1_pibfg"]
 
-[node name="SceneManager" type="Node" unique_id=547550823 node_paths=PackedStringArray("color_rect", "texture_rect")]
+[node name="SceneManager" type="Node" unique_id=547550823 node_paths=PackedStringArray("color_rect", "texture_rect", "quit_panel")]
 script = ExtResource("1_pibfg")
 color_rect = NodePath("CanvasLayer/ColorRect")
 texture_rect = NodePath("CanvasLayer/TextureRect")
+quit_panel = NodePath("CanvasLayer/QuitPanel")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=623813923]
 
@@ -28,3 +29,47 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 5
 stretch_mode = 6
+
+[node name="QuitPanel" type="ColorRect" parent="CanvasLayer" unique_id=1280101619]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8235294)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/QuitPanel" unique_id=288710320]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/QuitPanel/VBoxContainer" unique_id=1395788665]
+layout_mode = 2
+theme_override_font_sizes/font_size = 60
+text = "退出游戏"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/QuitPanel/VBoxContainer" unique_id=1581503288]
+layout_mode = 2
+
+[node name="OkQuit" type="Button" parent="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer" unique_id=699364697]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "确认"
+
+[node name="CancelQuit" type="Button" parent="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer" unique_id=115059605]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "取消"
+
+[connection signal="pressed" from="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer/OkQuit" to="." method="_on_ok_quit_pressed"]
+[connection signal="pressed" from="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer/CancelQuit" to="." method="_on_cancel_quit_pressed"]

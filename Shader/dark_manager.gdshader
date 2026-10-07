@@ -23,8 +23,15 @@ uniform float texture_strength : hint_range(0.0, 0.15) = 0.06;
 uniform float texture_scale    : hint_range(10.0, 500.0) = 180.0;
 
 // ============ 噪声函数（用于纸张纹理） ============
+// 哈希: 用 Dave Hoskins 的 "hash without sine"
+// INFO: 原版是 fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453) —— 一次 FBM 要跑
+//       16 次 sin, 在移动端是实打实的开销; 而且 sin 的参数很大 (texture_scale 一乘就是
+//       几万), 部分移动 GPU 精度不够, 会出现可见的条纹 / 块状伪影。
+//       下面这版只用乘加与 fract, 又快又没有精度问题。
 float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    vec3 p3 = fract(p.xyx * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
 }
 
 // 平滑噪声（基于哈希的插值）
@@ -40,11 +47,15 @@ float smooth_noise(vec2 p) {
 }
 
 // 分形布朗运动（多层噪声叠加）
+// INFO: 层数是留给低端机的旋钮 —— 第 4 层已经细到不足一个像素 (texture_scale 180 × 2³
+//       早就超过屏宽了), 它的幅度也只有 0.0625, 改成 3 层几乎看不出差别, 却少跑 4 次哈希
+const int FBM_OCTAVES = 4;
+
 float fbm(vec2 p) {
     float value = 0.0;
     float amp = 0.5;
     float freq = 1.0;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < FBM_OCTAVES; i++) {
         value += amp * smooth_noise(p * freq);
         freq *= 2.0;
         amp *= 0.5;
