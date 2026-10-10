@@ -437,6 +437,13 @@ func _bgm_target_volume() -> float:
 	return float(volume_bg) * VOLUME_FACTOR
 
 
+## volume_song 对应的线性音量
+## INFO: 歌曲音量有两个消费者 —— 游戏内播放 (Gameplay) 与 选歌界面试听 (Sympathy),
+##       统一从这里取。试听原先直接淡到 0 dB, 于是设置里怎么调它都不变
+func song_target_volume() -> float:
+	return float(volume_song) * VOLUME_FACTOR
+
+
 ## 把背景音乐的音量补间到目标值
 ## @param target: 目标线性音量
 ## @param duration: 补间时长 (秒), 为 0 则立刻生效

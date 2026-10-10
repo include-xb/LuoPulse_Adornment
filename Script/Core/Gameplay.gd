@@ -665,7 +665,7 @@ func _ready() -> void:
 	_pause_panel		.visible = false
 	_pause_button		.disabled = true
 	autoplay			.visible = Global.is_autoplay
-	audio_system.volume_linear = (float(Global.volume_song) / 100) * 2
+	audio_system.volume_linear = Global.song_target_volume()
 	_pause_panel.modulate.a = 0.0
 	username.text = Global.user_name
 	

@@ -335,15 +335,23 @@ func _on_preview_finished() -> void:
 	pass
 
 
+## 试听音量对应的 dB (由 volume_song 换算)
+## INFO: 淡入淡出是在 volume_db 上做的, 而音量配置是线性值, 这里换算一次。
+##       原先固定淡到 0 dB —— 于是设置里怎么调音量, 试听都不变
+## INFO: 低于静音底线时夹住: volume_song = 0 时 linear_to_db(0) = -inf, 会让补间炸掉
+func _preview_volume_db() -> float:
+	return maxf(AUDIO_SILENCE_DB, linear_to_db(Global.song_target_volume()))
+
+
 ## 淡入音频
 func _fade_in_audio() -> void:
 	_kill_audio_fade()
 	audio_stream_player.volume_db = AUDIO_SILENCE_DB
 	_audio_fade_tween = create_tween()
 	_audio_fade_tween.tween_property(
-		audio_stream_player, 
-		"volume_db", 
-		0.0,
+		audio_stream_player,
+		"volume_db",
+		_preview_volume_db(),
 		AUDIO_FADE_IN_TIME
 	).set_trans(Tween.TRANS_QUART) # 三次插值曲线
 	_audio_fade_tween.tween_callback(set_is_back_false) # 淡入完成后播放音频

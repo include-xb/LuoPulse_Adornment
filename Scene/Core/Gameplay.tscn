@@ -50,7 +50,7 @@ size = Vector2(4, 22)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -62,6 +62,7 @@ audio_system = NodePath("AudioSystem")
 note_loader = NodePath("NoteLoader")
 effect_manager = NodePath("EffectManager")
 heart_line = NodePath("UI/HeartLine")
+heart_vignette = NodePath("UI/HeartVignette")
 progress_bar = NodePath("UI/ProgressBar")
 background = NodePath("UI/Background")
 video_stream_player = NodePath("UI/VideoStreamPlayer")

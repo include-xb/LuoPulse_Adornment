@@ -15,8 +15,9 @@ shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_circle"]
 shader = ExtResource("6_circle")
+shader_parameter/gray_scale = 0.0
 
-[node name="MainMenu" type="Control" unique_id=399667804 node_paths=PackedStringArray("background", "username", "amount")]
+[node name="MainMenu" type="Control" unique_id=399667804 node_paths=PackedStringArray("background", "username", "amount", "avatar")]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 15
@@ -28,6 +29,7 @@ script = ExtResource("1_wxf6g")
 background = NodePath("Background")
 username = NodePath("Profile/VBoxContainer/InfoPanel/Username")
 amount = NodePath("Currency/HBoxContainer/Amount")
+avatar = NodePath("Profile/VBoxContainer/AvatarPanel/Avatar")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1168184271]
 material = SubResource("ShaderMaterial_cwtva")
