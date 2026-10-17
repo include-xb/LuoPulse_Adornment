@@ -185,13 +185,9 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"node_type": "ToggleButton",
 		},
 	},
-	"数据": {
-		"用户名": {
-			"key": "user_name",
-			# "config_key": "username",
-			"node_type": "LineEdit",
-		},
-	},
+	# INFO: 这里原本还有一组 "数据 / 用户名" (LineEdit)。改用户名已经迁到主菜单的
+	#       主页卡片 (点头像 → 编辑) —— 那边有确认按钮与校验, 不再走设置项这条
+	#       动态生成的路; 校验也一并搬到了 Global.is_user_name_valid
 }
 
 const normal_background: Texture2D = preload("res://Asset/Image/main.png")
@@ -305,6 +301,34 @@ var story_fragments_unlocked: Array = [ ]
 ## 是否初次打开游戏
 var is_first_open: bool = true
 
+## 当前选用的头像序号 (AVATAR_PATHS 的下标)
+var avatar_index: int = 0
+
+
+# ---------- 主页卡片 / 用户信息 ----------
+
+## 用户名长度上限
+const USER_NAME_MAX_LENGTH: int = 6
+
+## 可选头像的素材路径
+## INFO: 头像美术还没做, 这些文件目前都不存在 —— get_avatar_texture() 会回退到
+##       AVATAR_FALLBACK。美术按这个路径把文件放进来就自动生效, 场景与代码都不用改
+const AVATAR_PATHS: Array[String] = [
+	"res://Asset/Image/Avatar/avatar_1.png",
+	"res://Asset/Image/Avatar/avatar_2.png",
+	"res://Asset/Image/Avatar/avatar_3.png",
+	"res://Asset/Image/Avatar/avatar_4.png",
+	"res://Asset/Image/Avatar/avatar_5.png",
+	"res://Asset/Image/Avatar/avatar_6.png",
+]
+
+## 头像素材缺失时的占位图
+const AVATAR_FALLBACK: Texture2D = preload("res://Asset/Image/Godot-headimg.png")
+
+## 故事碎片表路径
+## INFO: 与 Notebook.gd 的 FRAGMENTS_JSON_PATH 是同一份数据, 改路径要两处一起改
+const FRAGMENTS_JSON_PATH: String = "res://Asset/NoteBook/fragments.json"
+
 
 # ---------- 游戏配置 (config.json) ----------
 
@@ -374,10 +398,22 @@ func get_progress_gray_scale(progress: float) -> float:
 	return 1.0 - saturation
 
 
+## 主线进度 (0~1) —— 已解锁曲数 / 共鸣主线曲数
+## INFO: 原先内联写在 get_current_gray_scale 里, 抽出来给主页卡片的"共鸣值"共用。
+##       分母用 sympath_song_num (Launch 实际扫到的曲包数), 而不是设计文档里的 17 ——
+##       否则会出现"显示 /17 但实际只有 3 首能玩"的错位
+func get_main_line_progress() -> float:
+	return float(main_line_unlocked) / float(maxi(sympath_song_num, 1))
+
+
+## 共鸣值 (0~100 的整数)
+func get_main_line_progress_percent() -> int:
+	return int(round(get_main_line_progress() * 100.0))
+
+
 ## 主菜单背景的灰度 —— 进度按"已解锁的曲目数量"算
 func get_current_gray_scale() -> float:
-	var total: float = float(maxi(sympath_song_num, 1))
-	return get_progress_gray_scale(float(main_line_unlocked) / total)
+	return get_progress_gray_scale(get_main_line_progress())
 
 
 ## 选歌界面某一首的背景灰度 —— 进度按"这是第几首"算
@@ -386,6 +422,44 @@ func get_current_gray_scale() -> float:
 func get_song_gray_scale(song_index: int) -> float:
 	var total: float = float(maxi(sympath_song_num, 1))
 	return get_progress_gray_scale(float(song_index + 1) / total)
+
+
+## 故事碎片总数 (数据表里的条目数)
+## INFO: 直接数数据表, 不写死设计文档里的 10 —— 与笔记页看到的条目数保持一致
+func get_story_fragment_total() -> int:
+	if not FileAccess.file_exists(FRAGMENTS_JSON_PATH):
+		push_error("找不到故事碎片表: %s" % FRAGMENTS_JSON_PATH)
+		return 0
+
+	var file: FileAccess = FileAccess.open(FRAGMENTS_JSON_PATH, FileAccess.READ)
+	if file == null:
+		push_error("无法打开故事碎片表: %s" % FRAGMENTS_JSON_PATH)
+		return 0
+
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	file.close()
+
+	if parsed is not Dictionary:
+		push_error("故事碎片表格式不对 (应为对象): %s" % FRAGMENTS_JSON_PATH)
+		return 0
+	return (parsed as Dictionary).size()
+
+
+## 取第 index 个头像的贴图
+## INFO: 越界或文件不存在都回退到占位图 —— 头像素材还没做, 现在每个槽位拿到的
+##       都是同一张 Godot 头像 (见 AVATAR_PATHS 的说明)
+func get_avatar_texture(index: int) -> Texture2D:
+	if index < 0 or index >= AVATAR_PATHS.size():
+		return AVATAR_FALLBACK
+	if not ResourceLoader.exists(AVATAR_PATHS[index]):
+		return AVATAR_FALLBACK
+	return load(AVATAR_PATHS[index]) as Texture2D
+
+
+## 用户名是否合法 (空 / 超过长度上限都不合法)
+## INFO: 只判定, 不出提示 —— 提示文案由调用方给
+func is_user_name_valid(candidate: String) -> bool:
+	return not candidate.is_empty() and candidate.length() <= USER_NAME_MAX_LENGTH
 
 
 ## ui 点击音效
@@ -770,6 +844,7 @@ func save_user_data() -> void:
 		"main_line_unlocked": main_line_unlocked,
 		"crystal": crystal,
 		"story_fragments_unlocked": story_fragments_unlocked,
+		"avatar_index": avatar_index,
 	}
 	var path: String = OS.get_user_data_dir().path_join("user.json")
 	var file := FileAccess.open(path, FileAccess.WRITE)

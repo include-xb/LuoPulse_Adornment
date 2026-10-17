@@ -46,6 +46,8 @@ Launch ──→ MainMenu ──→ Sympathy (song select) ──→ Gameplay �
 ```
 
 > **Current code**: MainMenu 四个按钮路由已正确 —— 共鸣→`Sympathy.tscn`、断章→`Album.tscn`、笔记→`Notebook.tscn`、设置→`SettingsMenu.tscn`。`AboutMenu.tscn` 场景存在,`! 关于` 按钮已放在 SettingsMenu 场景中,但尚未连接 `pressed` 信号(AboutMenu 脚本已实现返回/感谢逻辑)。Credits/感谢名单场景 `ThanksMenu.tscn` 尚不存在。
+>
+> **主页卡片 (不切场景)**: 点 MainMenu 左上角的头像 → 在**同一个 MainMenu 场景**里弹出用户主页卡片 (`MainMenu.tscn` 的 `ProfilePanel`), 显示头像 / 昵称 / 共鸣值 / 水晶 / 已解锁歌曲 / 已解锁故事碎片。卡片上的「编辑」切到编辑态 (改昵称 + 从头像表里选一个), 编辑态左上角的 `<` 回信息态, 点卡片外的遮罩关闭。整个流程一次都不经过 `SceneManager`。改昵称原先在设置页 (那是 `Global.SETTINGS` 里动态生成的一个 LineEdit), 现已迁到这里 —— 编辑态有「确定」按钮, 校验通过才写盘, `<` 等于取消 (见 `MainMenu.gd` 的 `_setup_profile_card` 一节)。
 
 ### Data Storage
 
@@ -69,9 +71,12 @@ OS.get_user_data_dir()/
 	"is_first_open": true,
 	"main_line_unlocked": 1,         // count of unlocked 共鸣 songs
 	"crystal": 100,                  // crystal currency
-	"story_fragments_unlocked": []   // discovered fragment IDs
+	"story_fragments_unlocked": [],  // discovered fragment IDs
+	"avatar_index": 0                // 选用的头像序号 (Global.AVATAR_PATHS 的下标)
 }
 ```
+
+> 读盘在 `Launch._load_user_data()`, 用的是"默认值字典 + 逐键合并"—— 老存档里缺的键会自动落回默认值, 所以新增字段不需要迁移脚本。写盘在 `Global.save_user_data()`。
 
 **config.json** (auto-created with defaults if missing):
 
@@ -280,7 +285,7 @@ A `.lpz` file is a ZIP archive:
   - [0.95, 1.00): `60 * acc - 41`
   - 1.00: 20 crystals
 - **Daily login bonus**: 5 crystals (shown as popup on MainMenu)
-- **Spending**: 15 per song unlock (共鸣), 6 for username change
+- **Spending**: 15 per song unlock (共鸣); 设计文档另写"改用户名 6 水晶", 但**代码从未收过费**, 主页卡片里的改昵称也不收 —— 以代码为准
 - **Display**: Shown on MainMenu, song select, and results screens
 
 ### Story Fragments System
@@ -357,6 +362,8 @@ Categories per design doc:
 
 All settings save immediately to `config.json`.
 
+> **改用户名已迁走**: 设置页原来有一组 `数据 / 用户名`(`Global.SETTINGS` 里动态生成的 LineEdit, 每敲一个字就写盘), 现已搬到主菜单的主页卡片 —— 那边有「确定」按钮与 `Global.is_user_name_valid` 校验。设置项类型里 `LineEdit` 的支持仍保留(见 `SettingsGroup._create_lineedit`), 只是当前没有设置项用它。
+
 ### UI Design Principles
 
 - **Text style**: Replace icon buttons with symbolic characters (`< 返回`, `@ 开始`, `& 关于`).
@@ -372,6 +379,7 @@ All settings save immediately to `config.json`.
 - **Results screen**: Animated counters (0.3s interval), crystal count ticks up with glow, background uses曲绘 at completion shader state. "继续" button → Notebook资料卡, then back to song select.
 - **Credits**: Scroll-up movie-style credits. Unlocked at 100% 共鸣 progress (hidden入口 on Launch page, or via About page). Ends with: "献给所有在黑暗中寻找光明的人."
 - **彩蛋 (Easter eggs)**: Non-story — specific P主 B站 ID as username changes avatar; tap小白头像 100× on developer page for hidden photo. Story — see fragments system above.
+- **头像 (avatar)**: 可选头像是一张固定表 `Global.AVATAR_PATHS` (6 条, 路径形如 `Asset/Image/Avatar/avatar_N.png`), 在主菜单主页卡片的编辑态里选。**美术素材暂时缺失** —— 文件不存在时 `Global.get_avatar_texture()` 回退到 `Asset/Image/Godot-headimg.png`, 所以现在 6 个槽位都是同一张图, 只靠灰度("选中原色 / 未选全灰", 复用 `Shader/circular_mask.gdshader` 的 `gray_scale`)区分。美术按路径把文件放进去就自动生效, 不用改代码或场景; 增减头像只改 `AVATAR_PATHS` 的条目数。
 - **Performance**: Target ≥ 100 FPS on mobile. Shader effects have fallback on low-end devices (reduce noise layers, lower paper texture resolution).
 
 ## Coding Conventions

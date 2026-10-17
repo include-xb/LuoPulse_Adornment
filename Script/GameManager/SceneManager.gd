@@ -43,7 +43,7 @@ func _notification(what: int) -> void:
 
 
 ## 询问当前场景是否允许离开 (安卓返回手势走这里, 不经过各场景自己的返回按钮)
-## 场景只要实现 can_leave() -> bool 就能拦住返回, 见 SettingsMenu
+## 场景只要实现 can_leave() -> bool 就能拦住返回, 见 MainMenu (主页卡片开着时)
 func _can_leave_current_scene() -> bool:
 	if _scene_track.is_empty():
 		return true

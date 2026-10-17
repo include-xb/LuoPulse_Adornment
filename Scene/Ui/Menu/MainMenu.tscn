@@ -17,7 +17,18 @@ shader_parameter/flash = 0.0
 shader = ExtResource("6_circle")
 shader_parameter/gray_scale = 0.0
 
-[node name="MainMenu" type="Control" unique_id=399667804 node_paths=PackedStringArray("background", "username", "amount", "avatar")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0, 0, 0, 0.7058824)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6a3fd"]
+shader = ExtResource("6_circle")
+shader_parameter/gray_scale = 0.0
+
+[node name="MainMenu" type="Control" unique_id=399667804 node_paths=PackedStringArray("background", "username", "amount", "avatar", "level_value", "avatar_panel", "profile_panel", "profile_mask", "profile_card", "profile_avatar", "profile_name", "info_view", "sympathy_value", "crystal_value", "song_value", "fragment_value", "edit_button", "back_button", "edit_view", "name_edit", "confirm_button", "avatar_picker")]
 clip_contents = true
 layout_mode = 3
 anchors_preset = 15
@@ -30,6 +41,24 @@ background = NodePath("Background")
 username = NodePath("Profile/VBoxContainer/InfoPanel/Username")
 amount = NodePath("Currency/HBoxContainer/Amount")
 avatar = NodePath("Profile/VBoxContainer/AvatarPanel/Avatar")
+level_value = NodePath("Profile/VBoxContainer/InfoPanel/HBoxContainer/value")
+avatar_panel = NodePath("Profile/VBoxContainer/AvatarPanel")
+profile_panel = NodePath("ProfilePanel")
+profile_mask = NodePath("ProfilePanel/Mask")
+profile_card = NodePath("ProfilePanel/CenterContainer/Card")
+profile_avatar = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/ProfileAvatarPanel/ProfileAvatar")
+profile_name = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/ProfileName")
+info_view = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView")
+sympathy_value = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/SympathyRow/SympathyValue")
+crystal_value = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/CrystalRow/CrystalValue")
+song_value = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/SongRow/SongValue")
+fragment_value = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/FragmentRow/FragmentValue")
+edit_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/EditButton")
+back_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/BackButton")
+edit_view = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView")
+name_edit = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/NameEdit")
+confirm_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/ConfirmButton")
+avatar_picker = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/AvatarPicker")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1168184271]
 material = SubResource("ShaderMaterial_cwtva")
@@ -215,7 +244,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.27509066, 0.27509055, 0.27509058, 1)
 theme_override_constants/shadow_outline_size = 0
 theme_override_font_sizes/font_size = 40
-text = "共鸣%"
+text = "共鸣"
 
 [node name="value" type="Label" parent="Profile/VBoxContainer/InfoPanel/HBoxContainer" unique_id=483545035]
 layout_mode = 2
@@ -223,10 +252,204 @@ theme_override_colors/font_color = Color(0.27509066, 0.27509055, 0.27509058, 1)
 theme_override_font_sizes/font_size = 40
 text = "114"
 
+[node name="ProfilePanel" type="Control" parent="." unique_id=1732808531]
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Mask" type="ColorRect" parent="ProfilePanel" unique_id=1733032792]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.92156863)
+
+[node name="CenterContainer" type="CenterContainer" parent="ProfilePanel" unique_id=1763440839]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="Panel" parent="ProfilePanel/CenterContainer" unique_id=1355775057]
+custom_minimum_size = Vector2(680, 570)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="CardMargin" type="MarginContainer" parent="ProfilePanel/CenterContainer/Card" unique_id=472973214]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 36
+
+[node name="VBox" type="VBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin" unique_id=1766625843]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="InfoView" type="VBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox" unique_id=1742617236]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="ProfileAvatarPanel" type="Panel" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=997240697]
+clip_children = 1
+custom_minimum_size = Vector2(108, 108)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="ProfileAvatar" type="TextureRect" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/ProfileAvatarPanel" unique_id=1127562177]
+material = SubResource("ShaderMaterial_6a3fd")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_cwtva")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ProfileName" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=1506923067]
+layout_mode = 2
+text = "小白"
+horizontal_alignment = 1
+
+[node name="SympathyRow" type="HBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=183643749]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SympathyLabel" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/SympathyRow" unique_id=870460904]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "共鸣"
+
+[node name="SympathyValue" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/SympathyRow" unique_id=1873663]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "-"
+horizontal_alignment = 2
+
+[node name="CrystalRow" type="HBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=285763987]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CrystalLabel" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/CrystalRow" unique_id=392328373]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "水晶"
+
+[node name="CrystalValue" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/CrystalRow" unique_id=233788482]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "-"
+horizontal_alignment = 2
+
+[node name="SongRow" type="HBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=477554473]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SongLabel" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/SongRow" unique_id=313447338]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "已解锁歌曲"
+
+[node name="SongValue" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/SongRow" unique_id=695386629]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "-"
+horizontal_alignment = 2
+
+[node name="FragmentRow" type="HBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=1963558605]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FragmentLabel" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/FragmentRow" unique_id=1140953013]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "故事碎片"
+
+[node name="FragmentValue" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/FragmentRow" unique_id=1137910549]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "-"
+horizontal_alignment = 2
+
+[node name="EditButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView" unique_id=2048470958]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 30
+text = "/ 编辑  "
+alignment = 2
+
+[node name="EditView" type="VBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox" unique_id=203717332]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="BackButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView" unique_id=2031772566]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 60
+text = "<   "
+
+[node name="NameRow" type="HBoxContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView" unique_id=714076542]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NameEdit" type="LineEdit" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow" unique_id=309151076]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 40
+placeholder_text = "昵称"
+
+[node name="ConfirmButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow" unique_id=2123973318]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "确定"
+
+[node name="ConfirmButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/ConfirmButton" unique_id=893236395]
+layout_mode = 0
+theme_override_font_sizes/font_size = 40
+text = "确定"
+
+[node name="PickerTitle" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView" unique_id=1807900776]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "头像"
+
+[node name="AvatarPicker" type="GridContainer" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView" unique_id=202533071]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 6
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 5
+
 [connection signal="pressed" from="MenuContainer/MenuButtons/Sympathy" to="." method="_on_sympathy_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtons/Album" to="." method="_on_album_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtons/Note" to="." method="_on_note_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtons/Setting" to="." method="_on_setting_pressed"]
+[connection signal="gui_input" from="Profile/VBoxContainer/AvatarPanel" to="." method="_on_avatar_panel_gui_input"]
+[connection signal="gui_input" from="ProfilePanel/Mask" to="." method="_on_profile_mask_gui_input"]
+[connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/EditButton" to="." method="_on_edit_pressed"]
+[connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/BackButton" to="." method="_on_edit_back_pressed"]
+[connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/ConfirmButton" to="." method="_on_confirm_pressed"]
 
 [editable path="MenuContainer/MenuButtons/Sympathy"]
 [editable path="MenuContainer/MenuButtons/Album"]

@@ -14,6 +14,13 @@ shader_parameter/flash = 0.0
 shader = ExtResource("3_t01hv")
 shader_parameter/blur_amount = 3.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s4y3q"]
+bg_color = Color(0.07058824, 0.06666667, 0.05882353, 0.74509805)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [node name="FinishMenu" type="Control" unique_id=1595795645 node_paths=PackedStringArray("grade_label", "title_label", "acc_label", "harmonious_count", "sympathetic_count", "aware_count", "lost_count", "combo_label", "notes_label", "crystal_label", "continue_button")]
 layout_mode = 3
 anchors_preset = 15
@@ -55,7 +62,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Card" type="ColorRect" parent="." unique_id=1711929231]
+[node name="Card" type="Panel" parent="." unique_id=1411653293]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -67,7 +74,7 @@ offset_right = 450.0
 offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.07058824, 0.06666667, 0.05882353, 0.8235294)
+theme_override_styles/panel = SubResource("StyleBoxFlat_s4y3q")
 
 [node name="Padding" type="MarginContainer" parent="Card" unique_id=527332286]
 layout_mode = 0

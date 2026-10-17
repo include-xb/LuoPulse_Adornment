@@ -12,10 +12,6 @@ extends Control
 @onready var texture_rect: TextureRect = $TextureRect
 
 
-## 用户名长度上限
-const USER_NAME_MAX_LENGTH: int = 6
-
-
 func _ready() -> void:
 	if texture_rect == null or texture_rect.material == null:
 		return
@@ -46,21 +42,10 @@ func _build_settings() -> void:
 ## 返回按钮
 func _on_back_pressed() -> void:
 	Global.play_ui_click_audio()
-	if not can_leave():
-		return
 	$"..".back_to_previous_scene()
 	pass
 
 
-## 能否离开设置页 —— 返回按钮和安卓返回手势都会问这里
-## 用户名不合法时弹提示并拒绝离开
-func can_leave() -> bool:
-	if Global.user_name.is_empty():
-		Global.display_notice("用户名不能为空")
-		return false
-
-	if Global.user_name.length() > USER_NAME_MAX_LENGTH:
-		Global.display_notice("用户名不得长于6字符")
-		return false
-
-	return true
+# INFO: 这里原本有个 can_leave(), 用来在离开前校验用户名。改用户名迁到主菜单的
+#       主页卡片之后, 这个页面已经没有会失效的输入, 校验也搬到了 Global.is_user_name_valid
+#       —— SceneManager 对没有 can_leave 的场景直接放行 (见 _can_leave_current_scene)

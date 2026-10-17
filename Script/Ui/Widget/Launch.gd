@@ -252,6 +252,7 @@ func _load_user_data() -> void:
 		"main_line_unlocked": 1,	# 主线中已经解锁的曲目数量
 		"crystal": 25,	# 水晶数
 		"story_fragments_unlocked": ["1"], 	# 已解锁的故事碎片id
+		"avatar_index": 0,	# 当前选用的头像序号
 	}
 
 	var data: Dictionary = default_data.duplicate()
@@ -297,6 +298,8 @@ func _load_user_data() -> void:
 	Global.main_line_unlocked 		= data["main_line_unlocked"]
 	Global.crystal 					= data["crystal"]
 	Global.story_fragments_unlocked = data["story_fragments_unlocked"]
+	# INFO: 老存档里没有这个键, 上面的合并循环会让它落回 default_data 里的 0
+	Global.avatar_index 			= data["avatar_index"]
 	pass
 
 
