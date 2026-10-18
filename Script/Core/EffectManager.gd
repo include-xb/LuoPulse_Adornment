@@ -145,7 +145,7 @@ func on_note_hit(strength: float = 1.0) -> void:
 		return
 
 	if _heart_vignette:
-		_heart_vignette.flash_once(strength)
+		# _heart_vignette.flash_once(strength)
 		pass
 
 	if _heart_line:

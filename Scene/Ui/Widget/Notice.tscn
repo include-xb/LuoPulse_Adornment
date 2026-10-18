@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://b8tvticei3ymk" path="res://Script/Ui/Widget/Notice.gd" id="1_o6fh4"]
 
 [node name="Notice" type="RichTextLabel" unique_id=1005835674]
-custom_minimum_size = Vector2(350, 40)
+custom_minimum_size = Vector2(350, 70)
 offset_right = 350.0
 offset_bottom = 40.0
-theme_override_font_sizes/normal_font_size = 35
+theme_override_font_sizes/normal_font_size = 45
 text = "Notice: ..."
 scroll_active = false
 horizontal_alignment = 1

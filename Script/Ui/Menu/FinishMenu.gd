@@ -36,15 +36,9 @@ extends Control
 ## 继续按钮
 @export var continue_button: Button # = $Card/Padding/VBox/ContinueButton
 
-
 ## 各个数值从 0 增长到最终值的时长 (秒)
 ## 设为 0 则不做动画, 直接显示最终值
 @export var count_up_duration: float = 0.8
-
-## 增长动画开始前的延迟 (秒)
-## SceneManager 切换场景时有 0.25 秒的淡入, 这期间本场景还看不见;
-## 等它过去再开始增长, 否则动画开头一段会被淡入整个盖掉
-const COUNT_UP_START_DELAY: float = 0.5
 
 ## 评级 (∞ Infinity / A / B / C / D) 淡入的时长 (秒)
 ## 评级在数值增长期间保持隐藏, 等增长结束后才开始淡入
@@ -57,6 +51,11 @@ const COUNT_UP_START_DELAY: float = 0.5
 @export var button_fade_duration: float = 0.75
 
 
+## 增长动画开始前的延迟 (秒)
+## SceneManager 切换场景时有 0.25 秒的淡入, 这期间本场景还看不见;
+## 等它过去再开始增长, 否则动画开头一段会被淡入整个盖掉
+const COUNT_UP_START_DELAY: float = 0.5
+
 ## 数值开始增长时播放的音效 (铅笔写字声)
 ## 只在"数值开始增长"这一个时间点播放一次, 所以要覆盖整段入场动画的话
 ## 音效本身得足够长 (入场动画总长 = COUNT_UP_START_DELAY + 增长 + 评级淡入 + 按钮淡入)
@@ -66,7 +65,7 @@ const COUNT_UP_SOUND: AudioStream = preload("res://Asset/Audio/pencil.wav")
 func _ready() -> void:
 	# 结算时曲目已经停了, 背景音乐淡入回来
 	Global.fade_in_bgm()
-
+	
 	_show_results()
 	pass
 
@@ -82,15 +81,13 @@ func _show_results() -> void:
 	grade_label.add_theme_color_override("font_color", result.get("grade_color", Color.GRAY))
 
 	# 以下数值都从 0 增长到最终值, 值为 0 的不产生动画
-	_count_up(acc_label, result.get("accuracy", 0.0) * 100.0, _format_percent)
-
-	_count_up(harmonious_count, float(result.get("harmonious", 0)), _format_int)
-	_count_up(sympathetic_count, float(result.get("sympathetic", 0)), _format_int)
-	_count_up(aware_count, float(result.get("aware", 0)), _format_int)
-	_count_up(lost_count, float(result.get("lost", 0)), _format_int)
-
-	_count_up(combo_label, float(result.get("max_combo", 0)), _format_int)
-	_count_up(notes_label, float(result.get("total_notes", 0)), _format_int)
+	_count_up(acc_label, 		 float(result.get("accuracy", 0.0) * 100),  _format_percent)
+	_count_up(harmonious_count,  float(result.get("harmonious", 0)), 		_format_int)
+	_count_up(sympathetic_count, float(result.get("sympathetic", 0)), 		_format_int)
+	_count_up(aware_count, 		 float(result.get("aware", 0)), 			_format_int)
+	_count_up(lost_count, 		 float(result.get("lost", 0)), 				_format_int)
+	_count_up(combo_label, 		 float(result.get("max_combo", 0)), 		_format_int)
+	_count_up(notes_label, 		 float(result.get("total_notes", 0)), 		_format_int)
 
 	# 水晶: 奖励立即入账, 显示上做增长动画
 	var crystal_earned: int = result.get("crystal_earned", 0)
@@ -179,9 +176,9 @@ func _fade_in_after(target: CanvasItem, delay: float, duration: float) -> void:
 	pass
 
 
-## 百分比 (两位小数), 例: 98.42%
+## 百分比 (四位小数), 例: 98.4218%
 func _format_percent(value: float) -> String:
-	return "%.2f%%" % value
+	return "%.4f%%" % value
 
 
 ## 整数

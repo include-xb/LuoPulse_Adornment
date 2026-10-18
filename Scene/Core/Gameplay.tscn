@@ -11,8 +11,16 @@
 [ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="7_46tx6"]
 [ext_resource type="PackedScene" uid="uid://d1gy1m1a3xlpc" path="res://Scene/Ui/Widget/HeartLine.tscn" id="8_2bmra"]
 [ext_resource type="AudioStream" uid="uid://cryyhdkor01jm" path="res://Asset/Test/audio.ogg" id="9_46tx6"]
-[ext_resource type="PackedScene" uid="uid://bnewl83jxx6uk" path="res://Scene/Ui/Widget/HeartVignette.tscn" id="10_fcvxv"]
+[ext_resource type="PackedScene" uid="uid://c0y0n78ljg55s" path="res://Scene/Ui/Widget/HeartVignette.tscn" id="10_fcvxv"]
 [ext_resource type="Script" uid="uid://bfsciob2nrhl" path="res://Script/Core/EffectManager.gd" id="11_8ls4n"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.3137255)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
+material = SubResource("StandardMaterial3D_fdpuf")
+size = Vector2(4, 22)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_j17h8"]
 shader = ExtResource("2_j17h8")
@@ -36,16 +44,8 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 0.50000002375
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_6xqko"]
-viewport_path = NodePath("UI/TextureRect/SubViewport")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fdpuf"]
-transparency = 1
-albedo_color = Color(1, 1, 1, 0.3137255)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_s4y3q"]
-material = SubResource("StandardMaterial3D_fdpuf")
-size = Vector2(4, 22)
+[sub_resource type="ViewportTexture" id="ViewportTexture_fcvxv"]
+viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
@@ -66,9 +66,9 @@ heart_vignette = NodePath("UI/HeartVignette")
 progress_bar = NodePath("UI/ProgressBar")
 background = NodePath("UI/Background")
 video_stream_player = NodePath("UI/VideoStreamPlayer")
-_subviewport = NodePath("UI/TextureRect/SubViewport")
-_camera = NodePath("UI/TextureRect/SubViewport/Node3D/Camera3D")
-_track = NodePath("UI/TextureRect/SubViewport/Node3D/Track")
+_subviewport = NodePath("SubViewport")
+_camera = NodePath("SubViewport/Node3D/Camera3D")
+_track = NodePath("SubViewport/Node3D/Track")
 _ui = NodePath("UI")
 _combo_label = NodePath("UI/Combo")
 _pause_button = NodePath("UI/PauseButton")
@@ -79,6 +79,41 @@ speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxCo
 speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
 tick = NodePath("UI/Tick")
 finish_button_mask = NodePath("UI/Mask")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=731722823]
+transparent_bg = true
+msaa_3d = 2
+screen_space_aa = 1
+size = Vector2i(1024, 1024)
+
+[node name="Node3D" type="Node3D" parent="SubViewport" unique_id=153500028]
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport/Node3D" unique_id=882379652]
+transform = Transform3D(1, 0, 0, 0, 0.5973439, 0.80198526, 0, -0.80198526, 0.5973439, 0, 3.242978, 0.6158583)
+current = true
+
+[node name="Panel" type="MeshInstance3D" parent="SubViewport/Node3D" unique_id=345256402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+visible = false
+mesh = SubResource("PlaneMesh_s4y3q")
+
+[node name="Track" type="Node3D" parent="SubViewport/Node3D" unique_id=1747796275]
+
+[node name="Column1" parent="SubViewport/Node3D/Track" unique_id=1829621600 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
+column = 1
+
+[node name="Column2" parent="SubViewport/Node3D/Track" unique_id=792229827 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
+column = 2
+
+[node name="Column3" parent="SubViewport/Node3D/Track" unique_id=1047817573 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
+column = 3
+
+[node name="Column4" parent="SubViewport/Node3D/Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
+column = 4
 
 [node name="UI" type="Control" parent="." unique_id=1897371010]
 layout_mode = 1
@@ -148,43 +183,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_6xqko")
+texture = SubResource("ViewportTexture_fcvxv")
 expand_mode = 3
-
-[node name="SubViewport" type="SubViewport" parent="UI/TextureRect" unique_id=731722823]
-transparent_bg = true
-msaa_3d = 2
-screen_space_aa = 1
-size = Vector2i(1024, 1024)
-
-[node name="Node3D" type="Node3D" parent="UI/TextureRect/SubViewport" unique_id=153500028]
-
-[node name="Camera3D" type="Camera3D" parent="UI/TextureRect/SubViewport/Node3D" unique_id=882379652]
-transform = Transform3D(1, 0, 0, 0, 0.5973439, 0.80198526, 0, -0.80198526, 0.5973439, 0, 3.242978, 0.6158583)
-current = true
-
-[node name="Panel" type="MeshInstance3D" parent="UI/TextureRect/SubViewport/Node3D" unique_id=345256402]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
-visible = false
-mesh = SubResource("PlaneMesh_s4y3q")
-
-[node name="Track" type="Node3D" parent="UI/TextureRect/SubViewport/Node3D" unique_id=1747796275]
-
-[node name="Column1" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=1829621600 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
-column = 1
-
-[node name="Column2" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=792229827 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
-column = 2
-
-[node name="Column3" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=1047817573 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
-column = 3
-
-[node name="Column4" parent="UI/TextureRect/SubViewport/Node3D/Track" unique_id=770454631 instance=ExtResource("3_21dkn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
-column = 4
 
 [node name="HeartVignette" parent="UI" unique_id=1225533570 instance=ExtResource("10_fcvxv")]
 layout_mode = 1
@@ -429,7 +429,7 @@ script = ExtResource("11_8ls4n")
 [connection signal="pressed" from="UI/PausePanel/CenterContainer/VBoxContainer/Buttons/RetryButton" to="." method="_on_retry_button_pressed"]
 [connection signal="pressed" from="UI/PausePanel/CenterContainer/VBoxContainer/Buttons/ContinueButton" to="." method="_on_continue_button_pressed"]
 
-[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column1"]
-[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column2"]
-[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column3"]
-[editable path="UI/TextureRect/SubViewport/Node3D/Track/Column4"]
+[editable path="SubViewport/Node3D/Track/Column1"]
+[editable path="SubViewport/Node3D/Track/Column2"]
+[editable path="SubViewport/Node3D/Track/Column3"]
+[editable path="SubViewport/Node3D/Track/Column4"]

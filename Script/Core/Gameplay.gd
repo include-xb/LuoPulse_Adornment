@@ -1687,9 +1687,9 @@ func _restart_game() -> void:
 
 ## 清除场景中现有的音符
 func _clear_notes() -> void:
-	var track: Node3D = $UI/TextureRect/SubViewport/Node3D/Track
+	
 	for i: int in range(Global.COLUMN_NUM):
-		var column_node: Node3D = track.get_node("Column" + str(i + 1))
+		var column_node: Node3D = _track.get_node("Column" + str(i + 1))
 		var note_pool: Node3D = column_node.get_node("NotePool")
 		for child in note_pool.get_children():
 			if child is Node3D:

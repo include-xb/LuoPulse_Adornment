@@ -253,6 +253,7 @@ theme_override_font_sizes/font_size = 40
 text = "114"
 
 [node name="ProfilePanel" type="Control" parent="." unique_id=1732808531]
+visible = false
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -420,11 +421,6 @@ placeholder_text = "昵称"
 
 [node name="ConfirmButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow" unique_id=2123973318]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "确定"
-
-[node name="ConfirmButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/ConfirmButton" unique_id=893236395]
-layout_mode = 0
 theme_override_font_sizes/font_size = 40
 text = "确定"
 

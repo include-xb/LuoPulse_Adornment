@@ -1,6 +1,8 @@
 #INFO: 已取消当前场景的自动加载，要在其他脚本中使用该脚本的方法，请使用 $"..".方法名
 
+
 extends Node
+
 
 const LAUNCH_SCENE_PATH: String = "res://Scene/Ui/Launch.tscn"
 

@@ -5,7 +5,7 @@
 [ext_resource type="AudioStream" uid="uid://7exxcrifkxjb" path="res://Asset/Audio/leave.wav" id="3_gydpq"]
 [ext_resource type="AudioStream" uid="uid://ucb68bnhsreq" path="res://Asset/Audio/bgm.ogg" id="4_diww1"]
 
-[node name="Global" type="Control" unique_id=224931585 node_paths=PackedStringArray("NOTICE_BOX", "ui_click")]
+[node name="Global" type="Control" unique_id=224931585 node_paths=PackedStringArray("NOTICE_BOX", "ui_click", "bgm_player")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,6 +15,7 @@ grow_vertical = 2
 script = ExtResource("1_i4ohj")
 NOTICE_BOX = NodePath("NoticeBox")
 ui_click = NodePath("UiClick")
+bgm_player = NodePath("Bgm")
 
 [node name="NoticeBox" type="VBoxContainer" parent="." unique_id=1211581081]
 z_index = 10

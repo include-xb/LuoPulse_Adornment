@@ -51,8 +51,8 @@ func _ready() -> void:
 
 	# 网格与材质都在代码里建: 组数只有运行时才知道, 场景侧没有任何可配置的内容
 	# x 方向留 1, 由 scale.x 拉伸到实际跨度
-	var mesh: PlaneMesh = PlaneMesh.new()
-	mesh.size = Vector2(1.0, LINE_DEPTH)
+	var _mesh: PlaneMesh = PlaneMesh.new()
+	_mesh.size = Vector2(1.0, LINE_DEPTH)
 
 	var material: StandardMaterial3D = StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -60,8 +60,8 @@ func _ready() -> void:
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.albedo_color = LINE_COLOR
 
-	mesh.material = material
-	self.mesh = mesh
+	_mesh.material = material
+	self.mesh = _mesh
 	pass
 
 

@@ -125,7 +125,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 52
-text = "洛之动脉"
+text = "缤纷动脉"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -133,7 +133,7 @@ vertical_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 32
-text = "Luo Pulse"
+text = "Adorned Pulse"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -144,6 +144,7 @@ script = ExtResource("2_chhln")
 metadata/_custom_type_script = "uid://byjyo8iitxtwv"
 
 [node name="LoadingPanel" type="Control" parent="." unique_id=1737859034]
+visible = false
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0

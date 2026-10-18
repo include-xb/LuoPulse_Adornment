@@ -4,10 +4,7 @@
 ## hold 音符行为差异较大, 单独实现 (见 Hold.gd)。
 
 
-extends MeshInstance3D
-
-
-class_name NoteBase
+class_name NoteBase extends MeshInstance3D
 
 
 ## 对 Gameplay 节点的引用 (由 NoteLoader 注入)

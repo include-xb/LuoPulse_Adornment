@@ -5,7 +5,7 @@ extends Control
 @export var ui_click: AudioStreamPlayer # = $UiClick
 
 ## 背景音乐播放器 (常驻循环播放, 音量由 volume_bg 控制)
-@onready var bgm_player: AudioStreamPlayer = $Bgm
+@export var bgm_player: AudioStreamPlayer # = $Bgm
 
 
 # ---------- 常量 ----------

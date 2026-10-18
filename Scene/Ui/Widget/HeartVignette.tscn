@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://bnewl83jxx6uk"]
+[gd_scene format=3 uid="uid://c0y0n78ljg55s"]
 
-[ext_resource type="Script" uid="uid://8laev50rabq2" path="res://Script/Ui/Widget/HeartVignette.gd" id="1_l4ihi"]
+[ext_resource type="Script" path="res://Script/Ui/Widget/HeartVignette.gd" id="1_l4ihi"]
 
 [node name="HeartVignette" type="ColorRect" unique_id=1225533570]
 anchors_preset = 15
