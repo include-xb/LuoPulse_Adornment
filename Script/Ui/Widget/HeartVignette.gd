@@ -10,10 +10,8 @@
 ## 外观参数 (血色 / 带子的宽窄 / 最浓多少) 都在 Shader/heart_vignette.gdshader 里,
 ## 这里只管强度, 以及让四周带子等宽所需的宽高比。
 
-extends ColorRect
 
-
-class_name HeartVignette
+class_name HeartVignette extends ColorRect
 
 
 ## 光晕用的 shader

@@ -133,7 +133,7 @@ func _read_requested_card_index() -> int:
 		return int(raw)
 	return -1
 
-
+# ---------- 信号绑定 ----------
 ## 返回按钮
 func _on_back_pressed() -> void:
 	Global.play_ui_click_audio()

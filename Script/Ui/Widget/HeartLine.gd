@@ -14,43 +14,7 @@
 ##   reset_now()                    —— 立即清空 (重开游戏时用)
 
 
-extends Control
-
-
-class_name HeartLine
-
-
-## 一段心电图的归一化模板 (x: 0~1, y: -1~1)
-## INFO: 屏幕坐标 y 向下, 所以向上的波峰写负值。顺序: 基线 → P 波 → 基线 →
-##       QRS 波群 → 基线 → T 波 → 基线; 首尾两点都必须落在基线上,
-##       否则平铺时相邻两趟之间会多出一条竖直连线
-const HEART_TEMPLATE: Array[Vector2] = [
-	Vector2(0.00, 0.0),
-	Vector2(0.10, 0.0),
-	Vector2(0.14, -0.18),
-	Vector2(0.18, 0.0),
-	Vector2(0.26, 0.0),
-	Vector2(0.30, 0.10),
-	Vector2(0.33, -1.0),
-	Vector2(0.36, 0.55),
-	Vector2(0.40, 0.0),
-	Vector2(0.52, 0.0),
-	Vector2(0.60, -0.30),
-	Vector2(0.68, 0.0),
-	Vector2(0.80, 0.0),
-	Vector2(1.00, 0.0),
-]
-
-## 辉光那笔相对主折线的宽度倍数
-const GLOW_WIDTH_SCALE: float = 3.0
-
-## 辉光那笔的透明度
-const GLOW_ALPHA: float = 0.25
-
-## 漏掉一个音符时笔尖往回退多少 = advance_step × 这个比例
-## INFO: 半步而不是一整步 —— 一次失误不该把一次命中完全抹平, 否则准度刚好一半的
-##       玩家会让心电图长期贴在零点, 特效等于没画
-const REWIND_RATIO: float = 0.5
+class_name HeartLine extends Control
 
 
 @export_group("外观")
@@ -113,6 +77,39 @@ const REWIND_RATIO: float = 0.5
 			_is_running = false
 			pass
 		pass
+
+
+## 一段心电图的归一化模板 (x: 0~1, y: -1~1)
+## INFO: 屏幕坐标 y 向下, 所以向上的波峰写负值。顺序: 基线 → P 波 → 基线 →
+##       QRS 波群 → 基线 → T 波 → 基线; 首尾两点都必须落在基线上,
+##       否则平铺时相邻两趟之间会多出一条竖直连线
+const HEART_TEMPLATE: Array[Vector2] = [
+	Vector2(0.00, 0.0),
+	Vector2(0.10, 0.0),
+	Vector2(0.14, -0.18),
+	Vector2(0.18, 0.0),
+	Vector2(0.26, 0.0),
+	Vector2(0.30, 0.10),
+	Vector2(0.33, -1.0),
+	Vector2(0.36, 0.55),
+	Vector2(0.40, 0.0),
+	Vector2(0.52, 0.0),
+	Vector2(0.60, -0.30),
+	Vector2(0.68, 0.0),
+	Vector2(0.80, 0.0),
+	Vector2(1.00, 0.0),
+]
+
+## 辉光那笔相对主折线的宽度倍数
+const GLOW_WIDTH_SCALE: float = 3.0
+
+## 辉光那笔的透明度
+const GLOW_ALPHA: float = 0.25
+
+## 漏掉一个音符时笔尖往回退多少 = advance_step × 这个比例
+## INFO: 半步而不是一整步 —— 一次失误不该把一次命中完全抹平, 否则准度刚好一半的
+##       玩家会让心电图长期贴在零点, 特效等于没画
+const REWIND_RATIO: float = 0.5
 
 
 ## 折线全部采样点 (屏幕坐标)
