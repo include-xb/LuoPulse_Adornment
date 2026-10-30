@@ -311,27 +311,24 @@ The "soul" of LuoPulse — a personal narrative about school bullying, broken fa
 
 > The Title and the Source need further design. Now they are uncertain.
 
-**Fragment JSON structure** (stored in `res://Data/story_fragments.json`):
+**Fragment JSON structure** (stored in `res://Asset/NoteBook/fragments.json`):
 
 ```json
 {
-	"fragment_id": 1,
-	"title": "伊甸园",
-	"date": "23/2/22",
-	"day_of_week": "周一",
-	"weather": "阴",
-	"content": "我的压力不来自于学习...",
-	"trigger_progress": 0.05,
-	"trigger_type": "progress"
+	"1": {
+		"data": { "year": "2022", "month": "9", "day": "1", "week": "星期四", "weather": "晴" },
+		"title": "序曲",
+		"text": "..."
+	},
+	"2": { "data": { ... }, "title": "伊甸园", "text": "..." }
 }
 ```
 
 **Trigger mechanism**:
 
-- Progress-based: after completing a 共鸣 song, if progress crosses a fragment's threshold, unlock it.
-- **Sequential only**: fragments unlock in ID order, even if multiple thresholds are crossed.
-- Notification: slip-paper popup on FinishMenu: "发现了新的故事碎片 —— 「碎片标题」"
-- Fallback: red dot on Notebook button in MainMenu if unread.
+- **随曲目解锁**: 在选歌页点「解锁」买下一首歌时, 同时顺次解锁一块故事碎片 (`Global.unlock_next_story_fragment()`) —— 按碎片序号从小到大找下一块未解锁的; 曲目与碎片共用一次 `save_user_data()`。
+- Notification: `Global.display_notice("碎片#N <标题> 已解锁")` (例如 `碎片#2 <伊甸园> 已解锁`), 与「解锁成功」一起弹出; 碎片全部解锁后不再提示。
+- Fallback: red dot on Notebook button in MainMenu if unread. (未实现)
 
 ### Notebook Scene
 

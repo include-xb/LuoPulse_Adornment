@@ -254,10 +254,16 @@ func update_if_locked() -> void:
 ## 解锁
 ## INFO: 解锁后必须重跑 update_if_locked(), 不能只手工把 start 打开 ——
 ##       否则笔记 / 选项两个按钮会一直留在禁用状态
+## INFO: 每解锁一首歌顺次解锁一块故事碎片; 两者共用一次写盘
 func unlock() -> void:
 	Global.main_line_unlocked += 1
+	var fragment_notice: String = Global.unlock_next_story_fragment()
 	Global.save_user_data()
 	update_if_locked()
+
+	if not fragment_notice.is_empty():
+		Global.display_notice(fragment_notice)
+		pass
 	pass
 
 

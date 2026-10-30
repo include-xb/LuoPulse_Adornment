@@ -448,25 +448,74 @@ func get_song_gray_scale(song_index: int) -> float:
 	return get_progress_gray_scale(float(song_index + 1) / total)
 
 
-## 故事碎片总数 (数据表里的条目数)
-## INFO: 直接数数据表, 不写死设计文档里的 10 —— 与笔记页看到的条目数保持一致
-func get_story_fragment_total() -> int:
+## 读取故事碎片表; 文件缺失 / 打开失败 / 结构不对时返回空字典
+func _read_fragments_table() -> Dictionary:
 	if not FileAccess.file_exists(FRAGMENTS_JSON_PATH):
 		push_error("找不到故事碎片表: %s" % FRAGMENTS_JSON_PATH)
-		return 0
+		return { }
 
 	var file: FileAccess = FileAccess.open(FRAGMENTS_JSON_PATH, FileAccess.READ)
 	if file == null:
 		push_error("无法打开故事碎片表: %s" % FRAGMENTS_JSON_PATH)
-		return 0
+		return { }
 
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	file.close()
 
-	if parsed is not Dictionary:
+	if not parsed is Dictionary:
 		push_error("故事碎片表格式不对 (应为对象): %s" % FRAGMENTS_JSON_PATH)
-		return 0
-	return (parsed as Dictionary).size()
+		return { }
+	return parsed as Dictionary
+
+
+## 故事碎片总数 (数据表里的条目数)
+## INFO: 直接数数据表, 不写死设计文档里的 10 —— 与笔记页看到的条目数保持一致
+func get_story_fragment_total() -> int:
+	return _read_fragments_table().size()
+
+
+## 解锁下一块故事碎片 (按序号从小到大), 返回提示文案; 没有可解锁的碎片时返回空串
+## INFO: 与曲目解锁一一对应 —— 每解锁一首歌顺次解锁一块。
+##       这里只改 story_fragments_unlocked, 不写盘、不弹提示:
+##       调用方 (Sympathy.unlock) 与曲目解锁共用一次 save_user_data(), 再 display_notice()
+func unlock_next_story_fragment() -> String:
+	var fragments: Dictionary = _read_fragments_table()
+	if fragments.is_empty():
+		return ""
+
+	# 已解锁的 id 统一转成字符串比对 (user.json 里可能是数字, 也可能是字符串)
+	var unlocked: Dictionary = { }
+	for unlocked_id: Variant in story_fragments_unlocked:
+		unlocked[str(unlocked_id)] = true
+		pass
+
+	# 按序号从小到大找第一块未解锁的
+	var next_id: String = ""
+	var next_order: int = 2147483647
+	for key: Variant in fragments:
+		var fragment_id: String = str(key)
+		if unlocked.has(fragment_id):
+			continue
+		var order: int = int(fragment_id)
+		if next_id.is_empty() or order < next_order:
+			next_id = fragment_id
+			next_order = order
+			pass
+		pass
+
+	if next_id.is_empty():
+		return ""
+
+	story_fragments_unlocked.append(next_id)
+
+	var entry: Variant = fragments[next_id]
+	var title: String = ""
+	if entry is Dictionary:
+		title = str((entry as Dictionary).get("title", ""))
+		pass
+	if title.is_empty():
+		return "碎片#%s 已解锁" % next_id
+	return "碎片#%s <%s> 已解锁" % [ next_id, title ]
 
 
 ## 取第 index 个头像的贴图
