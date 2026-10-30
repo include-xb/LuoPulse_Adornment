@@ -22,6 +22,21 @@ const NOTICE_PACKED_SCENE: PackedScene = preload("res://Scene/Ui/Widget/Notice.t
 ## 轨道数
 const COLUMN_NUM: int = 4
 
+## 每条轨道的身份色
+## INFO: 与 LPEditor 预览窗口的 ChartDefs.TRACK_COLORS 保持一致 —— 改一边就要同步另一边
+const TRACK_COLORS: Array[Color] = [
+	Color(0.25, 0.40, 0.70),
+	Color(0.70, 0.45, 0.20),
+	Color(0.25, 0.65, 0.40),
+	Color(0.70, 0.25, 0.45),
+]
+
+## 轨道底色中身份色所占比例 (0 = 纯黑, 1 = 纯身份色)
+const TRACK_LANE_TINT: float = 0.35
+
+## 轨道底色的透明度 (与 Column.tscn 里 track_color 的 alpha 一致)
+const TRACK_BASE_ALPHA: float = 0.5882353
+
 ## 透明物体的排序层级步长
 ## INFO: 换位动画时两根轨道会在同一 x 重合。透明物体不写深度, 彼此不做遮挡, 先后只按
 ##       "相机距离 - sorting_offset" 排序, 距离相等时先后不稳定, 高亮的那根会忽上忽下地闪。
@@ -102,7 +117,7 @@ var _bgm_tween: Tween = null
 ## 曲包清单链接
 ## 返回格式: { "list": [ "曲包下载链接", ... ] }
 ## 启动时从这里拉取全部曲包链接, 再逐个下载
-const SONG_PACKAGE_MANIFEST_URL: String = "https://lpfileserv.thirhythm.top/directlink/1/songpackages/list.json"
+const SONG_PACKAGE_MANIFEST_URL: String = "https://lpfileserv.thirhythm.top/directlink/1/songpackages/Sympathy/list.json"
 
 ## INFO: 设置项仅在此处修改，控件将会动态生成
 ## 设置项
@@ -414,6 +429,15 @@ func get_main_line_progress_percent() -> int:
 ## 主菜单背景的灰度 —— 进度按"已解锁的曲目数量"算
 func get_current_gray_scale() -> float:
 	return get_progress_gray_scale(get_main_line_progress())
+
+
+## 第 column 条轨道 (1-based) 的底色: 黑底叠一点该轨道的身份色
+## INFO: 颜色跟着轨道走 (所以换位时能一眼看出谁挪到了哪儿), 与 LPEditor 预览窗口一致
+func get_track_lane_color(column: int) -> Color:
+	var index: int = (maxi(column, 1) - 1) % TRACK_COLORS.size()
+	var color: Color = Color(0.0, 0.0, 0.0).lerp(TRACK_COLORS[index], TRACK_LANE_TINT)
+	color.a = TRACK_BASE_ALPHA
+	return color
 
 
 ## 选歌界面某一首的背景灰度 —— 进度按"这是第几首"算

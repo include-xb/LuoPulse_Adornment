@@ -30,6 +30,9 @@ extends Control
 ## 屏幕边缘的血色光晕 (heart 谱面效果期间随心跳闪动, 与心电图同相位)
 @export var heart_vignette: HeartVignette # = $UI/HeartVignette
 
+## 心跳颤动 —— 让 3D 演奏区跟着命中向下沉一下再弹回
+@export var heart_pulse: HeartPulse # = $UI/TextureRect
+
 ## 进度条
 @export var progress_bar: ProgressBar # = $UI/ProgressBar
 
@@ -1050,7 +1053,14 @@ func _setup_effects() -> void:
 		pass
 	heart_vignette = vignette
 
-	effect_manager.setup(input_processers, effect_list, line, vignette)
+	# 心跳颤动: 同样的两段式查找 (脚本挂在 UI/TextureRect 上)
+	var pulse: HeartPulse = heart_pulse
+	if pulse == null and _ui:
+		pulse = _ui.get_node_or_null("TextureRect") as HeartPulse
+		pass
+	heart_pulse = pulse
+
+	effect_manager.setup(input_processers, effect_list, line, vignette, pulse)
 	pass
 
 

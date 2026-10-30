@@ -27,6 +27,15 @@ class_name EffectManager
 ## 动画时长的下限 (秒) —— 防止导出变量被设成 0 导致除零
 const MIN_CHANGE_TIME: float = 0.001
 
+## 换位动画的指数收敛: 与 LPEditor 预览窗口的轨道切换一致, 起步快、尾部柔和
+## 名义时长 = effect_change_time × POSITION_RAMP_SCALE —— 指数收敛的理论终点在无穷远,
+## 取 3 倍时结束时残差只有 1 - e^-9 ≈ 0.01%, _finish_active 的精确归位看不出跳变
+const POSITION_RAMP_SCALE: float = 3.0
+
+## 名义时长内走过的指数幂次 (3 × POSITION_RAMP_SCALE)
+## INFO: 由它反推的收敛速率仍是每 effect_change_time 走完 95% —— 与预览窗口的 CHANGE_RAMP 同义
+const POSITION_EASE_POWER: float = 3.0 * POSITION_RAMP_SCALE
+
 ## 参与换位的轨道 (下标必须与 Gameplay.get_input_processor 一致, 由 Gameplay 注入)
 var _tracks: Array = [ ]
 
@@ -53,10 +62,16 @@ var _heart_line: HeartLine = null
 ##       (见 on_note_hit)
 var _heart_vignette: HeartVignette = null
 
+## 心跳颤动节点 (Gameplay 注入; 可缺) —— 触发时让 3D 演奏区向下沉再弹回
+var _heart_pulse: HeartPulse = null
+
 ## 当前 heart 效果的起止时刻 (毫秒), _heart_end_ms < 0 表示没有 heart 生效
 ## INFO: 特意只记时刻、不记下标 —— 效果在 _effects 里的生命周期与它的存续时间无关
 var _heart_start_ms: float = -1.0
 var _heart_end_ms: float = -1.0
+
+## heart 当前的整体淡入淡出 (0 ~ 1) —— 命中触发心跳颤动时作为幅度
+var _heart_fade: float = 0.0
 
 ## 当前效果: 各轨道在触发瞬间的 x (上升段的起点)
 var _from_x: PackedFloat32Array = PackedFloat32Array()
@@ -71,10 +86,12 @@ var _to_x: PackedFloat32Array = PackedFloat32Array()
 ## @param raw_effects: chart.lp 的 Effects 段原文 (缺失或非法时传空数组)
 ## @param heart_line: 心电图节点; 不传则 heart 只收紧判定窗口
 ## @param heart_vignette: 屏幕边缘的血色光晕节点; 不传则只出心电图
-func setup(tracks: Array, raw_effects: Variant, heart_line = null, heart_vignette = null) -> void:
+## @param heart_pulse: 心跳颤动节点; 不传则只出心电图与光晕
+func setup(tracks: Array, raw_effects: Variant, heart_line = null, heart_vignette = null, heart_pulse = null) -> void:
 	_tracks = tracks
 	_heart_line = heart_line
 	_heart_vignette = heart_vignette
+	_heart_pulse = heart_pulse
 
 	# 槽位坐标只记一次: 重开时轨道可能正被效果挪着, 那时读到的不是原位
 	if _origin_x.size() != _tracks.size():
@@ -100,6 +117,7 @@ func reset() -> void:
 	# heart 的状态必须一起复位: 收紧的判定窗口是静默的全局状态, 泄漏了不会有任何报错
 	_heart_start_ms = -1.0
 	_heart_end_ms = -1.0
+	_heart_fade = 0.0
 	Global.apply_judge_window(false)
 	if _heart_line:
 		_heart_line.modulate.a = 0.0
@@ -107,6 +125,9 @@ func reset() -> void:
 		pass
 	if _heart_vignette:
 		_heart_vignette.set_intensity(0.0)
+		pass
+	if _heart_pulse:
+		_heart_pulse.stop()
 		pass
 	pass
 
@@ -135,7 +156,7 @@ func tick(master_time: float) -> void:
 	pass
 
 
-## 玩家打中一个音符: 屏幕边缘闪一下, 同时心电图往前画一段
+## 玩家打中一个音符: 心电图往前画一段, 同时让演奏区向下颤一下
 ## INFO: 只在 heart 特效期间起作用 —— 特效没开时这里直接返回, 所以打击路径可以无脑调它。
 ##       强度按判定等级给 (与轨道闪光同一张表), "丢失"档是 0, 双重保证 miss 什么都不触发
 ## @param strength: 闪动强度 (0 ~ 1)
@@ -151,6 +172,11 @@ func on_note_hit(strength: float = 1.0) -> void:
 	if _heart_line:
 		# 心电图不按判定等级区分 —— 打中了就往前画一段
 		_heart_line.advance()
+		pass
+
+	# 心跳与心电图同一条逻辑: 打中了才跳; 幅度吃 heart 的整体 fade
+	if _heart_pulse:
+		_heart_pulse.beat_once(_heart_fade)
 		pass
 	pass
 
@@ -232,12 +258,12 @@ func _activate(index: int) -> void:
 
 
 ## 把当前效果的位置写进各轨道
-## INFO: 上升与下降两条 ramp 直接相乘叠加, 不用 if/else 分段 ——
+## INFO: 上升与下降两条 ramp 同时推进, 不用 if/else 分段 ——
 ##       duration 短于动画时长时它会自然退化成平滑的帐篷形, 不会跳变
 func _apply_positions(master_time: float) -> void:
 	var effect: Dictionary = _effects[_active_index]
 	var start: float = float(effect["time"])
-	var change: float = _change_time_ms()
+	var change: float = _position_change_ms()
 	var restore_end: float = start + float(effect["duration"]) + change
 
 	# 复原完毕: 精确归位并结束本次效果
@@ -277,14 +303,20 @@ func _start_heart(start: float, duration: float) -> void:
 	_heart_start_ms = start
 	# 结束时刻与换位一致: 复原 ramp 的时长也算在持续时间内
 	_heart_end_ms = start + duration + _change_time_ms()
+	_heart_fade = 0.0
 	Global.apply_judge_window(true)
 	if _heart_line:
 		_heart_line.set_beat(true)
 		pass
+	if _heart_pulse:
+		_heart_pulse.stop()
+		pass
 	pass
 
 
-## 每帧推进 heart: 心电图与血色光晕按与换位同款的一对 ramp 淡入淡出, 到期收尾
+## 每帧推进 heart: 心电图 / 血色光晕按与换位同款的一对 ramp 淡入淡出, 到期收尾
+## INFO: 心跳颤动不在这里推进 —— 它由 on_note_hit 触发, 这里只把当前的 fade 记下来
+##       当作下一次跳动的幅度
 func _apply_heart(master_time: float) -> void:
 	if master_time >= _heart_end_ms:
 		_finish_heart()
@@ -295,6 +327,7 @@ func _apply_heart(master_time: float) -> void:
 	var down: float = clampf((_heart_end_ms - master_time) / change, 0.0, 1.0)
 	# 取两条 ramp 的较小值: 开头淡入、结尾淡出, 中段恒为 1
 	var fade: float = minf(_ease(up), _ease(down))
+	_heart_fade = fade
 
 	if _heart_line:
 		_heart_line.modulate.a = fade
@@ -312,6 +345,7 @@ func _apply_heart(master_time: float) -> void:
 func _finish_heart() -> void:
 	_heart_start_ms = -1.0
 	_heart_end_ms = -1.0
+	_heart_fade = 0.0
 	Global.apply_judge_window(false)
 	if _heart_line:
 		_heart_line.modulate.a = 0.0
@@ -319,6 +353,9 @@ func _finish_heart() -> void:
 		pass
 	if _heart_vignette:
 		_heart_vignette.set_intensity(0.0)
+		pass
+	if _heart_pulse:
+		_heart_pulse.stop()
 		pass
 	pass
 
@@ -331,7 +368,7 @@ func _track_x_at(track_index: int, master_time: float) -> float:
 
 	var effect: Dictionary = _effects[_active_index]
 	var start: float = float(effect["time"])
-	var change: float = _change_time_ms()
+	var change: float = _position_change_ms()
 	var restore_end: float = start + float(effect["duration"]) + change
 	if master_time >= restore_end:
 		return _origin_x[track_index]
@@ -342,17 +379,37 @@ func _track_x_at(track_index: int, master_time: float) -> float:
 
 
 ## 第 i 根轨道在两条 ramp 进度下的 x
+## INFO: 上升与下降都用指数收敛, 与 LPEditor 预览窗口的轨道切换一致
 func _position_at(track_index: int, up: float, down: float) -> float:
-	var risen: float = lerpf(_from_x[track_index], _to_x[track_index], _ease(up))
-	return lerpf(risen, _origin_x[track_index], 1.0 - _ease(down))
+	var risen: float = lerpf(_from_x[track_index], _to_x[track_index], _rise_ease(up))
+	return lerpf(risen, _origin_x[track_index], _fall_weight(down))
 
 
-## 单程动画时长 (毫秒)
+## 换位的名义单程时长 (毫秒)
+## INFO: 指数收敛的尾部无限长, 这里取"走到 95% 的时间"的 POSITION_RAMP_SCALE 倍,
+##       结束时残差已经看不出来
+func _position_change_ms() -> float:
+	return _change_time_ms() * POSITION_RAMP_SCALE
+
+
+## 单程动画时长 (毫秒) —— heart 的淡入淡出仍用它 (0.2s 的定长渐变)
 func _change_time_ms() -> float:
 	return maxf(effect_change_time, MIN_CHANGE_TIME) * 1000.0
 
 
-## 0~1 的缓动映射
+## 上升段: 0 → 1 的指数收敛 (起步快、尾部柔和)
+func _rise_ease(up: float) -> float:
+	return 1.0 - exp(-POSITION_EASE_POWER * up)
+
+
+## 下降段: 朝原位走了多少 (down: 1 = 效果刚结束, 0 = 名义终点)
+## INFO: 取 1 - exp(-k × 已过时间比例), 所以同样是"起步快、尾部柔和";
+##       等价于把目标换成原位后继续指数收敛
+func _fall_weight(down: float) -> float:
+	return 1.0 - exp(-POSITION_EASE_POWER * (1.0 - down))
+
+
+## 0~1 的缓动映射 (heart 的淡入淡出用)
 func _ease(progress: float) -> float:
 	return smoothstep(0.0, 1.0, progress)
 

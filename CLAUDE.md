@@ -164,6 +164,7 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 - **Default**: 3D slanted rails (梯形 on screen), camera俯视角 adjustable.
 - **Optional**: Straight rails (设置中选择), 4 tracks centered, total width = 2/5 ~ 1/2 of screen.
 - Track贴图: pencil-sketch style matching the art direction.
+- **按列染色**: 每条轨道是黑底叠 35% 的身份色 (`Global.TRACK_COLORS` / `TRACK_LANE_TINT` / `TRACK_BASE_ALPHA`), 由 `InputProcesser._ready` 写进各自的材质副本。颜色跟着**轨道**走 (不是槽位), 所以换位时能一眼看出谁挪到了哪儿。配色与 LPEditor 预览窗口的 `ChartDefs.TRACK_COLORS` 一致, 改一边要同步另一边。
 
 ### Color / Saturation Progression System
 
@@ -251,7 +252,7 @@ A `.lpz` file is a ZIP archive:
 | type     | 行为                                                                                                              |
 | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `change` | 轨道换位: 把整根 Column 沿 x 挪到别的槽位, `duration` 到期后复原                                                    |
-| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入两样同相位的视觉: 心电图 `Scene/Ui/Widget/HeartLine.tscn` 与屏幕边缘的血色光晕 `Scene/Ui/Widget/HeartVignette.tscn` |
+| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入三样视觉: 心电图 `Scene/Ui/Widget/HeartLine.tscn`、屏幕边缘的血色光晕 `Scene/Ui/Widget/HeartVignette.tscn`、以及心跳颤动 `Script/Ui/Widget/HeartPulse.gd` (挂在 `Gameplay` 的 `UI/TextureRect` 上, 让 3D 演奏区向下沉再弹回; 由命中触发) |
 
 ```json
 "Effects": [
@@ -261,7 +262,8 @@ A `.lpz` file is a ZIP archive:
 ```
 
 - `changed`: 1~轨道数的排列, 语义是 `changed[槽位] = 轨道号`(1-based);`heart` 传恒等排列 `[ 1, 2, 3, 4 ]` 就等于"只收紧判定 + 心电图, 不换位"。
-- 换位与心电图 / 血色光晕淡入淡出的动画时长都用 `EffectManager.effect_change_time`(默认 0.2s)。
+- 换位动画采用**指数收敛**, 与 LPEditor 预览窗口的轨道切换一致 (起步快、尾部柔和), 而不是定长 smoothstep: `effect_change_time` (默认 0.2s) 仍是"走到 95% 的时间", 位置的名义单程时长取它的 `POSITION_RAMP_SCALE` (3) 倍, 结束时残差约 0.01%, 归位看不出跳变。心电图的淡入淡出仍用 `effect_change_time` 的定长 smoothstep。
+- **心跳颤动 (`HeartPulse`)**: 与心电图同一条逻辑 —— **每打中一个音符颤动一次**, 不是定时节拍; 正在颤时再次命中会掐掉当前动画、从头重颤。一次颤动 0~180ms (90ms 处最低), 把 `UI/TextureRect` 向下位移再回原位 (最大位移 = 控件高度 × `dip_ratio` 默认 0.016); 触发幅度取 `EffectManager` 当前的 heart fade, 所以特效淡入/淡出期间颤动更轻。不打就不颤。只动 3D 演奏层的 Y、不动 X, 背景 PV 与 UI 文字不受影响, 触屏的 X→轨道映射也就不需要反向补偿。
 - heart 特效的两样视觉**都由玩家踩出来**。**命中**: 每打中一个音符 (tap / drag / heart / release / 长键头部) 就走 `Gameplay.on_note_hit(strength)` → `EffectManager.on_note_hit()` → 屏幕边缘闪一下 (`HeartVignette.flash_once`) **并且**心电图笔尖往前画一段 (`HeartLine.advance`, 步长 `advance_step` 默认屏宽 1/8, 用 `advance_glide` 平滑推过去)。强度沿用判定等级那张表 (`HitFeedback.flash_of`), 特效没开时 `EffectManager` 会把所有调用丢掉。
 - **漏键**: 走 `Gameplay.on_note_miss()` → `EffectManager.on_note_miss()` → 心电图**往回退半步** (`HeartLine.rewind`, = `advance_step × REWIND_RATIO` 0.5, 退到 0 就打住) **并且**屏幕边缘那层血色底子**暗一下** (`HeartVignette.dim_once`, 先压到 `MISS_DIM_DEPTH` 0.8, 再按 220ms 恢复)。半步而不是一整步 —— 一次失误不该把一次命中完全抹平, 否则准度刚好一半的玩家会让心电图长期贴在零点、特效等于没画。压暗只作用于底子, 闪动不受影响。
 - 哪些算漏键: `NoteBase._lose` (从头没被点) / `NoteBase` 打到"丢失"档的点击 / `Hold._lose` (长键头部漏掉)。**长键尾判丢失不算** —— 那一条长键的头部已经推进过心电图了, 所以一条长键的净收益仍是 +1。
@@ -425,6 +427,8 @@ From `README.md` — follow these strictly:
 | Scene transitions    | `Script/GameManager/SceneManager.gd` |
 | Note factory         | `Script/Core/NoteLoader.gd`          |
 | Input handling       | `Script/Core/InputProcesser.gd`      |
+| Chart effects        | `Script/Core/EffectManager.gd`       |
+| Heartbeat pulse      | `Script/Ui/Widget/HeartPulse.gd`     |
 | Gameplay loop        | `Script/Core/Gameplay.gd`            |
 | Note base (Tap)      | `Script/Core/NoteTemplate/Tap.gd`    |
 | Time tracker         | `Script/GameManager/TimeManager.gd`  |

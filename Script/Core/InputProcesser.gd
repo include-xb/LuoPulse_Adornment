@@ -117,6 +117,10 @@ func _ready() -> void:
 	_track_material = src.duplicate()
 	single_track.material_override = _track_material
 
+	# 每条轨道叠一点自己的身份色 —— 颜色跟着轨道走, 换位时能一眼看出谁挪到了哪儿
+	# INFO: 与 LPEditor 预览窗口的轨道配色一致 (见 Global.get_track_lane_color)
+	_track_material.set_shader_parameter("track_color", Global.get_track_lane_color(column))
+
 	# 判定线与轨道复用同一个 shader, 同样需要独立副本, 否则 4 条轨道会互相污染
 	var judging_src: ShaderMaterial = _judging_strip.get_active_material(0)
 	_judging_material = judging_src.duplicate()

@@ -11,6 +11,7 @@
 [ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="7_46tx6"]
 [ext_resource type="PackedScene" uid="uid://d1gy1m1a3xlpc" path="res://Scene/Ui/Widget/HeartLine.tscn" id="8_2bmra"]
 [ext_resource type="AudioStream" uid="uid://cryyhdkor01jm" path="res://Asset/Test/audio.ogg" id="9_46tx6"]
+[ext_resource type="Script" uid="uid://dl5kkwaqfaxge" path="res://Script/Ui/Widget/HeartPulse.gd" id="10_0lm72"]
 [ext_resource type="PackedScene" uid="uid://c0y0n78ljg55s" path="res://Scene/Ui/Widget/HeartVignette.tscn" id="10_fcvxv"]
 [ext_resource type="Script" uid="uid://bfsciob2nrhl" path="res://Script/Core/EffectManager.gd" id="11_8ls4n"]
 
@@ -44,7 +45,7 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 0.50000002375
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_fcvxv"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_0lm72"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
@@ -181,10 +182,12 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -49.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_fcvxv")
+texture = SubResource("ViewportTexture_0lm72")
 expand_mode = 3
+script = ExtResource("10_0lm72")
 
 [node name="HeartVignette" parent="UI" unique_id=1225533570 instance=ExtResource("10_fcvxv")]
 layout_mode = 1
