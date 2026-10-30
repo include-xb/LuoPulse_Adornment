@@ -54,20 +54,21 @@ The chart file format is structured as follows:
 {
     "General": {
         "Title": "title",        // the title need NOT match song package filename
-        "Producer": "...",
-        "Vocalist": "...",
-        "Creator": "...",
-        "Difficulty": "EZ",        // difficulty: EZ(easy), NM(normal), HD(hard)
-        "Version": "1.0",        // currently unused
+        "Artist": "...",         // producer (shown under the "作词/作曲/编曲" label in song select)
+        "Vocalist": "...",       // vocalist
+        "Creator": "...",        // chart creator
+        "Chapter": 1,            // chapter number 1 ~ 5, shown as "ChapterⅠ. 序曲" etc.
         "BPM": 80,
         "Preview": 3000,        // play at 3000ms when previewing
-        "PreviewEnd": 10000,    // ended at 10000ms when previewing
-        "Crystal": 40            // crystal number needed to unlock the song
+        "PreviewEnd": 10000,    // end at 10000ms when previewing (omit or -1 to play to the end)
+        "Crystal": 40,           // crystal number needed to unlock the song (default 10)
+        "Difficulty": "EZ",        // difficulty: EZ(easy), NM(normal), HD(hard); currently unused
+        "Version": "1.0"        // currently unused
     },
     "HitObjects": [
         {
             "type": "tap",        // tap (blue key)
-            "time": 1000,        // time that note should spend arriving line (msec)
+            "time": 1000,        // msec, when the note reaches the judgment line
             "column": 1            // column 1 ~ 4
         },
         {
@@ -85,26 +86,48 @@ The chart file format is structured as follows:
             "time": 1000,
             "column": 4,
             "duration": 1500    // duration of the hold (msec)
+        },
+        {
+            "type": "heart",       // heart (judged like a tap; unrelated to the heart effect in Effects)
+            "time": 1500,
+            "column": 2
+        }
+    ],
+    "Effects": [                // optional; omitted means no chart effects
+        {
+            "type": "change",     // change: swaps the columns; restored when duration ends
+            "time": 3000,        // msec, when the effect starts (relative to the song start)
+            "duration": 4000,    // msec, how long the effect lasts
+            "changed": [ 2, 3, 4, 1 ]    // a permutation of 1 ~ track count (length must equal track count): changed[slot] = track number (1-based)
+        },
+        {
+            "type": "heart",      // heart: change plus tighter judgment windows, an ECG and a blood-red screen-edge vignette
+            "time": 5000,
+            "duration": 3000,
+            "changed": [ 3, 4, 1, 2 ]    // [ 1, 2, 3, 4 ] tightens judgment and shows visuals without swapping
         }
     ]
 }
 ```
 
-Chart effects:
+Chart effects (the `Effects` section, parallel to `HitObjects`):
 
-> Not implemented yet.
+- `change`: moves each track along x to another slot; restored when `duration` ends.
+- `heart`: a superset of `change` — it also tightens the judgment windows and fades in an ECG and a blood-red screen-edge vignette, both driven by the player's hits and misses.
 
 The user's data is structured as follows:
 
 ```javascript
 {
-    "crystal": 25,            // crystals
-    "main_line_unlocked": 1,  // number of unlocked mainline songs
+    "username": "源来是小白",    // username
+    "is_first_open": true,      // first-open flag
+    "main_line_unlocked": 1,    // number of unlocked mainline songs
+    "crystal": 25,              // crystals
     "story_fragments_unlocked": [    // ids of unlocked fragments
         "1",
         "3"
     ],
-    "username": "源来是小白"    // username
+    "avatar_index": 0           // index of the selected avatar
 }
 ```
 
@@ -112,13 +135,14 @@ The game config file is structured as follows:
 
 ```javascript
 {
-    "if_play_start_animation": true,
-    "offset": 0,                        // offset of the chart
-    "speed": 15,                        // speed of note
+    "if_play_start_animation": true,    // whether to play the start animation
+    "is_auto_update_package": true,     // whether to auto-update song packages on launch
+    "offset": 0,                        // chart offset (msec, -200 ~ 200)
+    "speed": 10,                        // note speed (-20 ~ 20)
     "version": "0.0.0.1",
     "volume_bg": 60,                    // volume of background music
-    "volume_note": 55,                  // volume of the note that is hit
-    "volume_song": 65,                  // volume of the song
+    "volume_note": 70,                  // volume of the note hit sound
+    "volume_song": 70,                  // volume of the song
     "volume_ui": 60                     // volume of UI
 }
 ```
@@ -151,8 +175,8 @@ Follow developers on Bilibili:
 ### Clone the repository 🗂️
 
 ```bash
-git clone https://github.com/include-xb/LuoPulse_from_git.git
-cd LuoPulse_from_git
+git clone https://github.com/include-xb/LuoPulse_Adornment.git
+cd LuoPulse_Adornment
 ```
 
 ### Download Godot Engine⚙️
