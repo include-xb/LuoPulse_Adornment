@@ -155,7 +155,7 @@ Global.accuracy = (Global.accuracy * float(n - 1) + a) / float(n)   # 等价于�
 
 3. **NoteLoader** (`Script/Core/NoteLoader.gd`): Factory instantiating note scenes from `res://Scene/Core/NoteTemplate/` based on chart `type` string.
 
-4. **InputProcesser** (`Script/Core/InputProcesser.gd`): 每根轨道 (Column 节点) 挂载一个实例, 处理该轨道的触屏/按键判定。触屏输入已在 `Gameplay._input` 实现 (根据屏幕 X 映射到轨道列, 支持多点触控); 键盘 D/F/J/K 保留为桌面调试输入。轨道按下/松开触发 `press_judge` / hold 释放逻辑, 附带轨道高亮 shader 反馈。红键与黄键都不参与按下候选: 红键松手时由 `_release_judge` 按松手时刻结算, 黄键由音符自己在进入判定区时查一次本轨是否被按住 (见 Note Types)。
+4. **InputProcesser** (`Script/Core/InputProcesser.gd`): 每根轨道 (Column 节点) 挂载一个实例, 处理该轨道的触屏/按键判定。触屏输入已在 `Gameplay._input` 实现 (根据屏幕 X 映射到轨道列, 支持多点触控; 换位后若多根轨道重叠在同一位置, 会同时按下 / 判定它们); 键盘 D/F/J/K 保留为桌面调试输入。轨道按下/松开触发 `press_judge` / hold 释放逻辑, 附带轨道高亮 shader 反馈。红键与黄键都不参与按下候选: 红键松手时由 `_release_judge` 按松手时刻结算, 黄键由音符自己在进入判定区时查一次本轨是否被按住 (见 Note Types)。
 
 5. **Note templates** (`Script/Core/NoteTemplate/`, 场景在 `Scene/Core/NoteTemplate/`): 音符为 3D 轨道内的 `MeshInstance3D` (`NoteBase`), 通过 `position.z = note_speed * (master_time - time) / 1000` 定位下落 (到达判定线时 z=0)。进入判定窗时注册到 `Global.judging_area`, 命中调用 `judge()`, 未中 `_lose()`, 两者最后都 `queue_free()` **原地消失** (碎裂反馈见 Note Types 表下方的说明); 长键的粒子由 `Hold.gd` 自己发, 不继承 `NoteBase`。
 
@@ -261,7 +261,7 @@ A `.lpz` file is a ZIP archive:
 ]
 ```
 
-- `changed`: 1~轨道数的排列, 语义是 `changed[槽位] = 轨道号`(1-based);`heart` 传恒等排列 `[ 1, 2, 3, 4 ]` 就等于"只收紧判定 + 心电图, 不换位"。
+- `changed`: 长度须等于轨道数, 每项是 1~轨道数, 语义是 `changed[槽位] = 轨道号`(1-based); 允许重复 / 留空 —— 重复值取第一次出现的位置, 没出现的轨道留在原位, 因此可能有两根轨道重叠在同一槽位 (例如 `[1,2,4,4]`: 轨道 4 去槽位 3, 轨道 3 留在原位也是槽位 3; 槽位 4 空着)。重叠的轨道在触屏 / 键盘判定时共同响应 (`EffectManager.track_indices_for_world_x` 返回数组)。`heart` 传恒等排列 `[ 1, 2, 3, 4 ]` 就等于"只收紧判定 + 心电图, 不换位"。
 - 换位动画采用**指数收敛**, 与 LPEditor 预览窗口的轨道切换一致 (起步快、尾部柔和), 而不是定长 smoothstep: `effect_change_time` (默认 0.2s) 仍是"走到 95% 的时间", 位置的名义单程时长取它的 `POSITION_RAMP_SCALE` (3) 倍, 结束时残差约 0.01%, 归位看不出跳变。心电图的淡入淡出仍用 `effect_change_time` 的定长 smoothstep。
 - **心跳颤动 (`HeartPulse`)**: 与心电图同一条逻辑 —— **每打中一个音符颤动一次**, 不是定时节拍; 正在颤时再次命中会掐掉当前动画、从头重颤。一次颤动 0~180ms (90ms 处最低), 把 `UI/TextureRect` 向下位移再回原位 (最大位移 = 控件高度 × `dip_ratio` 默认 0.016); 触发幅度取 `EffectManager` 当前的 heart fade, 所以特效淡入/淡出期间颤动更轻。不打就不颤。只动 3D 演奏层的 Y、不动 X, 背景 PV 与 UI 文字不受影响, 触屏的 X→轨道映射也就不需要反向补偿。
 - heart 特效的两样视觉**都由玩家踩出来**。**命中**: 每打中一个音符 (tap / drag / heart / release / 长键头部) 就走 `Gameplay.on_note_hit(strength)` → `EffectManager.on_note_hit()` → 屏幕边缘闪一下 (`HeartVignette.flash_once`) **并且**心电图笔尖往前画一段 (`HeartLine.advance`, 步长 `advance_step` 默认屏宽 1/8, 用 `advance_glide` 平滑推过去)。强度沿用判定等级那张表 (`HitFeedback.flash_of`), 特效没开时 `EffectManager` 会把所有调用丢掉。

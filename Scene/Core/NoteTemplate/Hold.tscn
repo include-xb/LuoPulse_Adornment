@@ -33,7 +33,7 @@ material = SubResource("StandardMaterial3D_bhst1")
 size = Vector2(0.8, 0.2)
 
 [node name="Hold" type="MeshInstance3D" unique_id=1919900854]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
 material_override = SubResource("ShaderMaterial_hold")
 mesh = SubResource("PlaneMesh_s4y3q")
 script = ExtResource("2_1lfxb")

@@ -35,6 +35,29 @@ var full_save_path: String
 var temp_save_path: String
 
 
+## 该链接对应的曲包是否已经完整下载到本地
+## INFO: 与 download() 的跳过判断同一套 —— 只有完整下完才会改名成正式文件,
+##       所以"正式文件存在"即"完整"
+func is_downloaded(url: String) -> bool:
+	return FileAccess.file_exists(SAVE_DIR.path_join(url.get_file()))
+
+
+## 从曲包链接列表里筛出本地还没有的那些
+## INFO: 启动进度条的分母只算这份"本次真正要下的文件" —— 本地已有的不计入,
+##       这样无论之前下过多少, 本次进度都是从 0 走到 100
+func get_missing_urls(url_list: Array) -> Array[String]:
+	var missing: Array[String] = [ ]
+	for item: Variant in url_list:
+		if not item is String:
+			continue
+		var url: String = item as String
+		if url.is_empty() or is_downloaded(url):
+			continue
+		missing.append(url)
+		pass
+	return missing
+
+
 ## 下载单个曲包, 失败会自动重试
 ## @param url: 下载链接, 文件名取自链接末段 (例: ".../EGoCb/2.lpz" → "2.lpz")
 ## @return: 是否下载成功 (文件已存在时视为成功并跳过)

@@ -98,7 +98,7 @@ The chart file format is structured as follows:
             "type": "change",     // change: swaps the columns; restored when duration ends
             "time": 3000,        // msec, when the effect starts (relative to the song start)
             "duration": 4000,    // msec, how long the effect lasts
-            "changed": [ 2, 3, 4, 1 ]    // a permutation of 1 ~ track count (length must equal track count): changed[slot] = track number (1-based)
+            "changed": [ 2, 3, 4, 1 ]    // length must equal track count; each entry is 1 ~ track count: changed[slot] = track number (1-based)
         },
         {
             "type": "heart",      // heart: change plus tighter judgment windows, an ECG and a blood-red screen-edge vignette
@@ -114,6 +114,7 @@ Chart effects (the `Effects` section, parallel to `HitObjects`):
 
 - `change`: moves each track along x to another slot; restored when `duration` ends.
 - `heart`: a superset of `change` — it also tightens the judgment windows and fades in an ECG and a blood-red screen-edge vignette, both driven by the player's hits and misses.
+- `changed` may repeat or omit tracks: a repeated value uses its first occurrence, and a track that does not appear stays in its original slot. Two tracks can therefore overlap in one slot, and they are judged together. For example, `[1,2,4,4]`: track 4 goes to slot 3, while track 3 stays in its original slot (also slot 3), so they overlap; slot 4 stays empty.
 
 The user's data is structured as follows:
 

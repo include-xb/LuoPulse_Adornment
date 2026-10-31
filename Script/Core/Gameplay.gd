@@ -155,11 +155,12 @@ var _countdown_label: Label = null
 ## 各列的 InputProcesser 引用
 var input_processers: Array = [ ]
 
-## 触屏状态追踪 (touch_index -> 轨道号)
+## 触屏状态追踪 (touch_index -> 轨道号数组)
+## INFO: 轨道重叠时一次按下会同时命中多根, 所以要记数组而不是单个轨道号
 var active_touches: Dictionary = { }
 
-## 键盘按住状态追踪 (keycode -> 轨道号)
-## INFO: 必须记下按下时的轨道号 —— 换位效果会在按住期间改变槽位归属, 松手时若重新查一次,
+## 键盘按住状态追踪 (keycode -> 轨道号数组)
+## INFO: 必须记下按下时命中的轨道 —— 换位效果会在按住期间改变槽位归属, 松手时若重新查一次,
 ##       会打到被换过来的那根轨道上, 而原来那根就永远卡在按下态 (一直亮着, hold 也不结算)
 var _active_keys: Dictionary = { }
 
@@ -747,11 +748,11 @@ func _process(delta: float) -> void:
 	progress_bar.value = current_progress * 100.0
 	video_stream_player.material.set_shader_parameter(
 		"gray_scale",
-		(1.0 - current_progress) * 0.6
+		(1.0 - current_progress) * 0.85
 	)
 	background.material.set_shader_parameter(
 		"gray_scale",
-		(1.0 - current_progress) * 0.6
+		(1.0 - current_progress) * 0.85
 	)
 
 	# 结束游戏 # NOTICE 修改为手动结束游戏
@@ -793,21 +794,24 @@ func _input(event: InputEvent) -> void:
 		if btn_rect.has_point(event.position):
 			return
 		
-		var col: int = _get_column_from_x(event.position.x)
-		if col >= 0:
-			if event.pressed:
-				active_touches[event.index] = col
-				_on_column_touch_pressed(col, input_time)
-				pass
-			else:
-				if active_touches.has(event.index):
-					var released_col: int = active_touches[event.index]
-					active_touches.erase(event.index)
-					_on_column_touch_released(released_col, input_time)
+		if event.pressed:
+			# 按下位置可能同时压着多根重叠的轨道 —— 一起按下、一起判定
+			var cols: Array[int] = _get_columns_from_x(event.position.x)
+			if not cols.is_empty():
+				active_touches[event.index] = cols
+				for col: int in cols:
+					_on_column_touch_pressed(col, input_time)
 					pass
 				pass
+		else:
+			# 松手按"按下时记住的轨道"释放, 不再按松手位置重算 —— 换位 / 移动都不影响
+			if active_touches.has(event.index):
+				var released_cols: Array = active_touches[event.index]
+				active_touches.erase(event.index)
+				for col: int in released_cols:
+					_on_column_touch_released(col, input_time)
+					pass
 			pass
-		pass
 
 	# 桌面键盘输入 (开发调试用)
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
@@ -831,11 +835,13 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if is_track_input_blocked:
 			return
-		var col: int = _get_column_from_key(event)
-		if col >= 0:
+		var cols: Array[int] = _get_columns_from_key(event)
+		if not cols.is_empty():
 			# 记下按下时命中的轨道 —— 松手时它可能已被换位效果挪到别处
-			_active_keys[event.keycode] = col
-			_on_column_touch_pressed(col, input_time)
+			_active_keys[event.keycode] = cols
+			for col: int in cols:
+				_on_column_touch_pressed(col, input_time)
+				pass
 			pass
 		pass
 
@@ -844,9 +850,11 @@ func _input(event: InputEvent) -> void:
 			return
 		# INFO: 用按下时记下的轨道号, 不能重新查一次 —— 理由见 _active_keys 的说明
 		if _active_keys.has(event.keycode):
-			var released_col: int = _active_keys[event.keycode]
+			var released_cols: Array = _active_keys[event.keycode]
 			_active_keys.erase(event.keycode)
-			_on_column_touch_released(released_col, input_time)
+			for col: int in released_cols:
+				_on_column_touch_released(col, input_time)
+				pass
 			pass
 		pass
 	pass
@@ -1089,10 +1097,11 @@ func _calculate_track_screen_bounds() -> void:
 	pass
 
 
-## 根据点击位置的 X 坐标获取被点击的轨道编号 (0-based)
-## INFO: 换位效果生效时返回的是"此刻实际占据该位置"的那根轨道, 而不是槽位号 ——
-##       按下哪里就判定哪里, 与玩家眼睛看到的画面一致
-func _get_column_from_x(x: float) -> int:
+## 根据点击位置的 X 坐标获取被点击的轨道编号 (0-based, 可能多根)
+## INFO: 换位效果生效时返回的是"此刻实际占据该位置"的轨道, 而不是槽位号 ——
+##       按下哪里就判定哪里, 与玩家眼睛看到的画面一致。
+##       轨道重叠时它们会被一起返回, 由调用方共同按下 / 共同判定
+func _get_columns_from_x(x: float) -> Array[int]:
 	var col_count: int = Global.COLUMN_NUM
 	var half_width: float = float(col_count) / 2.0
 	var _range: float = _track_screen_max - _track_screen_min
@@ -1103,25 +1112,25 @@ func _get_column_from_x(x: float) -> int:
 	# 越界判断沿用旧写法: 略微超出左边界仍算第 1 条, 免得改变边缘点击的手感
 	var slot: int = int(normalized * float(col_count))
 	if slot < 0 or slot >= col_count:
-		return -1
+		return [ ]
 
 	if effect_manager == null:
-		return slot
+		return [ slot ]
 
 	# 用连续的位置而不是槽位号换算 —— 换位动画途中轨道不在槽心上, 先量化到槽位会判错
 	var world_x: float = -half_width + normalized * float(col_count)
-	return effect_manager.track_index_for_world_x(world_x)
+	return effect_manager.track_indices_for_world_x(world_x)
 
 
-## 根据键盘按键获取被点击的轨道编号 (0-based)
-## INFO: D/F/J/K 对应的是四个固定槽位, 具体由谁响应交给 EffectManager 按当前位置决定
-func _get_column_from_key(event: InputEventKey) -> int:
+## 根据键盘按键获取被点击的轨道编号 (0-based, 可能多根)
+## INFO: D/F/J/K 对应四个固定槽位; 重叠槽位上站着的所有轨道一起响应
+func _get_columns_from_key(event: InputEventKey) -> Array[int]:
 	if not KEY_COLUMN_MAP.has(event.keycode):
-		return -1
+		return [ ]
 	var slot: int = KEY_COLUMN_MAP[event.keycode]
 	if effect_manager == null:
-		return slot
-	return effect_manager.track_index_for_slot(slot)
+		return [ slot ]
+	return effect_manager.track_indices_for_slot(slot)
 
 
 ## 取得某条轨道当前在屏幕上的 x (判定反馈文字用它定位)
@@ -1506,14 +1515,20 @@ func _on_pause_button_pressed() -> void:
 	var pause_time: float = _compute_master_time()
 	# INFO: 这两处是"合成"的松手 (玩家手指其实还按着), 所以传 true —— 只用来收拾长按
 	#       状态, 不能拿它结算红键, 否则暂停一下就会把一个正在等的红键判掉
-	for col in active_touches.values():
-		_on_column_touch_released(col, pause_time, true)
+	for cols: Array in active_touches.values():
+		for col: int in cols:
+			_on_column_touch_released(col, pause_time, true)
+			pass
+		pass
 	active_touches.clear()
 
 	# 按住的键也要一并松开: _input 开头 "not is_gaming 就 return" 会吞掉暂停期间的所有
 	# 松键事件, 不在这里释放的话, 那个键会一直卡在按下态 (轨道长亮, hold 也不结算)
-	for col in _active_keys.values():
-		_on_column_touch_released(col, pause_time, true)
+	for cols: Array in _active_keys.values():
+		for col: int in cols:
+			_on_column_touch_released(col, pause_time, true)
+			pass
+		pass
 	_active_keys.clear()
 
 	is_gaming = false

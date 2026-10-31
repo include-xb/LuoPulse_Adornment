@@ -86,20 +86,27 @@ func _download_all_song_packages() -> void:
 	if not is_manifest_ok:
 		push_error("曲包清单获取失败, 本次跳过下载")
 	else:
-		var url_list: Array[String] = Global.song_package_url_list
-		_download_total = url_list.size()
+		# 只把"本次真正要下的文件"算进进度 —— 本地已有的直接跳过, 不计入分母。
+		# 否则"本地已有 1 首 / 云端 3 首"会让进度条一上来就停在 33%
+		var pending_urls: Array[String] = $Downloader.get_missing_urls(Global.song_package_url_list)
+		_download_total = pending_urls.size()
 
-		for index: int in _download_total:
-			var url: String = url_list[index]
-			_download_index = index
+		if _download_total == 0:
+			# 没有待下载的文件: 直接显示满格, 不要停留在 0%
+			_apply_download_progress(1.0)
+		else:
+			for index: int in _download_total:
+				var url: String = pending_urls[index]
+				_download_index = index
 
-			var is_success: bool = await $Downloader.download(url)
-			if not is_success:
-				push_error("曲包下载失败, 已跳过: %s" % url)
+				var is_success: bool = await $Downloader.download(url)
+				if not is_success:
+					push_error("曲包下载失败, 已跳过: %s" % url)
+					pass
+
+				# 该文件结束, 进度推进到整数刻度
+				_apply_download_progress(float(index + 1) / float(_download_total))
 				pass
-
-			# 该文件结束, 进度推进到整数刻度
-			_apply_download_progress(float(index + 1) / float(_download_total))
 			pass
 		pass
 
@@ -142,7 +149,7 @@ func _load_song_package_url_list() -> bool:
 
 
 ## 当前文件的字节进度变化 → 换算成总体进度
-## 总体进度 = (已完成文件数 + 当前文件字节比例) / 文件总数
+## 总体进度 = (已完成文件数 + 当前文件字节比例) / 本次待下载文件数
 func _on_download_progress(file_ratio: float) -> void:
 	if _download_total <= 0:
 		return

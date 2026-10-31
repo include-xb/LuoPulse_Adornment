@@ -6,6 +6,12 @@
 ##             心电图 (HeartLine) 与屏幕边缘的血色光晕 (HeartVignette, 随心跳闪动)。
 ##             changed 传恒等排列 (如 [ 1, 2, 3, 4 ]) 就是"只收紧判定 + 这两样视觉, 不换位"。
 ##
+## changed 允许重复 / 留空: 每个槽位写一根轨道号 (changed[槽位] = 轨道号), 重复值取第一次
+## 出现的位置, 没出现的轨道留在原位 —— 因此可能有两根轨道落在同一槽位 (重叠)。
+## 例如 [1,2,4,4]: 槽位 3 与槽位 4 都写了轨道 4, 轨道 4 去槽位 3; 轨道 3 没出现,
+## 留在原位 (也是槽位 3), 于是轨道 3 / 4 重叠。重叠的轨道在判定时共同响应
+## (与 LPEditor 预览窗口的 slot_mapping 一致)。
+##
 ## 换位挪的是 Column 节点本身; 轨道面 / 判定线 / 粒子 / 音符 (NotePool) 都是它的子节点,
 ## 会整体跟着走, 所以"看到的轨道在哪"与"音符在哪"永远是同一处。
 ##
@@ -26,6 +32,15 @@ class_name EffectManager
 
 ## 动画时长的下限 (秒) —— 防止导出变量被设成 0 导致除零
 const MIN_CHANGE_TIME: float = 0.001
+
+## 判定"两根轨道重叠"的 x 容差 (槽位间距为 1.0)
+## INFO: 5% 槽宽 —— 换位动画收敛到 0.2s 附近时两根轨迹的间距已经小于它, 视觉上就是重合了
+const OVERLAP_EPSILON: float = 0.05
+
+## 点击位置到最近轨道的最大判定距离 (世界坐标)
+## INFO: 槽位间距 1.0, 空槽位到相邻轨道的距离是 1.0, 必须排除;
+##       换位途中轨道最多偏离槽心 0.5, 取 0.55 留一点浮点余量
+const MAX_JUDGE_DISTANCE: float = 0.55
 
 ## 换位动画的指数收敛: 与 LPEditor 预览窗口的轨道切换一致, 起步快、尾部柔和
 ## 名义时长 = effect_change_time × POSITION_RAMP_SCALE —— 指数收敛的理论终点在无穷远,
@@ -200,35 +215,64 @@ func on_note_miss() -> void:
 	pass
 
 
-## 找出当前 x 离给定世界坐标最近的那根轨道 (0-based)
-## INFO: 换位动画途中按下时, 这里返回的就是"此刻实际占据该位置"的那根轨道 ——
-##       所以判定永远和玩家眼睛看到的一致, 不需要等动画播完
-func track_index_for_world_x(world_x: float) -> int:
+## 找出当前所有"站在一起"的轨道 (0-based, 升序)
+## INFO: changed 允许重复 / 留空, 换位后可能有两根轨道落在同一个槽位 (视觉上完全重合),
+##       判定时应当一起响应。判据是"与最近轨道的 x 相差不超过 OVERLAP_EPSILON" ——
+##       不能直接用"离点击位置同样近": 点击位置是连续世界坐标, 相邻槽位本来就相距 1.0
+## @param world_x: 点击位置换算出的世界 x
+## @return: 轨道下标数组; 点击位置附近没有轨道 (例如空槽位) 时返回空数组
+func track_indices_for_world_x(world_x: float) -> Array[int]:
+	var result: Array[int] = [ ]
 	if _tracks.is_empty():
-		return -1
+		return result
 
-	var best_index: int = 0
+	var best_index: int = -1
 	var best_distance: float = INF
 	for i: int in _tracks.size():
 		var track: Node3D = _tracks[i]
 		if not is_instance_valid(track):
 			continue
 		var distance: float = absf(track.position.x - world_x)
-		# 用 < 而非 <=: 两根轨道交叉重合的瞬间取小下标, 保证结果确定
+		# 用 < 而非 <=: 两根轨道对称地分居点击位置两侧时取小下标, 保证结果确定
 		if distance < best_distance:
 			best_distance = distance
 			best_index = i
 			pass
 		pass
 
-	return best_index
+	# 空槽位: 最近的轨道在相邻槽位 (相距 1.0), 不能算进来
+	if best_index < 0 or best_distance > MAX_JUDGE_DISTANCE:
+		return result
+
+	var best_x: float = _tracks[best_index].position.x
+	for i: int in _tracks.size():
+		var track: Node3D = _tracks[i]
+		if not is_instance_valid(track):
+			continue
+		if absf(track.position.x - best_x) <= OVERLAP_EPSILON:
+			result.append(i)
+			pass
+		pass
+	return result
 
 
-## 槽位号 → 当前占据该槽位的轨道号 (键盘 D/F/J/K 走这条)
-func track_index_for_slot(slot: int) -> int:
+## 兼容旧调用: 只取最近的一根 (没有就近轨道时 -1)
+func track_index_for_world_x(world_x: float) -> int:
+	var indices: Array[int] = track_indices_for_world_x(world_x)
+	return indices[0] if not indices.is_empty() else -1
+
+
+## 槽位号 → 当前站在该槽位上的所有轨道号 (键盘 D/F/J/K 走这条)
+func track_indices_for_slot(slot: int) -> Array[int]:
 	if slot < 0 or slot >= _slot_x.size():
-		return -1
-	return track_index_for_world_x(_slot_x[slot])
+		return [ ]
+	return track_indices_for_world_x(_slot_x[slot])
+
+
+## 兼容旧调用
+func track_index_for_slot(slot: int) -> int:
+	var indices: Array[int] = track_indices_for_slot(slot)
+	return indices[0] if not indices.is_empty() else -1
 
 
 # ---------- 内部: 状态推进 ----------
@@ -244,8 +288,11 @@ func _activate(index: int) -> void:
 	_to_x.resize(_tracks.size())
 	for i: int in _tracks.size():
 		_from_x[i] = _track_x_at(i, start)
-		# changed[slot] 存的是轨道号 (1-based), 反查本轨道该去哪个槽位
-		_to_x[i] = _slot_x[changed.find(i + 1)]
+		# changed[槽位] 存的是轨道号 (1-based), 反查本轨道该去哪个槽位。
+		# INFO: 重复值取第一次出现的位置 (与 LPEditor 预览一致); 某个轨道号没出现
+		#       就把它的目标设成原位 —— 于是可能有两根轨道落到同一槽位 (重叠)
+		var slot: int = changed.find(i + 1)
+		_to_x[i] = _slot_x[slot] if slot >= 0 else _origin_x[i]
 		pass
 
 	_active_index = index
@@ -499,13 +546,12 @@ func _parse_change(raw: Dictionary, order: int, type_name: String) -> Dictionary
 		push_error("%s 效果的 changed 长度必须是 %d, 实际是 %d" % [ type_name, count, changed.size() ])
 		return { }
 
-	# 必须是 1~count 的一个排列: 有重复会让两条轨道抢同一个槽位, 另一个槽位空着
-	var seen: Dictionary = { }
-	for slot: int in changed:
-		if slot < 1 or slot > count or seen.has(slot):
-			push_error("%s 效果的 changed 必须是 1~%d 的排列: %s" % [ type_name, count, str(raw_changed) ])
+	# 只要求每一项落在 1~count 内; 允许重复 (多根轨道去同一槽位 → 重叠),
+	# 也允许某些轨道号不出现 (那根轨道留在原位, 与 LPEditor 预览一致)
+	for value: int in changed:
+		if value < 1 or value > count:
+			push_error("%s 效果的 changed 每一项必须在 1~%d 内: %s" % [ type_name, count, str(raw_changed) ])
 			return { }
-		seen[slot] = true
 		pass
 
 	return {

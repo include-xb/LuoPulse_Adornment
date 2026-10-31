@@ -43,9 +43,9 @@ shader_parameter/texture_scale = 180.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
 shader = ExtResource("7_46tx6")
-shader_parameter/blur_amount = 0.50000002375
+shader_parameter/blur_amount = 3.50000016625
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_0lm72"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_ge3h2"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
@@ -172,7 +172,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.27450982)
+color = Color(0, 0, 0, 0.3529412)
 
 [node name="HeartLine" parent="UI" unique_id=263587982 instance=ExtResource("8_2bmra")]
 layout_mode = 1
@@ -185,7 +185,7 @@ anchor_bottom = 1.0
 offset_top = -49.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_0lm72")
+texture = SubResource("ViewportTexture_ge3h2")
 expand_mode = 3
 script = ExtResource("10_0lm72")
 
