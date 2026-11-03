@@ -42,11 +42,11 @@ func _ready() -> void:
 	load_config()
 	if Global.is_auto_update_package:
 		$Downloader.download_progress.connect(_on_download_progress)
-		# 进入场景立刻开始下载缺失的曲包, 全部结束后才进入后续流程
-		await _download_all_song_packages()
+		# 进入场景立刻检查并补齐资源, 全部结束后才进入后续流程
+		await _check_and_update_song_packages()
 		pass
 	else:
-		# 玩家关闭了"自动更新曲包", 跳过下载, 直接进入后续流程
+		# 玩家关闭了"自动更新曲包", 跳过检查与下载, 直接进入后续流程
 		loading_panel.visible = false
 		pass
 	
@@ -73,79 +73,83 @@ func _input(event: InputEvent) -> void:
 
 
 # ---------- 曲包下载 ----------
-## 先从服务器拉取曲包清单, 再依次下载缺失的曲包, 并推进进度条
-## 全部下完 (或失败跳过) 后才会返回, 调用方用 await 等待
-func _download_all_song_packages() -> void:
+## 每次启动检查远端资源:
+##   1. 拉取远端文件列表, 只下载本地缺失或大小不一致的文件
+##   2. 每个下载完成的文件立刻用 SHA256 校验
+##   3. 服务器不可用 / 鉴权失败时直接使用本地资源进入游戏
+## 全部结束后才会返回, 调用方用 await 等待
+func _check_and_update_song_packages() -> void:
+	print("开始检查曲包更新")
 	_is_downloading = true
-	#_setup_download_bar_style()
+	_download_index = 0
+	_download_total = 0
 	loading_panel.visible = true
-	# 立刻显示 0%, 避免在拉取清单期间一直停在场景里的占位文字
-	_apply_download_progress(0.0)
+	# 立刻显示 0%, 避免在拉取列表期间一直停在场景里的占位文字
+	_apply_download_progress(0.0, "正在检查曲包更新")
 
-	var is_manifest_ok: bool = await _load_song_package_url_list()
-	if not is_manifest_ok:
-		push_error("曲包清单获取失败, 本次跳过下载")
-	else:
-		# 只把"本次真正要下的文件"算进进度 —— 本地已有的直接跳过, 不计入分母。
-		# 否则"本地已有 1 首 / 云端 3 首"会让进度条一上来就停在 33%
-		var pending_urls: Array[String] = $Downloader.get_missing_urls(Global.song_package_url_list)
-		_download_total = pending_urls.size()
+	var remote_result: Dictionary = await $Downloader.fetch_remote_files()
+	if not bool(remote_result.get("is_ok", false)):
+		push_warning("曲包列表获取失败, 本次使用本地资源")
+		await _finish_update_check("资源检查失败, 正在使用本地曲包")
+		return
 
-		if _download_total == 0:
-			# 没有待下载的文件: 直接显示满格, 不要停留在 0%
-			_apply_download_progress(1.0)
-		else:
-			for index: int in _download_total:
-				var url: String = pending_urls[index]
-				_download_index = index
-
-				var is_success: bool = await $Downloader.download(url)
-				if not is_success:
-					push_error("曲包下载失败, 已跳过: %s" % url)
-					pass
-
-				# 该文件结束, 进度推进到整数刻度
-				_apply_download_progress(float(index + 1) / float(_download_total))
-				pass
-			pass
+	var remote_files: Array = remote_result.get("files", [ ])
+	print("远端曲包列表获取成功, 共 %d 个" % remote_files.size())
+	# 远端已下架的曲包从本地清掉; 远端列表为空时 Downloader 会保留本地, 防止误清空
+	var deleted_files: Array[String] = $Downloader.delete_orphan_packages(remote_files)
+	if not deleted_files.is_empty():
+		print("已清理 %d 个远端不存在的曲包" % deleted_files.size())
 		pass
 
-	# 进度条已满, 先把提示语换成"下载完成", 并停留 1 秒让玩家看清
-	download_label.text = "正在下载曲包, 请不要退出游戏 (100%)"
-	await get_tree().create_timer(1.0).timeout
+	var pending_files: Array[Dictionary] = $Downloader.get_pending_files(remote_files)
+	_download_total = pending_files.size()
 
-	loading_panel.visible = false
-	_is_downloading = false
+	if _download_total == 0:
+		# 没有待下载的文件: 直接显示满格, 不要停留在 0%
+		_apply_download_progress(1.0, "曲包已是最新")
+		await _finish_update_check("曲包已是最新")
+		return
+
+	# /api/sha256 首次请求需要服务端计算全部文件哈希, 可能明显偏慢
+	_apply_download_progress(0.0, "正在获取校验信息, 首次可能较慢")
+	var sha_result: Dictionary = await $Downloader.fetch_remote_sha256()
+	if not bool(sha_result.get("is_ok", false)):
+		push_warning("SHA256 列表获取失败, 本次使用本地资源")
+		await _finish_update_check("资源检查失败, 正在使用本地曲包")
+		return
+
+	var sha_map: Dictionary = sha_result.get("sha256", { })
+
+	for index: int in _download_total:
+		var file: Dictionary = pending_files[index]
+		var file_name: String = str(file.get("name", ""))
+		var expected_sha256: String = str(sha_map.get(file_name, ""))
+		_download_index = index
+
+		if expected_sha256.is_empty():
+			push_error("远端未提供 SHA256, 已跳过: %s" % file_name)
+		else:
+			var is_success: bool = await $Downloader.download_file(file, expected_sha256)
+			if not is_success:
+				push_error("曲包下载或校验失败, 已跳过: %s" % file_name)
+				pass
+			pass
+
+		# 该文件结束, 进度推进到整数刻度
+		_apply_download_progress(float(index + 1) / float(_download_total))
+		pass
+
+	await _finish_update_check("曲包更新完成")
 	pass
 
 
-## 拉取曲包清单并解析出下载链接, 结果写入 Global.song_package_url_list
-## @return: 是否成功解析到清单 (清单为空也算成功)
-func _load_song_package_url_list() -> bool:
-	var text: String = await $Downloader.fetch_text(Global.SONG_PACKAGE_MANIFEST_URL)
-	if text.is_empty():
-		return false
-
-	var parsed: Variant = JSON.parse_string(text)
-	if parsed == null or parsed is not Dictionary:
-		push_error("曲包清单解析失败: %s" % Global.SONG_PACKAGE_MANIFEST_URL)
-		return false
-
-	var raw_list: Variant = (parsed as Dictionary).get("list", [ ])
-	if raw_list is not Array:
-		push_error("曲包清单缺少 list 字段: %s" % Global.SONG_PACKAGE_MANIFEST_URL)
-		return false
-
-	var urls: Array[String] = [ ]
-	for item: Variant in (raw_list as Array):
-		if item is String and not (item as String).is_empty():
-			urls.append(item as String)
-			pass
-		pass
-
-	Global.song_package_url_list = urls
-	print("曲包清单获取完成, 共 %d 个" % urls.size())
-	return true
+## 结束更新检查: 显示最终提示, 稍作停留后隐藏加载面板
+func _finish_update_check(text: String) -> void:
+	download_label.text = text
+	await get_tree().create_timer(1.0).timeout
+	loading_panel.visible = false
+	_is_downloading = false
+	pass
 
 
 ## 当前文件的字节进度变化 → 换算成总体进度
@@ -159,11 +163,11 @@ func _on_download_progress(file_ratio: float) -> void:
 
 
 ## 应用总体进度 (0.0 ~ 1.0), 同步进度条、背景色彩与提示文字
-func _apply_download_progress(ratio: float) -> void:
+func _apply_download_progress(ratio: float, status: String = "正在下载曲包, 请不要退出游戏") -> void:
 	var clamped: float = clampf(ratio, 0.0, 1.0)
 	download_progress_bar.value = clamped * 100.0
 	background.material.set_shader_parameter("gray_scale", 1.0 - clamped)
-	download_label.text = "正在下载曲包, 请不要退出游戏 (%d%%)" % int(clamped * 100.0)
+	download_label.text = "%s (%d%%)" % [ status, int(clamped * 100.0) ]
 	pass
 
 
@@ -381,7 +385,7 @@ func _load_game_config() -> void:
 
 
 # ---------- 加载曲目 ----------
-## 加载共鸣曲目 (扫描 CustomizedPlaylist 目录, 曲包由 _download_all_song_packages 下载)
+## 加载共鸣曲目 (扫描 CustomizedPlaylist 目录, 曲包由 _check_and_update_song_packages 检查/下载)
 func load_sympathy_song() -> void:
 	_record_sympath_song_paths()
 	_count_sympath_songs()

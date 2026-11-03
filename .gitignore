@@ -6,3 +6,7 @@ android/
 LuoPulse/addons/godot_mcp/cache/
 .tmp
 addons/godot_mcp/cache/screenshots/
+
+# 本地 API Key (复制 ApiKey.example.gd 后填写, 禁止提交)
+/Script/GameManager/ApiKey.gd
+/Script/GameManager/ApiKey.gd.uid

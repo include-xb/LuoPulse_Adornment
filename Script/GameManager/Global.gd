@@ -114,11 +114,6 @@ const BGM_FADE_TIME: float = 0.8
 ## 正在进行的背景音乐淡变
 var _bgm_tween: Tween = null
 
-## 曲包清单链接
-## 返回格式: { "list": [ "曲包下载链接", ... ] }
-## 启动时从这里拉取全部曲包链接, 再逐个下载
-const SONG_PACKAGE_MANIFEST_URL: String = "https://lpfileserv.thirhythm.top/directlink/1/songpackages/Sympathy/list.json"
-
 ## INFO: 设置项仅在此处修改，控件将会动态生成
 ## 设置项
 ## 每个设置项字段:
@@ -230,10 +225,6 @@ var is_autoplay: bool = false
 
 ## 是否播放 PV
 var is_pvplay: bool = true
-
-## 曲包下载链接列表 (启动时从 SONG_PACKAGE_MANIFEST_URL 拉取)
-## 文件名取自链接末段, 例: ".../songpackages/3.lpz" → "3.lpz"
-var song_package_url_list: Array[String] = [ ]
 
 ## 共鸣主线歌曲路径列表
 var sympath_song_path_list: Array[String] = [ ]
