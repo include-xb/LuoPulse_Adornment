@@ -197,6 +197,7 @@ func _write_json_file(path: String, data: Dictionary) -> void:
 
 
 ## 将每个 .lpz 文件的完整路径记录到 Global.sympath_song_path_list
+## INFO: 按文件名前缀的序号排序 (1-Step-on-your-heart.lpz → 第 1 首), 见 Global.sort_song_package_paths
 func _record_sympath_song_paths() -> void:
 	# 目标文件夹
 	var target_dir: String = _get_customized_playlist_dir()
@@ -207,8 +208,8 @@ func _record_sympath_song_paths() -> void:
 		# 记录到 paths
 		paths.append(target_dir.path_join(fname))
 		pass
-	# 赋值到 Global
-	Global.sympath_song_path_list = paths
+	# 按序号前缀排序后赋值到 Global
+	Global.sympath_song_path_list = Global.sort_song_package_paths(paths)
 	pass
 
 
@@ -322,10 +323,10 @@ func _load_game_config() -> void:
 	# 默认数据
 	var default_data: Dictionary = {
 		"version": "0.0.0.1",
-		"volume_song": 70,
-		"volume_note": 70,
+		"volume_song": 45,
+		"volume_note": 30,
 		"volume_ui": 60,
-		"volume_bg": 60,
+		"volume_bg": 40,
 		"offset": 0,
 		"speed": 10,
 		"if_play_start_animation": true,

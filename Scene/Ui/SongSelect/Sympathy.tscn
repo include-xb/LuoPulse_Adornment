@@ -326,7 +326,7 @@ libraries/ = SubResource("AnimationLibrary_ohs4k")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=781416472]
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1321983800]
-custom_minimum_size = Vector2(15, 0)
+custom_minimum_size = Vector2(15, 12)
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0

@@ -18,6 +18,7 @@ func _process(delta: float) -> void:
 
 
 func born() -> void:
+	Global.tear_player.play()
 	var tween: Tween = get_tree().create_tween()
 	tween.tween_property(self, "modulate:a", 1, 0.2)
 	await tween.finished

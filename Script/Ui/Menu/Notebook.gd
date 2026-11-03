@@ -552,16 +552,15 @@ func _song_title(song: Dictionary) -> String:
 
 
 ## 取全部曲包路径
-## 正常流程下 Launch 启动时已扫描好, 直接用它的结果 —— 单独运行本场景调试时
+## 正常流程下 Launch 启动时已扫描并排好序, 直接用它的结果 —— 单独运行本场景调试时
 ## (Global.sympath_song_path_list 还是空的) 才回退到现场扫描目录
-## INFO: 这里千万不能排序! Global.main_line_unlocked 是"已解锁几首"的计数, 靠下标去套,
-##       而 Sympathy 是把同一个计数套在 Global.sympath_song_path_list 上的。
-##       一旦在这里重排, 两个场景对"第 i 首"的认定就会错开, 结果就是锁错歌。
-##       好处是侧栏顺序与选歌界面看到的曲目顺序天然一致。
+## INFO: 排序规则必须与 Launch 完全一致 (Global.sort_song_package_paths) ——
+##       Global.main_line_unlocked 是"已解锁几首"的计数, 靠下标去套,
+##       两个场景对"第 i 首"的认定一旦错开, 结果就是锁错歌。
 func _get_song_packages() -> Array[String]:
 	if not Global.sympath_song_path_list.is_empty():
 		return Global.sympath_song_path_list.duplicate()
-	return _scan_song_package_dir()
+	return Global.sort_song_package_paths(_scan_song_package_dir())
 
 
 ## 扫描曲包目录下的 .lpz 文件

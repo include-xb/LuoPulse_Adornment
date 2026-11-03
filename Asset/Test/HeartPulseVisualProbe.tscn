@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cqdvlkep6slq5"]
+
+[ext_resource type="Script" path="res://Asset/Test/HeartPulseVisualProbe.gd" id="1_ygx71"]
+
+[node name="HeartPulseVisualProbe" type="Node" unique_id=1433340996]
+script = ExtResource("1_ygx71")

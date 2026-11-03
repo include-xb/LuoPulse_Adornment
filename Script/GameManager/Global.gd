@@ -7,6 +7,8 @@ extends Control
 ## 背景音乐播放器 (常驻循环播放, 音量由 volume_bg 控制)
 @export var bgm_player: AudioStreamPlayer # = $Bgm
 
+@export var tear_player: AudioStreamPlayer
+
 
 # ---------- 常量 ----------
 
@@ -437,6 +439,36 @@ func get_track_lane_color(column: int) -> Color:
 func get_song_gray_scale(song_index: int) -> float:
 	var total: float = float(maxi(sympath_song_num, 1))
 	return get_progress_gray_scale(float(song_index + 1) / total)
+
+
+## 按曲包文件名的序号前缀排序: "1-Step-on-your-heart.lpz" → 1
+## INFO: 主线 (Sympathy) 的曲目顺序由文件名前缀决定。必须按数值比较 ——
+##       字符串排序会把 10-... 排到 2-... 前面。没有 "序号-" 前缀的文件排到最后,
+##       同序号按文件名稳定排序。
+func sort_song_package_paths(paths: Array[String]) -> Array[String]:
+	var sorted_paths: Array[String] = paths.duplicate()
+	sorted_paths.sort_custom(_is_song_path_before)
+	return sorted_paths
+
+
+## sort_custom 用: a 是否应排在 b 前面
+func _is_song_path_before(a: String, b: String) -> bool:
+	var order_a: int = _song_path_order(a.get_file())
+	var order_b: int = _song_path_order(b.get_file())
+	if order_a != order_b:
+		return order_a < order_b
+	return a.get_file().naturalnocasecmp_to(b.get_file()) < 0
+
+
+## 从 "12-曲包名.lpz" 里取出 12; 不符合格式时返回一个很大的数 (排到最后)
+func _song_path_order(file_name: String) -> int:
+	var dash_index: int = file_name.find("-")
+	if dash_index <= 0:
+		return 2147483647
+	var prefix: String = file_name.substr(0, dash_index)
+	if not prefix.is_valid_int():
+		return 2147483647
+	return int(prefix)
 
 
 ## 读取故事碎片表; 文件缺失 / 打开失败 / 结构不对时返回空字典

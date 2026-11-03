@@ -41,12 +41,14 @@ For this reason, Luo Pulse will use more "narrative" methods to tell the stories
 The song package format for Luo Pulse is as follows:
 
 ```bash
-title.lpz    # .zip
+1-Step-on-your-heart.lpz    # order-title.lpz (.zip)
     ├────── chart.lp    # .json
     ├────── audio.ogg    # (format may change)
     ├────── cover.png
     └────── video.ogv    # not a must
 ```
+
+> The Sympathy (mainline) song list is sorted by the numeric prefix in ascending order: `1-...` is the first song, `2-...` the second, and `10-...` comes after `9-...`. Files without an `order-` prefix are placed last.
 
 The chart file format is structured as follows:
 

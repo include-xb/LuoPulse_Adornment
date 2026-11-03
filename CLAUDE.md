@@ -220,6 +220,8 @@ A `.lpz` file is a ZIP archive:
 | `cover.png` | Yes      | Album art (.png format)                   |
 | `video.ogv` | No       | Background PV video. If absent, no error. |
 
+> **文件名 / 顺序**: 曲包命名为 `序号-曲包名.lpz` (如 `1-Step-on-your-heart.lpz`)。主线 (Sympathy) 的曲目顺序由 `Launch._record_sympath_song_paths` 扫描后按前缀**数值**升序排列 (`Global.sort_song_package_paths`, 10 排在 9 之后); 没有 `序号-` 前缀的文件排在最后。`Global.main_line_unlocked` 的"前 N 首已解锁"就套在这个顺序上, 所以改序号会直接改变解锁顺序。
+
 **chart.lp structure**:
 
 ```json
@@ -252,7 +254,7 @@ A `.lpz` file is a ZIP archive:
 | type     | 行为                                                                                                              |
 | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `change` | 轨道换位: 把整根 Column 沿 x 挪到别的槽位, `duration` 到期后复原                                                    |
-| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入三样视觉: 心电图 `Scene/Ui/Widget/HeartLine.tscn`、屏幕边缘的血色光晕 `Scene/Ui/Widget/HeartVignette.tscn`、以及心跳颤动 `Script/Ui/Widget/HeartPulse.gd` (挂在 `Gameplay` 的 `UI/TextureRect` 上, 让 3D 演奏区向下沉再弹回; 由命中触发) |
+| `heart`  | `change` 的**超集**: 换位之外, 整组收紧判定窗口(见 Judging System), 并淡入三样视觉: 心电图 `Scene/Ui/Widget/HeartLine.tscn`、屏幕边缘的血色光晕 `Scene/Ui/Widget/HeartVignette.tscn`、以及心跳颤动 `Script/Ui/Widget/HeartPulse.gd` (挂在 `Gameplay` 的 `UI/TextureRect` 上, 让 3D 演奏区做阻尼弹簧式抖动 + 轻微倾斜; 由命中触发) |
 
 ```json
 "Effects": [
@@ -263,7 +265,7 @@ A `.lpz` file is a ZIP archive:
 
 - `changed`: 长度须等于轨道数, 每项是 1~轨道数, 语义是 `changed[槽位] = 轨道号`(1-based); 允许重复 / 留空 —— 重复值取第一次出现的位置, 没出现的轨道留在原位, 因此可能有两根轨道重叠在同一槽位 (例如 `[1,2,4,4]`: 轨道 4 去槽位 3, 轨道 3 留在原位也是槽位 3; 槽位 4 空着)。重叠的轨道在触屏 / 键盘判定时共同响应 (`EffectManager.track_indices_for_world_x` 返回数组)。`heart` 传恒等排列 `[ 1, 2, 3, 4 ]` 就等于"只收紧判定 + 心电图, 不换位"。
 - 换位动画采用**指数收敛**, 与 LPEditor 预览窗口的轨道切换一致 (起步快、尾部柔和), 而不是定长 smoothstep: `effect_change_time` (默认 0.2s) 仍是"走到 95% 的时间", 位置的名义单程时长取它的 `POSITION_RAMP_SCALE` (3) 倍, 结束时残差约 0.01%, 归位看不出跳变。心电图的淡入淡出仍用 `effect_change_time` 的定长 smoothstep。
-- **心跳颤动 (`HeartPulse`)**: 与心电图同一条逻辑 —— **每打中一个音符颤动一次**, 不是定时节拍; 正在颤时再次命中会掐掉当前动画、从头重颤。一次颤动 0~180ms (90ms 处最低), 把 `UI/TextureRect` 向下位移再回原位 (最大位移 = 控件高度 × `dip_ratio` 默认 0.016); 触发幅度取 `EffectManager` 当前的 heart fade, 所以特效淡入/淡出期间颤动更轻。不打就不颤。只动 3D 演奏层的 Y、不动 X, 背景 PV 与 UI 文字不受影响, 触屏的 X→轨道映射也就不需要反向补偿。
+- **心跳颤动 (`HeartPulse`)**: 与心电图同一条逻辑 —— **每打中一个音符颤动一次**, 不是定时节拍; 正在颤时再次命中会掐掉当前动画、从头重颤。波形是**阻尼弹簧** (160ms 周期 / 95ms 衰减, 共 320ms): 先向下沉到 `控件高度 × dip_ratio` (默认 0.014), 再回弹过冲、幅度递减; 同时叠一个很小的左右倾斜 (`tilt_degrees` 默认 0.25°, 每次命中方向交替)。触发幅度取 `EffectManager` 当前的 heart fade, 所以特效淡入/淡出期间颤动更轻。不打就不颤。倾斜角很小, 判定线附近的 X 偏移不到 1px, 触屏映射不需要补偿; 背景 PV 与 UI 文字不跟着动。
 - heart 特效的两样视觉**都由玩家踩出来**。**命中**: 每打中一个音符 (tap / drag / heart / release / 长键头部) 就走 `Gameplay.on_note_hit(strength)` → `EffectManager.on_note_hit()` → 屏幕边缘闪一下 (`HeartVignette.flash_once`) **并且**心电图笔尖往前画一段 (`HeartLine.advance`, 步长 `advance_step` 默认屏宽 1/8, 用 `advance_glide` 平滑推过去)。强度沿用判定等级那张表 (`HitFeedback.flash_of`), 特效没开时 `EffectManager` 会把所有调用丢掉。
 - **漏键**: 走 `Gameplay.on_note_miss()` → `EffectManager.on_note_miss()` → 心电图**往回退半步** (`HeartLine.rewind`, = `advance_step × REWIND_RATIO` 0.5, 退到 0 就打住) **并且**屏幕边缘那层血色底子**暗一下** (`HeartVignette.dim_once`, 先压到 `MISS_DIM_DEPTH` 0.8, 再按 220ms 恢复)。半步而不是一整步 —— 一次失误不该把一次命中完全抹平, 否则准度刚好一半的玩家会让心电图长期贴在零点、特效等于没画。压暗只作用于底子, 闪动不受影响。
 - 哪些算漏键: `NoteBase._lose` (从头没被点) / `NoteBase` 打到"丢失"档的点击 / `Hold._lose` (长键头部漏掉)。**长键尾判丢失不算** —— 那一条长键的头部已经推进过心电图了, 所以一条长键的净收益仍是 +1。
