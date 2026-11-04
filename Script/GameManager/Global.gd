@@ -2,6 +2,7 @@ extends Control
 
 
 @export var NOTICE_BOX: VBoxContainer # = $NoticeBox
+
 @export var ui_click: AudioStreamPlayer # = $UiClick
 
 ## 背景音乐播放器 (常驻循环播放, 音量由 volume_bg 控制)
@@ -36,8 +37,8 @@ const TRACK_COLORS: Array[Color] = [
 ## 轨道底色中身份色所占比例 (0 = 纯黑, 1 = 纯身份色)
 const TRACK_LANE_TINT: float = 0.35
 
-## 轨道底色的透明度 (与 Column.tscn 里 track_color 的 alpha 一致)
-const TRACK_BASE_ALPHA: float = 0.5882353
+## 轨道底色的透明度
+const TRACK_BASE_ALPHA: float = 0.58
 
 ## 透明物体的排序层级步长
 ## INFO: 换位动画时两根轨道会在同一 x 重合。透明物体不写深度, 彼此不做遮挡, 先后只按
@@ -82,39 +83,15 @@ const JUDGE_WINDOW_HEART: Dictionary = {
 	"lost": 180,
 }
 
-## 开始判定时间 (毫秒) —— 当前生效值, 由 apply_judge_window() 整组写入
-var start_judge_time: int = -240
 
-## 结束判定时间 (毫秒)
-var end_judge_time: int = 240
-
-## 和一 (Harmonious) 判定区间: 常规 [-60, 60], heart 期间 [-40, 40]
-var harmonious_time: int = 60
-
-## 共鸣 (Sympathetic) 判定区间: 常规 [-120, -60) and (60, 120]
-var sympathetic_time: int = 120
-
-## 觉醒 (Aware) 判定区间: 常规 [-180, -120) and (120, 180]
-var aware_time: int = 180
-
-## 丢失 (Lost) 判定区间: 常规 [-240, -180) and (180, 240]
-var lost_time: int = 240
 
 ## 调节音量时的音量缩放因子
 const VOLUME_FACTOR: float = 0.02
 
-## 背景音乐 (启动后一直循环, 各场景只调整音量, 不打断播放)
-## INFO: 这里用 var 而不是 const —— const 持有的资源不能在代码里改属性, 而循环开关
-##      (AudioStreamOggVorbis.loop) 需要在 _ready() 里打开 (bgm.ogg 导入时是 loop=false)
-## INFO: 音频流在 _ready() 里才挂到 Global.tscn 的 Bgm 节点上 ——
-##      这个 MCP 无法给节点写资源型属性, 所以不放进场景文件
-# var bgm_stream: AudioStreamOggVorbis = preload("res://Asset/Audio/bgm.ogg")
-
 ## 背景音乐淡入 / 淡出的时长 (秒)
 const BGM_FADE_TIME: float = 0.8
 
-## 正在进行的背景音乐淡变
-var _bgm_tween: Tween = null
+const normal_background: Texture2D = preload("res://Asset/Image/main.png")
 
 ## INFO: 设置项仅在此处修改，控件将会动态生成
 ## 设置项
@@ -197,19 +174,68 @@ const SETTINGS: Dictionary[String, Dictionary] = {
 			"node_type": "ToggleButton",
 		},
 	},
-	# INFO: 这里原本还有一组 "数据 / 用户名" (LineEdit)。改用户名已经迁到主菜单的
-	#       主页卡片 (点头像 → 编辑) —— 那边有确认按钮与校验, 不再走设置项这条
-	#       动态生成的路; 校验也一并搬到了 Global.is_user_name_valid
+	# INFO: 
+	# 这里原本还有一组 "数据 / 用户名" (LineEdit).
+	# 改用户名已经迁到主菜单的主页卡片 (点头像 → 编辑)
+	# 不再走设置项这条动态生成的路; 校验也一并搬到了 Global.is_user_name_valid
 }
 
-const normal_background: Texture2D = preload("res://Asset/Image/main.png")
+# ---------- 主页卡片 / 用户信息 ----------
 
+## 用户名长度上限
+const USER_NAME_MAX_LENGTH: int = 6
+
+## 可选头像的素材路径
+## INFO: 头像美术还没做, 这些文件目前都不存在 —— get_avatar_texture() 会回退到
+##       AVATAR_FALLBACK。美术按这个路径把文件放进来就自动生效, 场景与代码都不用改
+const AVATAR_PATHS: Array[String] = [
+	"res://Asset/Image/Avatar/avatar_1.png",
+	"res://Asset/Image/Avatar/avatar_2.png",
+	"res://Asset/Image/Avatar/avatar_3.png",
+	"res://Asset/Image/Avatar/avatar_4.png",
+	"res://Asset/Image/Avatar/avatar_5.png",
+	"res://Asset/Image/Avatar/avatar_6.png",
+]
+
+## 头像素材缺失时的占位图
+const AVATAR_FALLBACK: Texture2D = preload("res://Asset/Image/Godot-headimg.png")
+
+## 故事碎片索引表路径 (序号 -> 标题; 正文在 fragments/fragment_n.bbcode)
+## INFO: 与 Notebook.gd 的 FRAGMENTS_JSON_PATH 是同一份数据, 改路径要两处一起改
+const FRAGMENTS_JSON_PATH: String = "res://Asset/NoteBook/fragments.json"
+
+## U 形曲线: 进度在两端 (0 和 1) 时对应的饱和度
+const PROGRESS_SATURATION_EDGE: float = 0.85
+
+## U 形曲线: 进度过半时对应的谷底饱和度
+const PROGRESS_SATURATION_VALLEY: float = 0.2
 
 
 # ---------- 变量 ----------
 
+## 开始判定时间 (毫秒) —— 当前生效值, 由 apply_judge_window() 整组写入
+var start_judge_time: int = -240
+
+## 结束判定时间 (毫秒)
+var end_judge_time: int = 240
+
+## 和一 (Harmonious) 判定区间: 常规 [-60, 60], heart 期间 [-40, 40]
+var harmonious_time: int = 60
+
+## 共鸣 (Sympathetic) 判定区间: 常规 [-120, -60) U (60, 120]
+var sympathetic_time: int = 120
+
+## 觉醒 (Aware) 判定区间: 常规 [-180, -120) U (120, 180]
+var aware_time: int = 180
+
+## 丢失 (Lost) 判定区间: 常规 [-240, -180) U (180, 240]
+var lost_time: int = 240
+
+## 正在进行的背景音乐淡变
+var _bgm_tween: Tween = null
+
 ## 音符速度, 这个速度是下落的实际速度准值
-var note_speed: float = 10.0
+var note_speed: float = 20.0
 
 ## 用户名
 var user_name: String = "小白"
@@ -289,7 +315,6 @@ var judging_area: Array = [ ]
 ## 被绘制到屏幕上的音符
 var rendering_area: Array = [ ]
 
-
 ## 开始前的延时，这个时间也反应着同一时间内场景中音符最大数量。
 ## 相当于当前时间，到当前时间 + start_duration这段时间内的音符会被加载到场景中
 var start_duration: int = 3000
@@ -311,31 +336,6 @@ var is_first_open: bool = true
 
 ## 当前选用的头像序号 (AVATAR_PATHS 的下标)
 var avatar_index: int = 0
-
-
-# ---------- 主页卡片 / 用户信息 ----------
-
-## 用户名长度上限
-const USER_NAME_MAX_LENGTH: int = 6
-
-## 可选头像的素材路径
-## INFO: 头像美术还没做, 这些文件目前都不存在 —— get_avatar_texture() 会回退到
-##       AVATAR_FALLBACK。美术按这个路径把文件放进来就自动生效, 场景与代码都不用改
-const AVATAR_PATHS: Array[String] = [
-	"res://Asset/Image/Avatar/avatar_1.png",
-	"res://Asset/Image/Avatar/avatar_2.png",
-	"res://Asset/Image/Avatar/avatar_3.png",
-	"res://Asset/Image/Avatar/avatar_4.png",
-	"res://Asset/Image/Avatar/avatar_5.png",
-	"res://Asset/Image/Avatar/avatar_6.png",
-]
-
-## 头像素材缺失时的占位图
-const AVATAR_FALLBACK: Texture2D = preload("res://Asset/Image/Godot-headimg.png")
-
-## 故事碎片索引表路径 (序号 -> 标题; 正文在 fragments/fragment_n.bbcode)
-## INFO: 与 Notebook.gd 的 FRAGMENTS_JSON_PATH 是同一份数据, 改路径要两处一起改
-const FRAGMENTS_JSON_PATH: String = "res://Asset/NoteBook/fragments.json"
 
 
 # ---------- 游戏配置 (config.json) ----------
@@ -386,13 +386,6 @@ var max_combo: int = 0
 
 
 # ---------- 工具函数 ----------
-
-## U 形曲线: 进度在两端 (0 和 1) 时对应的饱和度
-const PROGRESS_SATURATION_EDGE: float = 0.8
-
-## U 形曲线: 进度过半时对应的谷底饱和度
-const PROGRESS_SATURATION_VALLEY: float = 0.2
-
 
 ## 把主线进度 (0~1) 换算成界面灰度
 ## INFO: 这条曲线不是线性的, 而是 U 形 —— 两端最鲜艳、过半时最灰, 对应

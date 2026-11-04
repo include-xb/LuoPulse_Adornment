@@ -45,7 +45,7 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 3.50000016625
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_ge3h2"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_qbuod"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
@@ -149,15 +149,6 @@ grow_vertical = 2
 stream = ExtResource("6_qalqs")
 expand = true
 
-[node name="ProgressBar" type="ProgressBar" parent="UI" unique_id=1275532284]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 12.0
-grow_horizontal = 2
-theme = ExtResource("3_i27d6")
-show_percentage = false
-
 [node name="Blur" type="ColorRect" parent="UI" unique_id=843432478]
 material = SubResource("ShaderMaterial_s4y3q")
 layout_mode = 1
@@ -176,6 +167,15 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.3529412)
 
+[node name="ProgressBar" type="ProgressBar" parent="UI" unique_id=1275532284]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 12.0
+grow_horizontal = 2
+theme = ExtResource("3_i27d6")
+show_percentage = false
+
 [node name="HeartLine" parent="UI" unique_id=263587982 instance=ExtResource("8_2bmra")]
 layout_mode = 1
 
@@ -188,11 +188,12 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_ge3h2")
+texture = SubResource("ViewportTexture_qbuod")
 expand_mode = 3
 script = ExtResource("10_0lm72")
 
 [node name="HeartVignette" parent="UI" unique_id=1225533570 instance=ExtResource("10_fcvxv")]
+visible = false
 layout_mode = 1
 
 [node name="Combo" type="Label" parent="UI" unique_id=146666133]
@@ -277,7 +278,6 @@ theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 30
 
 [node name="PauseButton" type="Button" parent="UI" unique_id=1928355887]
-disabled = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 12.0
@@ -290,6 +290,7 @@ theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
 theme_override_colors/font_disabled_color = Color(0.9019608, 0.9019608, 0.9019608, 0.39215687)
 theme_override_constants/outline_size = 2
+disabled = true
 text = "| |"
 
 [node name="MarginContainer" type="MarginContainer" parent="UI" unique_id=1278088281]
@@ -430,71 +431,71 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Feedback1" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback1" type="Label" parent="UI/JudgmentContainer" unique_id=1397617940]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback2" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback2" type="Label" parent="UI/JudgmentContainer" unique_id=743477919]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback3" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback3" type="Label" parent="UI/JudgmentContainer" unique_id=129149663]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback4" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback4" type="Label" parent="UI/JudgmentContainer" unique_id=1487878122]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback5" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback5" type="Label" parent="UI/JudgmentContainer" unique_id=1896213020]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback6" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback6" type="Label" parent="UI/JudgmentContainer" unique_id=1990059633]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback7" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback7" type="Label" parent="UI/JudgmentContainer" unique_id=1249224704]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Feedback8" type="Label" parent="UI/JudgmentContainer"]
+[node name="Feedback8" type="Label" parent="UI/JudgmentContainer" unique_id=1607922347]
 visible = false
 modulate = Color(1, 1, 1, 0)
-mouse_filter = 2
+layout_mode = 0
 theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CountdownLabel" type="Label" parent="UI"]
+[node name="CountdownLabel" type="Label" parent="UI" unique_id=354606280]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -508,7 +509,6 @@ offset_right = 150.0
 offset_bottom = 50.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.784, 0.784, 0.784, 1)
 theme_override_font_sizes/font_size = 80
 horizontal_alignment = 1

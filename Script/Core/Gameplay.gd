@@ -180,6 +180,26 @@ var last_note_time: int = 0
 ## 多押提示
 var mulit_tap: bool = false
 
+## 反馈信息标签对象池
+var _feedback_labels: Array[Label] = [ ]
+## 反馈信息标签索引, 用于在对象池中循环复用标签的索引
+var _feedback_index: int = 0
+## 反馈信息标签数量 (从场景中的标签节点统计, 用于对象池轮转)
+var _max_feedback_labels: int = 0
+
+## 打击音播放池 (轮转使用, 避免快速连打互相截断)
+var _hit_sound_players: Array[AudioStreamPlayer] = [ ]
+
+## 播放池轮转索引
+var _hit_sound_index: int = 0
+
+## 上一帧的连击数 (只在变化时触发动效, 避免每帧重写)
+var _last_combo: int = 0
+
+## 连击数字当前的动效 tween
+var _combo_tween: Tween = null
+
+
 ## ---- 判定视觉反馈 ----
 const JUDGMENT_TEXT: Dictionary = {
 	"harmonious": "和一",
@@ -214,14 +234,6 @@ const KEY_COLUMN_MAP: Dictionary = {
 	KEY_K: 3,
 }
 
-## 反馈信息标签对象池
-var _feedback_labels: Array[Label] = [ ]
-## 反馈信息标签索引, 用于在对象池中循环复用标签的索引
-var _feedback_index: int = 0
-## 反馈信息标签数量 (从场景中的标签节点统计, 用于对象池轮转)
-var _max_feedback_labels: int = 0
-
-
 ## ---- 打击音效 ----
 ## 打击音效 (Asset/Audio/note.wav)
 ## INFO: 原来是 HitSoundFactory 现场合成的占位音, 现在换成正式素材;
@@ -230,13 +242,6 @@ const HIT_SOUND: AudioStream = preload("res://Asset/Audio/note.wav")
 
 ## 打击音播放池大小 (要能盖住最密的连打: 200BPM 的 16 分音符约 13 次/秒)
 const HIT_SOUND_POOL_SIZE: int = 8
-
-## 打击音播放池 (轮转使用, 避免快速连打互相截断)
-var _hit_sound_players: Array[AudioStreamPlayer] = [ ]
-
-## 播放池轮转索引
-var _hit_sound_index: int = 0
-
 
 ## ---- 连击动效 ----
 ## 触发放大动效的最小连击数
@@ -265,13 +270,6 @@ const COMBO_BASE_COLOR: Color = Color(0.7246, 0.7246, 0.7246, 1.0)
 
 ## 连击中断后红字停留的时长
 const COMBO_BREAK_HOLD: float = 0.35
-
-## 上一帧的连击数 (只在变化时触发动效, 避免每帧重写)
-var _last_combo: int = 0
-
-## 连击数字当前的动效 tween
-var _combo_tween: Tween = null
-
 
 ## ---- 背景高亮 ----
 ## 背景高亮完全由连击数驱动 (连击越高越亮)
@@ -748,6 +746,8 @@ func _process(delta: float) -> void:
 	)
 
 	# 结束游戏 # NOTICE 修改为手动结束游戏
+	
+
 	if master_time >= last_note_time + 1000 && is_gaming:
 		show_finish_btn()
 		pass
@@ -1269,6 +1269,11 @@ static func _sort_note_by_time(a: Dictionary, b: Dictionary) -> bool:
 func get_first_last_note_time() -> void:
 	first_note_time = time_list[0]
 	last_note_time = time_list[-1]
+	
+	# 如果最后一个音符是 hold, 则要加上 duration
+	if  type_list[-1] == "hold":
+		last_note_time += duration_list[-1]
+		pass
 	pass
 
 
