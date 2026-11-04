@@ -3,17 +3,17 @@
 ## 布局按 LPDocument/ui-mockup/index.html 的笔记部分重做: 纸面底色 + 墨色文字
 ## 两个标签页 (资料卡 / 故事碎片), 左侧索引列表, 右侧内容区
 ##
-## 资料卡的数据来自全部曲包 (.lpz): 侧栏列出每首的标题 (chart.lp 的 General.Title),
+## 资料卡: 侧栏曲目仍来自全部曲包 (.lpz) 的 chart.lp General.Title,
+## cards.json 只记录 { "曲名": 资料卡序号 n }; 正文直接读
+## res://Asset/NoteBook/cards/card_n.bbcode 并写进 RichTextLabel。
 ## 未解锁的条目只显示 ??? 且点不动; 点已解锁的条目会把全屏背景换成该曲的曲绘封面 (cover.png)
-## 正文里"收录专辑 / 发布时间 / 创作背景 / P主简介"来自 res://Asset/NoteBook/cards.json,
-## 它和故事碎片表一样是按序号索引的对象, 第 n 首取键 "n" (n 从 1 开始)
-## 故事碎片的数据来自 res://Asset/NoteBook/fragments.json,
-## 侧栏列出每条碎片的 title, 未解锁的只显示 ??? 且点不动;
-## 解锁进度看 Global.story_fragments_unlocked 里记的碎片序号
-## INFO: 两个数据文件缺失时正文显示 "（暂无数据）"
+## 故事碎片: 侧栏标题/解锁顺序仍看 fragments.json,
+## 正文直接读 res://Asset/NoteBook/fragments/fragment_n.bbcode。
+## 解锁进度看 Global.story_fragments_unlocked 里记的碎片序号。
+## INFO: 索引表/碎片表缺失时侧栏退回"暂无数据"; 单个 .bbcode 缺失时正文给出提示。
 ##
 ## 从 Sympathy 的"笔记"按钮进来时, 上个场景会通过 SceneManager 传参
-## { "card_index": 曲目下标 } 指定要展示哪一首的资料卡
+## { "song_index": 曲目下标 }; 本场景按该下标取出曲名, 再查 cards.json 得资料卡序号 n。
 
 
 extends Control
@@ -58,15 +58,17 @@ const PLAYLIST_DIR_NAME: String = "CustomizedPlaylist"
 ## 曲包扩展名
 const SONG_PACKAGE_EXTENSION: String = "lpz"
 
-## 资料卡补充文本表: 以曲目序号 (从 1 开始) 为键的对象
-## 结构与故事碎片表一样, 只是每项装的是 收录专辑 / 发布时间 / 创作背景 / P主简介
+## 资料卡索引表: { "曲名": 资料卡序号 n }
 const CARDS_JSON_PATH: String = "res://Asset/NoteBook/cards.json"
 
-## 故事碎片表: 以碎片序号为键的对象
+## 资料卡正文目录: card_n.bbcode
+const CARDS_DIR: String = "res://Asset/NoteBook/cards"
+
+## 故事碎片表: 侧栏标题与解锁顺序
 const FRAGMENTS_JSON_PATH: String = "res://Asset/NoteBook/fragments.json"
 
-## 文本字段缺失时的占位
-const TEXT_PLACEHOLDER: String = "——"
+## 故事碎片正文目录: fragment_n.bbcode
+const FRAGMENTS_DIR: String = "res://Asset/NoteBook/fragments"
 
 ## 未解锁条目的占位 (资料卡与故事碎片共用)
 const LOCKED_PLACEHOLDER: String = "???"
@@ -78,13 +80,12 @@ var current_tab: String = "cards"
 ## 选中的标签索引
 var selected_card_index: int = -1
 
-## 资料卡列表: 每项 { "path": String, "general": Dictionary, "note": Dictionary },
-## 与侧栏条目一一对应。曲目信息与补充文本在进入资料卡时读一次缓存下来,
-## 之后点侧栏只再读曲绘
+## 资料卡列表: 每项 { "path": String, "general": Dictionary, "card_no": int },
+## 与侧栏条目一一对应。card_no 是 cards.json 里的资料卡序号 n, -1 表示没有索引
 var _songs: Array[Dictionary] = [ ]
 
-## 故事碎片表: { "序号": { "title": String, "text": String, "data": Dictionary } },
-## 进故事碎片页时读一次缓存下来
+## 故事碎片索引表: { "序号": "标题" }, 进故事碎片页时读一次缓存下来
+## 正文和日期不在索引表里, 由 fragments/fragment_n.bbcode 提供
 var _fragments: Dictionary = { }
 
 ## color_rect 原本的透明度 —— 黑场过渡结束要回到这个值, 而不是回到透明
@@ -117,18 +118,20 @@ func _ready() -> void:
 	# 先记下 color_rect 本来的透明度, 必须在任何过渡发生之前读
 	_color_rect_base_alpha = color_rect.color.a
 	Global.fade_in_bgm()
-	switch_tab("cards", _read_requested_card_index())
+	switch_tab("cards", _read_requested_song_index())
 	pass
 
 
-## 读上个场景通过 SceneManager 传进来的曲目下标 (键 "card_index")
+## 读上个场景通过 SceneManager 传进来的曲目下标 (键 "song_index";
+## 旧键 "card_index" 保留兼容)。它只是曲目列表下标, 不是 cards.json 里的资料卡序号。
 ## 单独运行本场景调试时父节点不是 SceneManager, 没有 get_args, 用 has_method 挡一下
-func _read_requested_card_index() -> int:
+func _read_requested_song_index() -> int:
 	var parent_node: Node = get_parent()
 	if parent_node == null or not parent_node.has_method("get_args"):
 		return -1
 
-	var raw: Variant = parent_node.get_args().get("card_index", -1)
+	var args: Dictionary = parent_node.get_args()
+	var raw: Variant = args.get("song_index", args.get("card_index", -1))
 	if raw is int or raw is float:
 		return int(raw)
 	return -1
@@ -163,8 +166,8 @@ func _on_fragments_tab_pressed() -> void:
 ## 切换标签页: 清空侧栏后重建列表
 ## 两个标签按钮和侧栏条目都用主题 (Genrial) 里的默认 Button 样式, 不覆盖字色字号;
 ## 选中态只靠下划线的显隐表示
-## @param card_index: 资料卡要优先展示的曲目下标, -1 表示不指定
-func switch_tab(tab: String, card_index: int = -1) -> void:
+## @param song_index: 资料卡要优先展示的曲目下标, -1 表示不指定
+func switch_tab(tab: String, song_index: int = -1) -> void:
 	current_tab = tab
 	var is_cards: bool = tab == "cards"
 
@@ -183,7 +186,7 @@ func switch_tab(tab: String, card_index: int = -1) -> void:
 		pass
 
 	if is_cards:
-		_build_card_list(card_index)
+		_build_card_list(song_index)
 		pass
 	else:
 		_build_fragment_list()
@@ -211,8 +214,8 @@ func _is_fragment_locked(fragment_id: String) -> bool:
 
 
 ## 资料卡侧栏: 列出全部曲包, 未解锁的只显示 ???
-## @param card_index: 要优先展示的曲目下标, -1 表示不指定
-func _build_card_list(card_index: int = -1) -> void:
+## @param requested_song_index: 要优先展示的曲目下标, -1 表示不指定
+func _build_card_list(requested_song_index: int = -1) -> void:
 	_songs = _load_song_cards()
 	if _songs.is_empty():
 		_show_empty_hint()
@@ -234,7 +237,7 @@ func _build_card_list(card_index: int = -1) -> void:
 	# 优先选中上个场景指定的那一首, 没指定 (或它没解锁) 就退回第一首已解锁的
 	# INFO: 指定的下标越界 (曲包被删过) 或那一首未解锁时都不能直接用 ——
 	#       否则会把未解锁曲目的资料漏出来
-	var target_index: int = card_index
+	var target_index: int = requested_song_index
 	if target_index < 0 or target_index >= _songs.size() or _is_song_locked(target_index):
 		target_index = -1
 		for i: int in _songs.size():
@@ -329,13 +332,32 @@ func _on_card_selected(index: int) -> void:
 		_fade_to_cover(_read_song_cover.bind(song["path"]))
 		pass
 
-	content_label.text = _format_data_card(_song_card_data(song))
+	var card_no: int = int(song.get("card_no", -1))
+	if card_no <= 0:
+		content_label.text = "[center]（这首曲目还没有资料卡）[/center]"
+		return
+
+	var card_text: String = _read_bbcode_file(_card_file_path(card_no))
+	if card_text.is_empty():
+		content_label.text = "[center]（资料卡 #%d 缺失）[/center]" % card_no
+		return
+
+	content_label.text = card_text
 	pass
 
 
 func _on_fragment_selected(fragment_id: String) -> void:
-	var fragment: Dictionary = _fragments.get(fragment_id, { })
-	content_label.text = _format_diary_entry(fragment)
+	var fragment_no: int = fragment_id.to_int()
+	if fragment_no <= 0:
+		content_label.text = "[center]（故事碎片序号无效）[/center]"
+		return
+
+	var fragment_text: String = _read_bbcode_file(_fragment_file_path(fragment_no))
+	if fragment_text.is_empty():
+		content_label.text = "[center]（故事碎片 #%d 缺失）[/center]" % fragment_no
+		return
+
+	content_label.text = fragment_text
 	pass
 
 
@@ -403,64 +425,35 @@ func _read_song_cover(lpz_path: String) -> Texture2D:
 	return Global._read_cover_from_lpz(lpz_path)
 
 
-# ---------- 内容格式 ----------
-func _format_data_card(song: Dictionary) -> String:
-	var bbcode: String = "[center][font_size=50]& %s[/font_size][/center]\n\n" % song.get("title", "???")
-	bbcode += "[center]P主: %s\n" % song.get("producer", "——")
-	bbcode += "歌手: %s\n" % song.get("vocalist", "——")
-	bbcode += "BPM: %s\n" % str(song.get("bpm", "——"))
-	bbcode += "收录专辑: %s\n" % song.get("album", "——")
-	bbcode += "发布时间: %s[/center]\n\n" % song.get("release_date", "——")
-	bbcode += "[center]── 创作背景 ──[/center]\n\n"
-	bbcode += "%s\n\n" % song.get("background", "(待补充)")
-	bbcode += "[center]── P主简介 ──[/center]\n\n"
-	bbcode += "%s\n" % song.get("producer_intro", "(待补充)")
-
-	# if Global.notebook_return_scene != "home" and Global.notebook_return_song_title != "":
-	# 	bbcode += "\n\n[center][url=close]关闭[/url][/center]"
-	return bbcode
+# ---------- 资料卡 / 碎片文件 ----------
+## 资料卡序号 n 对应的 .bbcode 路径
+func _card_file_path(card_no: int) -> String:
+	return CARDS_DIR.path_join("card_%d.bbcode" % card_no)
 
 
-## 把一条故事碎片格式化成日记体 BBCode
-## INFO: json 里日期那组字段是放在 "data" 下的 (不是 "date"), 正文在 "text"
-func _format_diary_entry(fragment: Dictionary) -> String:
-	var date: Dictionary = fragment.get("data", { })
-	var header: String = "%s年%s月%s日    %s    %s" % [
-		date.get("year", "????"),
-		date.get("month", "??"),
-		date.get("day", "??"),
-		date.get("week", "???"),
-		date.get("weather", "??"),
-	]
-	var bbcode: String = "[right]%s[/right]\n" % header
-	bbcode += "[center]———————————————————————————————[/center]\n\n"
-	bbcode += str(fragment.get("text", ""))
-	return bbcode
+## 故事碎片序号 n 对应的 .bbcode 路径
+func _fragment_file_path(fragment_no: int) -> String:
+	return FRAGMENTS_DIR.path_join("fragment_%d.bbcode" % fragment_no)
 
 
-## 把 chart.General 与资料卡补充文本合成 _format_data_card 认的键
-## 曲目基本信息来自曲包, "收录专辑 / 发布时间 / 创作背景 / P主简介"来自同序号 json
-## INFO: json 的键名直接沿用 _format_data_card 读取的那一套 (album / release_date /
-##       background / producer_intro), 写了什么就覆盖什么, 没写的交给它的缺省值。
-##       想覆盖曲名或 P主, 在 json 里写同名键 (title / producer) 即可
-func _song_card_data(song: Dictionary) -> Dictionary:
-	var general: Dictionary = song["general"]
-	var note: Dictionary = song["note"]
+## 读一个纯文本 .bbcode 文件; 文件缺失 / 打不开时返回空字符串
+func _read_bbcode_file(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		push_error("找不到文本文件: %s" % path)
+		return ""
 
-	var data: Dictionary = {
-		"title": _song_title(song),
-		"producer": general.get("Artist", TEXT_PLACEHOLDER),
-		"vocalist": general.get("Vocalist", TEXT_PLACEHOLDER),
-		"bpm": general.get("BPM", TEXT_PLACEHOLDER),
-	}
-	for key: String in note:
-		data[key] = note[key]
-		pass
-	return data
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_error("无法打开文本文件: %s" % path)
+		return ""
+
+	var text: String = file.get_as_text()
+	file.close()
+	return text
 
 
 # ---------- 数据文件读取 ----------
-## 读一个"以字符串为键的 JSON 对象"文件 (资料卡表与故事碎片表都是这个形状)
+## 读一个"以字符串为键的 JSON 对象"文件 (资料卡索引表与故事碎片表都是这个形状)
 ## 文件缺失 / 打不开 / 解析结果不是对象, 一律返回空字典, 调用方据此退回占位文字
 ## @param path: res:// 路径
 ## @param label: 出错时打印用的中文名, 便于一眼看出是哪个表出了问题
@@ -483,41 +476,41 @@ func _read_json_object(path: String, label: String) -> Dictionary:
 
 
 # ---------- 曲包数据 ----------
-## 读取全部曲包, 抽出每首的 chart.General, 并配上同名曲目的资料卡补充文本
+## 读取全部曲包, 抽出每首的 chart.General, 并配上同名曲目的资料卡序号
 ## 每个曲包只读 chart.lp —— 它在包里是压缩过的几 KB, 不碰同包的音频与视频
 func _load_song_cards() -> Array[Dictionary]:
 	var cards: Array[Dictionary] = [ ]
 	var paths: Array[String] = _get_song_packages()
-	# 补充文本整表读一次就够, 不要在循环里按曲名反复读同一个文件
-	var notes: Dictionary = _get_card_data()
+	# 索引表整表读一次就够, 不要在循环里按曲名反复读同一个文件
+	var card_indices: Dictionary = _get_card_indices()
 	var missing_titles: Array[String] = [ ]
 	for i: int in paths.size():
 		var chart: Dictionary = Global._read_chart_from_lpz(paths[i])
 		var general: Dictionary = chart.get("General", { })
 		var title: String = _raw_title(general)
-		var note: Dictionary = _card_note(notes, general)
-		# 曲名写错一个字 (全角空格、标点差异) 资料卡就会静默少掉两块内容, 攒起来一次报全
-		if not title.is_empty() and note.is_empty():
+		var card_no: int = _card_no_for_title(card_indices, general)
+		# 曲名写错一个字 (全角空格、标点差异) 资料卡就会静默找不到, 攒起来一次报全
+		if not title.is_empty() and card_no <= 0:
 			missing_titles.append(title)
 			pass
 		cards.append({
 			"path": paths[i],
 			"general": general,
-			"note": note,
+			"card_no": card_no,
 		})
 		pass
 	print("资料卡曲包读取完成, 共 %d 首" % cards.size())
 	if not missing_titles.is_empty():
-		print("以下曲名在%s里没有条目, 请核对键名: %s" % [
+		print("以下曲名在%s里没有序号, 请核对键名: %s" % [
 			CARDS_JSON_PATH,
 			", ".join(missing_titles),
 		])
 	return cards
 
 
-## 读资料卡补充文本表
-func _get_card_data() -> Dictionary:
-	return _read_json_object(CARDS_JSON_PATH, "资料卡文本表")
+## 读资料卡索引表 (曲名 -> 资料卡序号 n)
+func _get_card_indices() -> Dictionary:
+	return _read_json_object(CARDS_JSON_PATH, "资料卡索引表")
 
 
 ## 曲包里的原始曲名 (chart.General 的 Title), 取不到就是空字符串
@@ -527,19 +520,21 @@ func _raw_title(general: Dictionary) -> String:
 	return str(general.get("Title", ""))
 
 
-## 取曲名对应的那一份资料卡补充文本
+## 取曲名对应的资料卡序号 n
 ## INFO: 键是曲名而不是"第几首" —— 下标来自未排序的目录枚举, 曲包一增删就整体错位,
 ##       曲名是曲目的固有属性, 不受目录顺序影响
-## 曲名为空、表里没有这个曲名 (或那一项不是对象) 都返回空字典, 正文退回缺省占位文字
-func _card_note(notes: Dictionary, general: Dictionary) -> Dictionary:
+## 曲名为空、表里没有这个曲名、值不是有效序号时返回 -1
+func _card_no_for_title(card_indices: Dictionary, general: Dictionary) -> int:
 	var title: String = _raw_title(general)
 	if title.is_empty():
-		return { }
+		return -1
 
-	var entry: Variant = notes.get(title, { })
-	if entry is Dictionary:
-		return entry
-	return { }
+	var raw: Variant = card_indices.get(title, -1)
+	if raw is int or raw is float:
+		return int(raw)
+	if raw is String and (raw as String).is_valid_int():
+		return int(raw)
+	return -1
 
 
 ## 侧栏显示用的曲名: 优先曲包里的 Title, 没有就退回文件名
@@ -585,11 +580,11 @@ func _scan_song_package_dir() -> Array[String]:
 
 
 # ---------- 故事碎片数据 ----------
-## 读故事碎片表
-## 结构是 { "序号": { "title": String, "text": String, "data": { 年/月/日/周/天气 } } }
-## 文件缺失或格式不对都返回空字典, 侧栏与正文就退回"暂无数据"
+## 读故事碎片索引表 (侧栏标题与解锁顺序; 正文由 fragment_n.bbcode 提供)
+## 结构是 { "序号": "标题" }
+## 文件缺失或格式不对都返回空字典, 侧栏退回"暂无数据"
 func _get_fragment_data() -> Dictionary:
-	return _read_json_object(FRAGMENTS_JSON_PATH, "故事碎片表")
+	return _read_json_object(FRAGMENTS_JSON_PATH, "故事碎片索引表")
 
 
 ## 取碎片序号的显示顺序
@@ -605,8 +600,13 @@ func _sorted_fragment_ids(fragments: Dictionary) -> Array[String]:
 
 ## 侧栏显示用的碎片标题
 func _fragment_title(fragment_id: String) -> String:
-	var fragment: Dictionary = _fragments.get(fragment_id, { })
-	return str(fragment.get("title", LOCKED_PLACEHOLDER))
+	var title: Variant = _fragments.get(fragment_id, LOCKED_PLACEHOLDER)
+	if title is String:
+		return title
+	if title is Dictionary:
+		# 兼容旧的 { "title": ... } 结构
+		return str((title as Dictionary).get("title", LOCKED_PLACEHOLDER))
+	return LOCKED_PLACEHOLDER
 
 
 # ---------- 内容里的链接 ----------

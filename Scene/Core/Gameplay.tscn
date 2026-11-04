@@ -51,7 +51,7 @@ viewport_path = NodePath("SubViewport")
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask") groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask", "judgment_container", "countdown_label") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -80,6 +80,8 @@ speed_label = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxCo
 speed_scroll_bar = NodePath("UI/PausePanel/CenterContainer/VBoxContainer/Speed/HBoxContainer/SpeedScrollBar")
 tick = NodePath("UI/Tick")
 finish_button_mask = NodePath("UI/Mask")
+judgment_container = NodePath("UI/JudgmentContainer")
+countdown_label = NodePath("UI/CountdownLabel")
 
 [node name="SubViewport" type="SubViewport" parent="." unique_id=731722823]
 transparent_bg = true
@@ -233,6 +235,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Mask" type="ColorRect" parent="UI" unique_id=1068299061]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -274,6 +277,7 @@ theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 30
 
 [node name="PauseButton" type="Button" parent="UI" unique_id=1928355887]
+disabled = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 12.0
@@ -416,6 +420,99 @@ theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488,
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
 text = "> 继续"
+
+[node name="JudgmentContainer" type="Control" parent="UI" unique_id=778484401]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Feedback1" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback2" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback3" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback4" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback5" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback6" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback7" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Feedback8" type="Label" parent="UI/JudgmentContainer"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CountdownLabel" type="Label" parent="UI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -50.0
+offset_right = 150.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.784, 0.784, 0.784, 1)
+theme_override_font_sizes/font_size = 80
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="NoteLoader" type="Node" parent="." unique_id=380954061]
 script = ExtResource("2_ovtvy")

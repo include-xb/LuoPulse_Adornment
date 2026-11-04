@@ -81,6 +81,12 @@ extends Control
 ## 结束按钮
 @export var finish_button_mask: ColorRect # = $UI/Mask
 
+## 判定反馈容器 (反馈标签的父节点)
+@export var judgment_container: Control # = $UI/JudgmentContainer
+
+## 暂停后继续的倒计时标签
+@export var countdown_label: Label # = $UI/CountdownLabel
+
 
 ## 解析完成的谱面数据
 var chart: Array = [ ]
@@ -149,9 +155,6 @@ var _countdown_remaining: float = 0.0
 ## 继续后的倒计时时间
 const COUNTDOWN_DURATION: float = 3.0
 
-## 显示倒计时的标签
-var _countdown_label: Label = null
-
 ## 各列的 InputProcesser 引用
 var input_processers: Array = [ ]
 
@@ -202,8 +205,6 @@ const LATE_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
 const FEEDBACK_DURATION: float = 0.2
 ## 显示反馈词的 Y 轴偏移
 const FEEDBACK_FLOAT_Y: float = 35.0
-## 显示反馈词的字体大小
-const FEEDBACK_FONT_SIZE: int = 40
 
 ## 桌面键盘按键映射 (开发调试用)
 const KEY_COLUMN_MAP: Dictionary = {
@@ -213,14 +214,12 @@ const KEY_COLUMN_MAP: Dictionary = {
 	KEY_K: 3,
 }
 
-## 用于展示反馈信息标签
-var _judgment_container: Control = null
 ## 反馈信息标签对象池
 var _feedback_labels: Array[Label] = [ ]
 ## 反馈信息标签索引, 用于在对象池中循环复用标签的索引
 var _feedback_index: int = 0
-## 最多可以同时显示的反馈信息标签数量
-var _max_feedback_labels: int = 8
+## 反馈信息标签数量 (从场景中的标签节点统计, 用于对象池轮转)
+var _max_feedback_labels: int = 0
 
 
 ## ---- 打击音效 ----
@@ -660,17 +659,10 @@ func _ready() -> void:
 	_setup_judgment_feedback()
 	_setup_hit_sound_pool()
 	_collect_input_processers()
-	_setup_countdown_label()
 	reset_speed()
 
-	video_stream_player	.visible = true
-	tick				.visible = false
-	finish_button_mask	.visible = false
-	_pause_panel		.visible = false
-	_pause_button		.disabled = true
-	autoplay			.visible = Global.is_autoplay
+	autoplay.visible = Global.is_autoplay
 	audio_system.volume_linear = Global.song_target_volume()
-	_pause_panel.modulate.a = 0.0
 	username.text = Global.user_name
 	
 	
@@ -1315,28 +1307,16 @@ func load_note(note_index: int, index: int, is_mulit_tap: bool = false) -> void:
 
 
 # ---------- 判定反馈 ----------
-## 初始化判定反馈
+## 收集判定反馈标签 (场景中已经摆好, 这里只做对象池引用)
 func _setup_judgment_feedback() -> void:
-	_judgment_container = Control.new()
-	_judgment_container.anchor_left = 0.0
-	_judgment_container.anchor_right = 1.0
-	_judgment_container.anchor_top = 0.0
-	_judgment_container.anchor_bottom = 1.0
-	_judgment_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_ui.add_child(_judgment_container)
-
-	# 初始化反馈信息标签
-	for _i in range(_max_feedback_labels):
-		var lbl: Label = Label.new()
-		lbl.add_theme_font_size_override("font_size", FEEDBACK_FONT_SIZE)
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.visible = false
-		lbl.modulate.a = 0.0
-		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_judgment_container.add_child(lbl)
-		_feedback_labels.append(lbl)
+	_feedback_labels.clear()
+	for child: Node in judgment_container.get_children():
+		var label: Label = child as Label
+		if label:
+			_feedback_labels.append(label)
+			pass
 		pass
+	_max_feedback_labels = _feedback_labels.size()
 	pass
 
 
@@ -1575,37 +1555,16 @@ func _on_exit_button_pressed() -> void:
 
 
 # ---------- 继续游戏 倒计时 ----------
-## 设置暂停后继续的倒计时标签
-func _setup_countdown_label() -> void:
-	_countdown_label = Label.new()
-	_countdown_label.visible = false
-	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_countdown_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_countdown_label.anchor_left = 0.5
-	_countdown_label.anchor_right = 0.5
-	_countdown_label.anchor_top = 0.5
-	_countdown_label.anchor_bottom = 0.5
-	_countdown_label.offset_left = -150.0
-	_countdown_label.offset_top = -50.0
-	_countdown_label.offset_right = 150.0
-	_countdown_label.offset_bottom = 50.0
-	_countdown_label.add_theme_font_size_override("font_size", 80)
-	_countdown_label.add_theme_color_override("font_color", Color(0.784, 0.784, 0.784, 1.0))
-	_countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_ui.add_child(_countdown_label)
-	pass
-
-
 ## 启动继续按钮按后的倒计时
 func _start_countdown() -> void:
 	_is_counting_down = true
 	_countdown_remaining = COUNTDOWN_DURATION
-	_countdown_label.visible = true
-	_countdown_label.modulate.a = 0.0
+	countdown_label.visible = true
+	countdown_label.modulate.a = 0.0
 	_update_countdown_display()
 
 	var tween: Tween = create_tween()
-	tween.tween_property(_countdown_label, "modulate:a", 1.0, 0.15)
+	tween.tween_property(countdown_label, "modulate:a", 1.0, 0.15)
 	pass
 
 
@@ -1628,7 +1587,7 @@ func _countdown_tick(delta: float) -> void:
 ## 更新继续按钮按后的倒计时时间
 func _update_countdown_display() -> void:
 	var second: int = ceili(_countdown_remaining)
-	_countdown_label.text = str(second)
+	countdown_label.text = str(second)
 	pass
 
 
@@ -1637,15 +1596,15 @@ func _pulse_countdown_label() -> void:
 	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_BACK)
 	tween.set_ease(Tween.EASE_OUT)
-	_countdown_label.scale = Vector2(1.3, 1.3)
-	tween.tween_property(_countdown_label, "scale", Vector2.ONE, 0.3)
+	countdown_label.scale = Vector2(1.3, 1.3)
+	tween.tween_property(countdown_label, "scale", Vector2.ONE, 0.3)
 	pass
 
 
 ## 按下继续按钮按后的倒计时结束
 func _on_countdown_ready() -> void:
-	_countdown_label.visible = false
-	_countdown_label.scale = Vector2.ONE
+	countdown_label.visible = false
+	countdown_label.scale = Vector2.ONE
 	_is_counting_down = false
 
 	audio_system.stream_paused = false

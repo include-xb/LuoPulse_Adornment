@@ -333,7 +333,7 @@ const AVATAR_PATHS: Array[String] = [
 ## 头像素材缺失时的占位图
 const AVATAR_FALLBACK: Texture2D = preload("res://Asset/Image/Godot-headimg.png")
 
-## 故事碎片表路径
+## 故事碎片索引表路径 (序号 -> 标题; 正文在 fragments/fragment_n.bbcode)
 ## INFO: 与 Notebook.gd 的 FRAGMENTS_JSON_PATH 是同一份数据, 改路径要两处一起改
 const FRAGMENTS_JSON_PATH: String = "res://Asset/NoteBook/fragments.json"
 
@@ -471,7 +471,7 @@ func _song_path_order(file_name: String) -> int:
 	return int(prefix)
 
 
-## 读取故事碎片表; 文件缺失 / 打开失败 / 结构不对时返回空字典
+## 读取故事碎片索引表 (序号 -> 标题); 文件缺失 / 打开失败 / 结构不对时返回空字典
 func _read_fragments_table() -> Dictionary:
 	if not FileAccess.file_exists(FRAGMENTS_JSON_PATH):
 		push_error("找不到故事碎片表: %s" % FRAGMENTS_JSON_PATH)
@@ -533,7 +533,10 @@ func unlock_next_story_fragment() -> String:
 
 	var entry: Variant = fragments[next_id]
 	var title: String = ""
-	if entry is Dictionary:
+	if entry is String:
+		title = entry
+	elif entry is Dictionary:
+		# 兼容旧的 { "title": ... } 结构
 		title = str((entry as Dictionary).get("title", ""))
 		pass
 	if title.is_empty():

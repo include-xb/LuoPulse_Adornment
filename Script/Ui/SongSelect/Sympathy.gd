@@ -100,6 +100,7 @@ var end_pointer: float = 0.0
 ## 正在回拨
 var is_back: bool = false
 
+
 ## 音频淡入时间
 const AUDIO_FADE_IN_TIME: float = 1.5
 
@@ -229,15 +230,6 @@ func if_locked() -> bool:
 func update_unlock_button() -> void:
 	unlock_button.text = ("$ 解锁 ◇-" + str(needed_crystal_num)) if is_locked else "已解锁"
 	unlock_button.disabled = false if is_locked else true
-	# if is_locked:
-	# 	if Global.current_song_index > Global.main_line_unlocked:
-	# 		unlock_button.disabled = true
-	# 		unlock_button.tooltip_text = "必须先解锁上一个关卡"
-	# 		pass
-	# 	else:
-	# 		unlock_button.disabled = false
-	# 		unlock_button.tooltip_text = ""
-	# 		pass
 	pass
 
 
@@ -268,10 +260,10 @@ func unlock() -> void:
 
 
 ## 把谱面的 Chapter 序号拼成 "ChapterⅠ. 序曲" 这样的标签文字
-## 序号不在已知章节里时返回空串, 标签就留白
+## 序号不在已知章节里时返回'-'
 func _format_chapter(chapter_number: int) -> String:
 	if not CHAPTER_NAMES.has(chapter_number):
-		return ""
+		return "Chapter-.--"
 	return "Chapter%s. %s" % [ CHAPTER_ROMAN[chapter_number], CHAPTER_NAMES[chapter_number] ]
 
 
@@ -427,7 +419,7 @@ func _on_start_pressed() -> void:
 	# audio_stream_player.stop()
 	_fade_out_audio()
 	Global.play_ui_click_audio()
-	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", {}, "img", cover.texture)
+	$"..".start_scene_by_path("res://Scene/Core/Gameplay.tscn", { }, "img", cover.texture)
 	pass
 
 
@@ -438,7 +430,7 @@ func _on_note_pressed() -> void:
 	audio_stream_player.stop()
 	$"..".start_scene_by_path(
 		"res://Scene/Ui/Menu/Notebook.tscn",
-		{ "card_index": Global.current_song_index }
+		{ "song_index": Global.current_song_index }
 	)
 	pass
 
@@ -449,8 +441,8 @@ func _on_setting_pressed() -> void:
 	setting_panel.visible = true
 	setting_panel.modulate.a = 0.0
 	
-	autoplay_button.text = "自动播放     " + ("开" if Global.is_autoplay else "关")
-	pv_button.text = "播放 PV        " + ("开" if Global.is_pvplay else "关")
+	autoplay_button.text = "自动播放     "   + ("开" if Global.is_autoplay else "关")
+	pv_button.text       = "播放 PV        " + ("开" if Global.is_pvplay else "关")
 
 	var tween: Tween = create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)

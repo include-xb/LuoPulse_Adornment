@@ -24,6 +24,9 @@ extends Control
 ## 下载时的背景图
 @export var background: TextureRect
 
+## 下载管理器
+@export var downloader: Node
+
 
 # @export var is_test: bool = false
 
@@ -41,18 +44,16 @@ func _ready() -> void:
 	Engine.max_fps = 50
 	load_config()
 	if Global.is_auto_update_package:
-		$Downloader.download_progress.connect(_on_download_progress)
+		downloader.download_progress.connect(_on_download_progress)
 		# 进入场景立刻检查并补齐资源, 全部结束后才进入后续流程
 		await _check_and_update_song_packages()
 		pass
 	else:
 		# 玩家关闭了"自动更新曲包", 跳过检查与下载, 直接进入后续流程
-		loading_panel.visible = false
 		pass
 	
 	load_sympathy_song()
 	if Global.if_play_start_animation:
-		_setup_animations()
 		_play_intro_sequence()
 		Global.is_first_open = false
 		pass
@@ -87,7 +88,7 @@ func _check_and_update_song_packages() -> void:
 	# 立刻显示 0%, 避免在拉取列表期间一直停在场景里的占位文字
 	_apply_download_progress(0.0, "正在检查曲包更新")
 
-	var remote_result: Dictionary = await $Downloader.fetch_remote_files()
+	var remote_result: Dictionary = await downloader.fetch_remote_files()
 	if not bool(remote_result.get("is_ok", false)):
 		push_warning("曲包列表获取失败, 本次使用本地资源")
 		await _finish_update_check("资源检查失败, 正在使用本地曲包")
@@ -96,12 +97,12 @@ func _check_and_update_song_packages() -> void:
 	var remote_files: Array = remote_result.get("files", [ ])
 	print("远端曲包列表获取成功, 共 %d 个" % remote_files.size())
 	# 远端已下架的曲包从本地清掉; 远端列表为空时 Downloader 会保留本地, 防止误清空
-	var deleted_files: Array[String] = $Downloader.delete_orphan_packages(remote_files)
+	var deleted_files: Array[String] = downloader.delete_orphan_packages(remote_files)
 	if not deleted_files.is_empty():
 		print("已清理 %d 个远端不存在的曲包" % deleted_files.size())
 		pass
 
-	var pending_files: Array[Dictionary] = $Downloader.get_pending_files(remote_files)
+	var pending_files: Array[Dictionary] = downloader.get_pending_files(remote_files)
 	_download_total = pending_files.size()
 
 	if _download_total == 0:
@@ -112,7 +113,7 @@ func _check_and_update_song_packages() -> void:
 
 	# /api/sha256 首次请求需要服务端计算全部文件哈希, 可能明显偏慢
 	_apply_download_progress(0.0, "正在获取校验信息, 首次可能较慢")
-	var sha_result: Dictionary = await $Downloader.fetch_remote_sha256()
+	var sha_result: Dictionary = await downloader.fetch_remote_sha256()
 	if not bool(sha_result.get("is_ok", false)):
 		push_warning("SHA256 列表获取失败, 本次使用本地资源")
 		await _finish_update_check("资源检查失败, 正在使用本地曲包")
@@ -129,7 +130,7 @@ func _check_and_update_song_packages() -> void:
 		if expected_sha256.is_empty():
 			push_error("远端未提供 SHA256, 已跳过: %s" % file_name)
 		else:
-			var is_success: bool = await $Downloader.download_file(file, expected_sha256)
+			var is_success: bool = await downloader.download_file(file, expected_sha256)
 			if not is_success:
 				push_error("曲包下载或校验失败, 已跳过: %s" % file_name)
 				pass
@@ -400,50 +401,6 @@ func load_album_song() -> void:
 
 
 # ---------- 开始动画 ----------
-## 设置开始动画
-func _setup_animations() -> void:
-	var lib: AnimationLibrary = AnimationLibrary.new()
-
-	# 淡入 Text1
-	var fade_in_text1: Animation = Animation.new()
-	fade_in_text1.length = 1.0
-	fade_in_text1.add_track(Animation.TYPE_VALUE)
-	fade_in_text1.track_set_path(0, "Text1:modulate:a")
-	fade_in_text1.track_insert_key(0, 0.0, 0.0)
-	fade_in_text1.track_insert_key(0, 1.0, 1.0)
-	lib.add_animation("fade_in_text1", fade_in_text1)
-
-	# 淡出 Text1
-	var fade_out_text1: Animation = Animation.new()
-	fade_out_text1.length = 1.0
-	fade_out_text1.add_track(Animation.TYPE_VALUE)
-	fade_out_text1.track_set_path(0, "Text1:modulate:a")
-	fade_out_text1.track_insert_key(0, 0.0, 1.0)
-	fade_out_text1.track_insert_key(0, 1.0, 0.0)
-	lib.add_animation("fade_out_text1", fade_out_text1)
-
-	# 淡入 Text2
-	var fade_in_text2: Animation = Animation.new()
-	fade_in_text2.length = 1.0
-	fade_in_text2.add_track(Animation.TYPE_VALUE)
-	fade_in_text2.track_set_path(0, "Text2:modulate:a")
-	fade_in_text2.track_insert_key(0, 0.0, 0.0)
-	fade_in_text2.track_insert_key(0, 1.0, 1.0)
-	lib.add_animation("fade_in_text2", fade_in_text2)
-
-	# 淡出 Text2
-	var fade_out_text2: Animation = Animation.new()
-	fade_out_text2.length = 1.0
-	fade_out_text2.add_track(Animation.TYPE_VALUE)
-	fade_out_text2.track_set_path(0, "Text2:modulate:a")
-	fade_out_text2.track_insert_key(0, 0.0, 1.0)
-	fade_out_text2.track_insert_key(0, 1.0, 0.0)
-	lib.add_animation("fade_out_text2", fade_out_text2)
-
-	animation_player.add_animation_library("", lib)
-	pass
-
-
 ## 播放开始动画
 func _play_intro_sequence() -> void:
 	# 淡入第一段文字

@@ -57,7 +57,7 @@ edit_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoVi
 back_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/BackButton")
 edit_view = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView")
 name_edit = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/NameEdit")
-confirm_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/ConfirmButton")
+confirm_button = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/ConfirmButton")
 avatar_picker = NodePath("ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/AvatarPicker")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1168184271]
@@ -419,11 +419,6 @@ size_flags_vertical = 4
 theme_override_font_sizes/font_size = 40
 placeholder_text = "昵称"
 
-[node name="ConfirmButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow" unique_id=2123973318]
-layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "确定"
-
 [node name="PickerTitle" type="Label" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView" unique_id=1807900776]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
@@ -437,6 +432,11 @@ theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
 columns = 5
 
+[node name="ConfirmButton" type="Button" parent="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView" unique_id=2123973318]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "确定"
+
 [connection signal="pressed" from="MenuContainer/MenuButtons/Sympathy" to="." method="_on_sympathy_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtons/Album" to="." method="_on_album_pressed"]
 [connection signal="pressed" from="MenuContainer/MenuButtons/Note" to="." method="_on_note_pressed"]
@@ -445,7 +445,7 @@ columns = 5
 [connection signal="gui_input" from="ProfilePanel/Mask" to="." method="_on_profile_mask_gui_input"]
 [connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/InfoView/EditButton" to="." method="_on_edit_pressed"]
 [connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/BackButton" to="." method="_on_edit_back_pressed"]
-[connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/NameRow/ConfirmButton" to="." method="_on_confirm_pressed"]
+[connection signal="pressed" from="ProfilePanel/CenterContainer/Card/CardMargin/VBox/EditView/ConfirmButton" to="." method="_on_confirm_pressed"]
 
 [editable path="MenuContainer/MenuButtons/Sympathy"]
 [editable path="MenuContainer/MenuButtons/Album"]

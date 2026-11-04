@@ -1,48 +1,45 @@
 extends Node
 
-# 保存目录 (user://CustomizedPlaylist)
-const SAVE_DIR := "user://CustomizedPlaylist"
+## 保存目录 (user://CustomizedPlaylist)
+const SAVE_DIR: String = "user://CustomizedPlaylist"
 
-# 临时文件后缀: 先下到 <文件名>.part, 全部写完后再改名成正式文件
-# 避免下载中断/失败时把已经存在的可用文件截断销毁
-const TEMP_SUFFIX := ".part"
+## 临时文件后缀: 先下到 <文件名>.part, 全部写完后再改名成正式文件
+## 避免下载中断/失败时把已经存在的可用文件截断销毁
+const TEMP_SUFFIX: String = ".part"
 
-# 本地校验记录: 记录每个成功下载并通过 SHA256 校验的文件
-const LOCAL_MANIFEST_FILE := "resource_manifest.json"
-const LOCAL_MANIFEST_VERSION := 1
+## 本地校验记录: 记录每个成功下载并通过 SHA256 校验的文件
+const LOCAL_MANIFEST_FILE: String = "resource_manifest.json"
+const LOCAL_MANIFEST_VERSION: int = 1
 
-# 资源服务 (见 API_README.md)
-const API_BASE_URL := "https://lpserver.thirhythm.top"
-const SONG_PACKAGE_MODULE := "sympathy"
+## 资源服务 (见 API_README.md)
+const API_BASE_URL: String = "https://lpserver.thirhythm.top"
+const SONG_PACKAGE_MODULE: String = "sympathy"
 
-# 本地 API Key 脚本 (已加入 .gitignore, 从 ApiKey.example.gd 复制后填写)
-const API_KEY_SCRIPT_PATH := "res://Script/GameManager/ApiKey.gd"
-const API_KEY_CONST_NAME := "API_KEY"
+## 本地 API Key 脚本 (加 .gitignore, 从 ApiKey.gd 复制后填写)
+const API_KEY_SCRIPT_PATH: String = "res://Script/GameManager/ApiKey.gd"
+const API_KEY_CONST_NAME: String = "API_KEY"
 
-# 普通 API 请求超时 (秒)
-const API_TIMEOUT := 20.0
+## 普通 API 请求超时 (秒)
+const API_TIMEOUT: float = 20.0
 
-# /api/sha256 首次请求会在服务端计算全部文件哈希, 需要更长的超时
-const SHA256_TIMEOUT := 180.0
+## /api/sha256 首次请求会在服务端计算全部文件哈希, 需要更长的超时
+const SHA256_TIMEOUT: float = 180.0
 
-# 下载超时时间（秒）。0 表示不超时，适合大文件下载，防止因网络波动中断
-const TIMEOUT := 0.0
+## 下载超时时间（秒）。0 表示不超时，适合大文件下载，防止因网络波动中断
+const TIMEOUT: float = 0.0
 
-# 最大重定向次数，应对网盘的 302 跳转
-const MAX_REDIRECTS := 5
+## 最大重定向次数，应对网盘的 302 跳转
+const MAX_REDIRECTS: int = 5
 
-# 单个文件下载失败后的最大重试次数
+## 单个文件下载失败后的最大重试次数
 const MAX_RETRY: int = 3
 
-# 两次重试之间的等待时间 (秒)
+## 两次重试之间的等待时间 (秒)
 const RETRY_DELAY: float = 1.0
 
-# 计算 SHA256 时每次读取的字节数 (1 MiB)
+## 计算 SHA256 时每次读取的字节数 (1 MiB)
 const HASH_CHUNK_SIZE: int = 1048576
 
-
-## 单个文件的下载进度变化 (0.0 ~ 1.0), 仅在已知文件总大小时发出
-signal download_progress(ratio: float)
 
 var http_request: HTTPRequest
 
@@ -58,6 +55,9 @@ var temp_save_path: String
 ## 本地校验记录: 文件名 -> { "size": int, "sha256": String }
 var _local_manifest: Dictionary = { }
 var _is_local_manifest_loaded: bool = false
+
+## 单个文件的下载进度变化 (0.0 ~ 1.0), 仅在已知文件总大小时发出
+signal download_progress(ratio: float)
 
 
 ## 拉取远端曲包列表
@@ -92,7 +92,7 @@ func fetch_remote_files() -> Dictionary:
 			"size": size,
 		})
 		pass
-
+	
 	return { "is_ok": true, "files": files }
 
 
@@ -265,7 +265,7 @@ func _fetch_api_json(api_path: String, timeout: float) -> Variant:
 		push_error("API Key 未配置, 跳过本次资源检查")
 		return null
 
-	# INFO: API 请求使用独立节点, 避免和下载共用节点时的状态干扰
+	# INFO: API 请求使用独立节点, 避免 和下载共用节点时的状态 干扰
 	await get_tree().process_frame
 	var request: HTTPRequest = HTTPRequest.new()
 	request.timeout = timeout
@@ -300,7 +300,7 @@ func _fetch_api_json(api_path: String, timeout: float) -> Variant:
 ## 从独立脚本读取 API Key; 文件缺失或未填写时返回空串
 func _get_api_key() -> String:
 	if not ResourceLoader.exists(API_KEY_SCRIPT_PATH):
-		push_error("缺少 API Key 文件: %s (请复制 ApiKey.example.gd 并填写)" % API_KEY_SCRIPT_PATH)
+		push_error("缺少 API Key 文件: %s (请复制 ApiKey.gd 并填写)" % API_KEY_SCRIPT_PATH)
 		return ""
 
 	var api_key_script: Script = load(API_KEY_SCRIPT_PATH) as Script
@@ -386,36 +386,38 @@ func _is_request_ok(args: Array) -> bool:
 ## 校验一次下载的结果, 通过则把临时文件改名成正式文件
 ## @param args: request_completed 信号的参数 [result, response_code, headers, body]
 func _finish_request(args: Array, expected_sha256: String, expected_size: int) -> bool:
+	# 验证请求结果与状态码是否正常
 	if not _is_request_ok(args):
 		return false
-
+	
 	# 验证文件是否已成功写入临时文件
 	if not FileAccess.file_exists(temp_save_path):
 		push_error("临时文件未写入: %s" % temp_save_path)
 		return false
-
+	
+	# 验证文件大小是否一致
 	var actual_size: int = _get_file_size(temp_save_path)
 	if expected_size >= 0 and actual_size != expected_size:
 		push_error("文件大小不一致 (期望 %d, 实际 %d): %s" % [ expected_size, actual_size, temp_save_path ])
 		return false
-
+	
 	var actual_sha256: String = await _compute_sha256_async(temp_save_path)
 	if actual_sha256.is_empty():
 		push_error("无法计算文件 SHA256: %s" % temp_save_path)
 		return false
-
+	
 	if actual_sha256 != expected_sha256:
 		push_error(
 			"SHA256 校验失败: %s\n  期望: %s\n  实际: %s" % [ temp_save_path, expected_sha256, actual_sha256 ]
 		)
 		return false
-
-	# 下载确实完整且内容一致后, 才用临时文件替换正式文件
+	
+	# 下载的实在是太完整啦(啾咪) 且 内容一致后, 才用临时文件替换正式文件
 	var err: Error = _promote_temp_file()
 	if err != OK:
 		push_error("临时文件改名失败, 错误码: %d" % err)
 		return false
-
+	
 	return true
 
 

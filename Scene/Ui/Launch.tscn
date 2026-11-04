@@ -6,6 +6,70 @@
 [ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="3_gqisj"]
 [ext_resource type="PackedScene" uid="uid://r07edpdgjye1" path="res://Scene/Ui/Widget/Pulse.tscn" id="5_3u8ks"]
 
+[sub_resource type="Animation" id="Animation_intro_in1"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Text1:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_intro_in2"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Text2:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_intro_out1"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Text1:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_intro_out2"]
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Text2:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_intro"]
+_data = {
+&"fade_in_text1": SubResource("Animation_intro_in1"),
+&"fade_in_text2": SubResource("Animation_intro_in2"),
+&"fade_out_text1": SubResource("Animation_intro_out1"),
+&"fade_out_text2": SubResource("Animation_intro_out2")
+}
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gqisj"]
 shader = ExtResource("3_awa0l")
 shader_parameter/gray_scale = 1.0
@@ -48,7 +112,7 @@ _data = {
 &"downloader_fadeout": SubResource("Animation_3u8ks")
 }
 
-[node name="Launch" type="Control" unique_id=1952455162 node_paths=PackedStringArray("animation_player", "loading_panel", "download_progress_bar", "download_label", "background")]
+[node name="Launch" type="Control" unique_id=1952455162 node_paths=PackedStringArray("animation_player", "loading_panel", "download_progress_bar", "download_label", "background", "downloader")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -61,6 +125,7 @@ loading_panel = NodePath("LoadingPanel")
 download_progress_bar = NodePath("LoadingPanel/VBoxContainer/DownloadProgressBar")
 download_label = NodePath("LoadingPanel/VBoxContainer/DownloadLabel")
 background = NodePath("LoadingPanel/Background")
+downloader = NodePath("Downloader")
 
 [node name="Background" type="ColorRect" parent="." unique_id=964636709]
 layout_mode = 1
@@ -138,6 +203,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1280571672]
+libraries/ = SubResource("AnimationLibrary_intro")
 
 [node name="Downloader" type="Node" parent="." unique_id=933006297]
 script = ExtResource("2_chhln")
