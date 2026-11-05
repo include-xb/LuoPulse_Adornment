@@ -45,13 +45,13 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 3.50000016625
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_qbuod"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_dtck8"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask", "judgment_container", "countdown_label") groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "heart_pulse", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask", "judgment_container", "countdown_label") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -64,6 +64,7 @@ note_loader = NodePath("NoteLoader")
 effect_manager = NodePath("EffectManager")
 heart_line = NodePath("UI/HeartLine")
 heart_vignette = NodePath("UI/HeartVignette")
+heart_pulse = NodePath("UI/3DPort")
 progress_bar = NodePath("UI/ProgressBar")
 background = NodePath("UI/Background")
 video_stream_player = NodePath("UI/VideoStreamPlayer")
@@ -179,7 +180,7 @@ show_percentage = false
 [node name="HeartLine" parent="UI" unique_id=263587982 instance=ExtResource("8_2bmra")]
 layout_mode = 1
 
-[node name="TextureRect" type="TextureRect" parent="UI" unique_id=1108125530]
+[node name="3DPort" type="TextureRect" parent="UI" unique_id=1108125530]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -188,12 +189,11 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_qbuod")
+texture = SubResource("ViewportTexture_dtck8")
 expand_mode = 3
 script = ExtResource("10_0lm72")
 
 [node name="HeartVignette" parent="UI" unique_id=1225533570 instance=ExtResource("10_fcvxv")]
-visible = false
 layout_mode = 1
 
 [node name="Combo" type="Label" parent="UI" unique_id=146666133]
@@ -209,7 +209,7 @@ grow_horizontal = 2
 theme_override_colors/font_color = Color(0.72464263, 0.72464263, 0.72464246, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 57
+theme_override_font_sizes/font_size = 62
 text = "0 COMBO"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -290,6 +290,7 @@ theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_hover_pressed_color = Color(0.5764706, 0.5764706, 0.5764706, 1)
 theme_override_colors/font_disabled_color = Color(0.9019608, 0.9019608, 0.9019608, 0.39215687)
 theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 50
 disabled = true
 text = "| |"
 
@@ -313,7 +314,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 2
 theme_override_colors/font_color = Color(0.8431839, 0.8431839, 0.84318376, 1)
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "autoplay"
 horizontal_alignment = 1
 vertical_alignment = 2
@@ -323,7 +324,7 @@ layout_mode = 2
 size_flags_horizontal = 10
 size_flags_vertical = 8
 theme_override_colors/font_color = Color(0.8431839, 0.8431839, 0.84318376, 1)
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "小白"
 horizontal_alignment = 1
 vertical_alignment = 2
@@ -349,7 +350,7 @@ theme_override_constants/separation = 21
 layout_mode = 2
 size_flags_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 0.8784314, 0.77254903)
-theme_override_font_sizes/font_size = 60
+theme_override_font_sizes/font_size = 65
 text = "已暂停"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -361,7 +362,7 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 0.8784314, 0.77254903)
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 45
 text = "音符流速"
 
 [node name="ToolMan" type="MarginContainer" parent="UI/PausePanel/CenterContainer/VBoxContainer/Speed" unique_id=1074515395]
@@ -385,7 +386,7 @@ rounded = true
 layout_mode = 2
 size_flags_horizontal = 8
 theme_override_colors/font_color = Color(1, 1, 0.8784314, 0.77254903)
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "10"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -402,6 +403,7 @@ theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.7843
 theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+theme_override_font_sizes/font_size = 50
 text = "< 退出"
 
 [node name="RetryButton" type="Button" parent="UI/PausePanel/CenterContainer/VBoxContainer/Buttons" unique_id=366171315]
@@ -411,6 +413,7 @@ theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.7843
 theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+theme_override_font_sizes/font_size = 50
 text = "@ 重试"
 
 [node name="ContinueButton" type="Button" parent="UI/PausePanel/CenterContainer/VBoxContainer/Buttons" unique_id=160578082]
@@ -420,6 +423,7 @@ theme_override_colors/font_focus_color = Color(0.8, 0.7490196, 0.6784314, 0.7843
 theme_override_colors/font_pressed_color = Color(0.621869, 0.563104, 0.47678488, 1)
 theme_override_colors/font_hover_color = Color(0.8, 0.7490196, 0.6784314, 0.78431374)
 theme_override_colors/font_hover_pressed_color = Color(0.62352943, 0.5647059, 0.47843137, 1)
+theme_override_font_sizes/font_size = 50
 text = "> 继续"
 
 [node name="JudgmentContainer" type="Control" parent="UI" unique_id=778484401]

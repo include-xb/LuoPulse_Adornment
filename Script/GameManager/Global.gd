@@ -235,7 +235,7 @@ var lost_time: int = 240
 var _bgm_tween: Tween = null
 
 ## 音符速度, 这个速度是下落的实际速度准值
-var note_speed: float = 20.0
+var note_speed: float = 10.0
 
 ## 用户名
 var user_name: String = "小白"
@@ -336,6 +336,9 @@ var is_first_open: bool = true
 
 ## 当前选用的头像序号 (AVATAR_PATHS 的下标)
 var avatar_index: int = 0
+
+## 每首歌的历史最高准度 (键: 歌曲标题, 值: 0 ~ 1)
+var song_max_accuracy: Dictionary = { }
 
 
 # ---------- 游戏配置 (config.json) ----------
@@ -488,6 +491,26 @@ func _read_fragments_table() -> Dictionary:
 ## INFO: 直接数数据表, 不写死设计文档里的 10 —— 与笔记页看到的条目数保持一致
 func get_story_fragment_total() -> int:
 	return _read_fragments_table().size()
+
+
+## 取一首歌的历史最高准度
+## @return: 0 ~ 1; 没有记录时返回 -1
+func get_song_max_accuracy(song_title: String) -> float:
+	if song_title.is_empty() or not song_max_accuracy.has(song_title):
+		return -1.0
+	return float(song_max_accuracy[song_title])
+
+
+## 记录一首歌的最高准度, 只在新纪录时写入
+## @return: 是否刷新了纪录
+## 调用方与水晶奖励等一起走一次 save_user_data()
+func record_song_max_accuracy(song_title: String, new_accuracy: float) -> bool:
+	if song_title.is_empty():
+		return false
+	if new_accuracy <= get_song_max_accuracy(song_title):
+		return false
+	song_max_accuracy[song_title] = new_accuracy
+	return true
 
 
 ## 解锁下一块故事碎片 (按序号从小到大), 返回提示文案; 没有可解锁的碎片时返回空串
@@ -937,6 +960,7 @@ func save_user_data() -> void:
 		"crystal": crystal,
 		"story_fragments_unlocked": story_fragments_unlocked,
 		"avatar_index": avatar_index,
+		"max_accuracy": song_max_accuracy,
 	}
 	var path: String = OS.get_user_data_dir().path_join("user.json")
 	var file := FileAccess.open(path, FileAccess.WRITE)

@@ -4,11 +4,11 @@
 ##   - 底子: EffectManager 每帧写 (效果的整体淡入淡出 × heart_vignette_base)
 ##   - 闪动: 打中一个音符时 flash_once() 踩出来的一记, 按 FLASH_DECAY_MS 衰减
 ##   - 压暗: 漏掉一个音符时 dim_once() 把底子压暗, 按 MISS_DIM_RECOVER_MS 恢复
-##     (压暗只作用于底子, 不影响闪动 —— miss 依旧不给任何"命中感"的东西)
+##     (压暗只作用于底子, 不影响闪动 -- miss 依旧不给任何"命中感"的东西)
 ##
-## 相位一律取自 Global.master_time —— 暂停 / 继续倒计时期间会跟着一起冻结。
+## 相位一律取自 Global.master_time -- 暂停 / 继续倒计时期间会跟着一起冻结。
 ## 外观参数 (血色 / 带子的宽窄 / 最浓多少) 都在 Shader/heart_vignette.gdshader 里,
-## 这里只管强度, 以及让四周带子等宽所需的宽高比。
+## 这里只管强度, 以及让四周带子等宽所需的宽高比
 
 
 class_name HeartVignette extends ColorRect

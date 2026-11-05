@@ -266,6 +266,7 @@ func _load_user_data() -> void:
 		"crystal": 25,	# 水晶数
 		"story_fragments_unlocked": ["1"], 	# 已解锁的故事碎片id
 		"avatar_index": 0,	# 当前选用的头像序号
+		"max_accuracy": { },	# 每首歌的历史最高准度 (键: 歌曲标题)
 	}
 
 	var data: Dictionary = default_data.duplicate()
@@ -313,6 +314,8 @@ func _load_user_data() -> void:
 	Global.story_fragments_unlocked = data["story_fragments_unlocked"]
 	# INFO: 老存档里没有这个键, 上面的合并循环会让它落回 default_data 里的 0
 	Global.avatar_index 			= data["avatar_index"]
+	# INFO: 老存档没有 max_accuracy, 合并循环会落回空字典; 这里再防一手损坏的非字典值
+	Global.song_max_accuracy 		= data["max_accuracy"] if data["max_accuracy"] is Dictionary else { }
 	pass
 
 

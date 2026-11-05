@@ -27,22 +27,6 @@ extends Control
 ## 头像
 @export var avatar: TextureRect
 
-
-## 头像 / 卡片头像槽位用的圆形遮罩 shader
-const AVATAR_SHADER: Shader = preload("res://Shader/circular_mask.gdshader")
-
-## 卡片里每个头像槽位的尺寸
-const AVATAR_SLOT_SIZE: Vector2 = Vector2(96, 96)
-
-## 选中的头像槽位灰度 (0 = 原色)
-const AVATAR_SLOT_LIT: float = 0.0
-
-## 未选中的头像槽位灰度 (1 = 全灰)
-## INFO: 头像素材还没做 (见 Global.AVATAR_PATHS), 现在每个槽位都是同一张图 ——
-##       只能靠灰度把"当前选中的那个"区分出来
-const AVATAR_SLOT_DIM: float = 0.7
-
-
 # ---------- 主页卡片节点 ----------
 ## 头像下方那对标签里的数值 (共鸣值)
 @export var level_value: Label
@@ -76,11 +60,25 @@ const AVATAR_SLOT_DIM: float = 0.7
 ## ---- 编辑态 ----
 ## 编辑态左上角的 "<"。它挂在卡片上而不是编辑态容器里 —— 只有这样才钉得住左上角,
 ## 而且它在两态间切显隐时不会把卡片内容顶下去
-@export var back_button: Button
 @export var edit_view: VBoxContainer
 @export var name_edit: LineEdit
 @export var confirm_button: Button
 @export var avatar_picker: GridContainer
+
+
+## 头像 / 卡片头像槽位用的圆形遮罩 shader
+const AVATAR_SHADER: Shader = preload("res://Shader/circular_mask.gdshader")
+
+## 卡片里每个头像槽位的尺寸
+const AVATAR_SLOT_SIZE: Vector2 = Vector2(96, 96)
+
+## 选中的头像槽位灰度 (0 = 原色)
+const AVATAR_SLOT_LIT: float = 0.0
+
+## 未选中的头像槽位灰度 (1 = 全灰)
+## INFO: 头像素材还没做 (见 Global.AVATAR_PATHS), 现在每个槽位都是同一张图 ——
+##       只能靠灰度把"当前选中的那个"区分出来
+const AVATAR_SLOT_DIM: float = 0.7
 
 
 ## 主页卡片是否正在显示
@@ -400,10 +398,10 @@ func _on_edit_pressed() -> void:
 
 
 ## 编辑态左上角的 "<" —— 回信息态 (等于取消)
-func _on_edit_back_pressed() -> void:
-	Global.play_ui_click_audio()
-	_on_confirm_pressed()
-	pass
+#func _on_edit_back_pressed() -> void:
+	#Global.play_ui_click_audio()
+	#_on_confirm_pressed()
+	#pass
 
 
 ## "确定": 校验通过才写入并落盘, 不通过就弹提示并留在编辑态

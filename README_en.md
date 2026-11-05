@@ -130,7 +130,8 @@ The user's data is structured as follows:
         "1",
         "3"
     ],
-    "avatar_index": 0           // index of the selected avatar
+    "avatar_index": 0,          // index of the selected avatar
+    "max_accuracy": {}          // best accuracy per song (key: song title, value: 0 ~ 1)
 }
 ```
 

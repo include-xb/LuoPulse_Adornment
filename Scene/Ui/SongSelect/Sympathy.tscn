@@ -7,12 +7,12 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_558w5"]
 shader = ExtResource("2_qx1yg")
-shader_parameter/gray_scale = 0.2000000000
+shader_parameter/gray_scale = 0.2
 shader_parameter/flash = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_s4y3q"]
 shader = ExtResource("4_lqs8k")
-shader_parameter/blur_amount = 4.50000000000
+shader_parameter/blur_amount = 4.5
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qx1yg"]
 shader = ExtResource("2_qx1yg")
@@ -36,31 +36,32 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Control/Cover:position")
+tracks/1/path = NodePath("Control/VBoxContainer:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(152.49896, 0)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Control/VBoxContainer:modulate")
+tracks/2/path = NodePath("PreviousScore:modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 
 [sub_resource type="Animation" id="Animation_lqs8k"]
 resource_name = "unfold"
 length = 0.3
+step = 0.01
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -76,26 +77,26 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Control/Cover:position")
-tracks/1/interp = 2
+tracks/1/path = NodePath("Control/VBoxContainer:modulate")
+tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.3),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.15, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Vector2(152.49896, 0), Vector2(0, 0)]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Control/VBoxContainer:modulate")
-tracks/2/interp = 1
+tracks/2/path = NodePath("PreviousScore:modulate")
+tracks/2/interp = 2
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0.0009999999, 0.3),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.1, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ohs4k"]
@@ -107,7 +108,7 @@ _data = {
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qx1yg"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist", "chapter", "note_button", "setting_button")]
+[node name="Sympathy" type="Control" unique_id=1456702183 node_paths=PackedStringArray("background", "cover", "left", "start", "right", "animation_player", "audio_stream_player", "progress_bar", "amount", "setting_panel", "autoplay_button", "pv_button", "unlock_button", "title", "producer", "creator", "vocalist", "chapter", "note_button", "setting_button", "max_acc")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -135,6 +136,7 @@ vocalist = NodePath("Control/VBoxContainer/Vocalist")
 chapter = NodePath("Chapter")
 note_button = NodePath("MarginContainer/Option/PopCard/Card")
 setting_button = NodePath("MarginContainer/Option/PopSetting/Setting")
+max_acc = NodePath("PreviousScore/VBoxContainer/HBoxContainer/MaxAcc")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1136130409]
 material = SubResource("ShaderMaterial_558w5")
@@ -167,7 +169,7 @@ offset_top = 88.0
 offset_right = 147.5
 offset_bottom = 150.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 55
 text = "ChapterⅠ. 序曲"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1790863430]
@@ -183,6 +185,7 @@ theme_override_constants/margin_left = 50
 
 [node name="Back" type="Button" parent="HBoxContainer/MarginContainer" unique_id=666879444]
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "< 返回"
 
 [node name="Currency" type="MarginContainer" parent="HBoxContainer" unique_id=729937514]
@@ -200,12 +203,12 @@ alignment = 2
 
 [node name="Diamond" type="Label" parent="HBoxContainer/Currency/HBoxContainer" unique_id=357431331]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 45
 text = "◇"
 
 [node name="Amount" type="Label" parent="HBoxContainer/Currency/HBoxContainer" unique_id=1634015711]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 43
 text = "114514"
 
 [node name="Select" type="HBoxContainer" parent="." unique_id=787473497]
@@ -216,28 +219,29 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -192.0
-offset_top = -208.0
+offset_top = -195.0
 offset_right = 192.0
-offset_bottom = -109.0
+offset_bottom = -90.0
 grow_horizontal = 2
 grow_vertical = 0
+metadata/_edit_group_ = true
 
 [node name="Left" type="Button" parent="Select" unique_id=1979864805]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 80
+theme_override_font_sizes/font_size = 85
 text = "<"
 
 [node name="Start" type="Button" parent="Select" unique_id=2104645452]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 75
+theme_override_font_sizes/font_size = 80
 text = "@"
 
 [node name="Right" type="Button" parent="Select" unique_id=1609907361]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 80
+theme_override_font_sizes/font_size = 85
 text = ">"
 
 [node name="Control" type="Control" parent="." unique_id=13272405]
@@ -264,7 +268,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -138.0
 offset_top = -148.0
-offset_right = 138.00006
+offset_right = 137.99878
 offset_bottom = 148.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -273,7 +277,7 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 55
 text = "最初日"
 
 [node name="MarginContainer" type="MarginContainer" parent="Control/VBoxContainer" unique_id=502763094]
@@ -284,21 +288,21 @@ theme_override_constants/margin_top = 10
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "作词/作曲/编曲"
 
 [node name="Vocalist" type="Label" parent="Control/VBoxContainer" unique_id=166633472]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "演唱"
 
 [node name="Creator" type="Label" parent="Control/VBoxContainer" unique_id=1615023692]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "制谱"
 
 [node name="Cover" type="TextureRect" parent="Control" unique_id=327564411]
@@ -310,9 +314,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.00104
+offset_left = -302.5
 offset_top = -150.0
-offset_right = 150.00104
+offset_right = -2.4979248
 offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -364,6 +368,7 @@ size_flags_horizontal = 8
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 10
+theme_override_font_sizes/font_size = 55
 text = "= 笔记"
 alignment = 0
 
@@ -375,13 +380,40 @@ size_flags_horizontal = 8
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 3
+theme_override_font_sizes/font_size = 55
 text = "* 选项"
 
 [node name="UnlockButton" type="Button" parent="MarginContainer/Option" unique_id=896117029]
 layout_mode = 2
 size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 55
 disabled = true
 text = "$ 解锁"
+
+[node name="PreviousScore" type="MarginContainer" parent="." unique_id=455603980]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_top = 356.0
+offset_right = 230.0
+offset_bottom = 472.0
+theme_override_constants/margin_left = 20
+metadata/_edit_group_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PreviousScore" unique_id=171245854]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="PreviousScore/VBoxContainer" unique_id=1032564708]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "^^ 最高准度"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PreviousScore/VBoxContainer" unique_id=166287221]
+layout_mode = 2
+
+[node name="MaxAcc" type="Label" parent="PreviousScore/VBoxContainer/HBoxContainer" unique_id=964724701]
+layout_mode = 2
+theme_override_font_sizes/font_size = 50
+text = "98.4551"
 
 [node name="SettingPanel" type="PanelContainer" parent="." unique_id=9111105]
 visible = false

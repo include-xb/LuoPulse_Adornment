@@ -68,9 +68,11 @@ layout_mode = 2
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/TopBar" unique_id=1610253764]
 layout_mode = 2
 theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 14
 
 [node name="BackButton" type="Button" parent="VBoxContainer/TopBar/MarginContainer" unique_id=1875153704]
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "< 返回"
 
 [node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/TopBar" unique_id=1660373825]
@@ -80,7 +82,7 @@ theme_override_constants/margin_right = 100
 
 [node name="Label" type="Label" parent="VBoxContainer/TopBar/MarginContainer2" unique_id=1963809536]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 35
 text = "NOTEBOOK"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -95,7 +97,7 @@ theme_override_constants/margin_left = 80
 [node name="CardsTab" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=623737011]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 45
 text = "资料卡"
 
 [node name="Underline" type="ColorRect" parent="VBoxContainer/HBoxContainer/CardsTab" unique_id=1433812374]
@@ -111,7 +113,7 @@ color = Color(0.176, 0.176, 0.176, 1)
 [node name="FragmentsTab" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=962232136]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 45
 text = "故事碎片"
 
 [node name="Underline" type="ColorRect" parent="VBoxContainer/HBoxContainer/FragmentsTab" unique_id=1935293909]
@@ -175,7 +177,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
 theme_override_constants/line_separation = 5
-theme_override_font_sizes/normal_font_size = 32
+theme_override_font_sizes/normal_font_size = 37
 bbcode_enabled = true
 text = "jhuknygjbjk"
 fit_content = true

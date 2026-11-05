@@ -72,7 +72,8 @@ OS.get_user_data_dir()/
 	"main_line_unlocked": 1,         // count of unlocked 共鸣 songs
 	"crystal": 100,                  // crystal currency
 	"story_fragments_unlocked": [],  // discovered fragment IDs
-	"avatar_index": 0                // 选用的头像序号 (Global.AVATAR_PATHS 的下标)
+	"avatar_index": 0,               // 选用的头像序号 (Global.AVATAR_PATHS 的下标)
+	"max_accuracy": {}               // 每首歌的历史最高准度 (键: 歌曲标题, 值: 0 ~ 1)
 }
 ```
 

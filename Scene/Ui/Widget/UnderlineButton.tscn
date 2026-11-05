@@ -27,7 +27,7 @@ theme_override_colors/font_focus_color = Color(0.39215687, 0.39215687, 0.3921568
 theme_override_colors/font_pressed_color = Color(0.31431594, 0.31431618, 0.31431603, 1)
 theme_override_colors/font_hover_color = Color(0.39215687, 0.39215687, 0.39215687, 1)
 theme_override_colors/font_hover_pressed_color = Color(0.3137255, 0.3137255, 0.3137255, 1)
-theme_override_font_sizes/font_size = 50
+theme_override_font_sizes/font_size = 65
 text = ">>>"
 
 [node name="Separator" type="HSeparator" parent="." unique_id=483453183]

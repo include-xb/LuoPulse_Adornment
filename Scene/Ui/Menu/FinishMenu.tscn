@@ -63,15 +63,16 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Card" type="Panel" parent="." unique_id=1411653293]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -450.0
-offset_top = -260.0
+offset_top = -284.0
 offset_right = 450.0
-offset_bottom = 260.0
+offset_bottom = 290.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_s4y3q")
@@ -99,14 +100,14 @@ theme_override_constants/separation = 20
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 0.8784314, 0.77254903)
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 48
 text = "& 最初日"
 vertical_alignment = 1
 
 [node name="Grade" type="Label" parent="Card/Padding/VBox/Header" unique_id=76769418]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 70
 text = "∞ Infinity"
 vertical_alignment = 1
 
@@ -131,37 +132,37 @@ columns = 2
 [node name="AccLabel" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=1368959459]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 0.55)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "准度"
 
 [node name="AccCount" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=435359626]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "98.42%"
 
 [node name="ComboLabel" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=2023048450]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 0.55)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "最大连击"
 
 [node name="ComboCount" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=481793036]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "1142"
 
 [node name="NotesLabel" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=1843742402]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 0.55)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "总音符"
 
 [node name="NotesCount" type="Label" parent="Card/Padding/VBox/Body/LeftGrid" unique_id=179686575]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "1876"
 
 [node name="RightGrid" type="GridContainer" parent="Card/Padding/VBox/Body" unique_id=87481434]
@@ -175,49 +176,49 @@ columns = 2
 [node name="HarmoniousLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=1930534758]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.41960785, 0.7921569, 0.41960785, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "和一"
 
 [node name="HarmoniousCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=923162871]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "1719"
 
 [node name="SympatheticLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=1638676348]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.7019608, 1, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "共鸣"
 
 [node name="SympatheticCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=736455945]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "12"
 
 [node name="AwareLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=735446727]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8509804, 0.3019608, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "觉醒"
 
 [node name="AwareCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=1211778128]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "3"
 
 [node name="LostLabel" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=804438885]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "丢失"
 
 [node name="LostCount" type="Label" parent="Card/Padding/VBox/Body/RightGrid" unique_id=2101391596]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.7490196, 0.6784314, 1)
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 40
 text = "0"
 
 [node name="Rule2" type="ColorRect" parent="Card/Padding/VBox" unique_id=1788681240]
@@ -228,7 +229,7 @@ color = Color(0.8, 0.7490196, 0.6784314, 0.25)
 [node name="Crystal" type="Label" parent="Card/Padding/VBox" unique_id=1095835732]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.854902, 0.647059, 0.12549, 1)
-theme_override_font_sizes/font_size = 44
+theme_override_font_sizes/font_size = 48
 text = "◇ +14"
 horizontal_alignment = 1
 
@@ -236,7 +237,7 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(220, 56)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 45
 text = ">>> 继续"
 
 [connection signal="pressed" from="Card/Padding/VBox/ContinueButton" to="." method="_on_continue_pressed"]

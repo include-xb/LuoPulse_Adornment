@@ -156,7 +156,7 @@ alignment = 1
 [node name="SpanishLabel" type="Label" parent="Text1" unique_id=1022063291]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 42
+theme_override_font_sizes/font_size = 47
 text = "viva los artistas y su amor."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -164,7 +164,7 @@ vertical_alignment = 1
 [node name="ChineseLabel" type="Label" parent="Text1" unique_id=484850362]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 33
 text = "艺术家与 ta 们的爱万岁"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -189,7 +189,7 @@ alignment = 1
 [node name="TitleLabel" type="Label" parent="Text2" unique_id=1873932510]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 52
+theme_override_font_sizes/font_size = 57
 text = "缤纷动脉"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -197,7 +197,7 @@ vertical_alignment = 1
 [node name="SubtitleLabel" type="Label" parent="Text2" unique_id=494067955]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 37
 text = "Adorned Artery"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -242,7 +242,7 @@ grow_vertical = 0
 [node name="DownloadLabel" type="Label" parent="LoadingPanel/VBoxContainer" unique_id=414873825]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 text = "正在下载曲包, 请不要退出游戏 (0%)"
 horizontal_alignment = 1
 vertical_alignment = 1

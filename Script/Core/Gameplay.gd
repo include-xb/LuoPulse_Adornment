@@ -1041,23 +1041,23 @@ func _setup_effects() -> void:
 	# 心电图节点: 优先用导出变量, 没在检视器里接上就按名字找一次
 	# (它只影响视觉, 找不到也不影响本局照常进行)
 	var line: HeartLine = heart_line
-	if line == null and _ui:
-		line = _ui.get_node_or_null("HeartLine") as HeartLine
-		pass
+	# if line == null and _ui:
+	# 	line = _ui.get_node_or_null("HeartLine") as HeartLine
+	# 	pass
 
 	# 屏幕边缘的血色光晕: 同样的两段式查找。
 	# 查到之后写回导出变量 —— 别处想单独闪一下 (HeartVignette.flash_once) 就靠它取节点
 	var vignette: HeartVignette = heart_vignette
-	if vignette == null and _ui:
-		vignette = _ui.get_node_or_null("HeartVignette") as HeartVignette
-		pass
+	# if vignette == null and _ui:
+	# 	vignette = _ui.get_node_or_null("HeartVignette") as HeartVignette
+	# 	pass
 	heart_vignette = vignette
 
 	# 心跳颤动: 同样的两段式查找 (脚本挂在 UI/TextureRect 上)
 	var pulse: HeartPulse = heart_pulse
-	if pulse == null and _ui:
-		pulse = _ui.get_node_or_null("TextureRect") as HeartPulse
-		pass
+	# if pulse == null and _ui:
+	# 	pulse = _ui.get_node_or_null("HeartPulse") as HeartPulse
+	# 	pass
 	heart_pulse = pulse
 
 	effect_manager.setup(input_processers, effect_list, line, vignette, pulse)
@@ -1269,7 +1269,7 @@ static func _sort_note_by_time(a: Dictionary, b: Dictionary) -> bool:
 func get_first_last_note_time() -> void:
 	first_note_time = time_list[0]
 	last_note_time = time_list[-1]
-	
+
 	# 如果最后一个音符是 hold, 则要加上 duration
 	if  type_list[-1] == "hold":
 		last_note_time += duration_list[-1]
@@ -1709,7 +1709,8 @@ func _on_speed_scroll_bar_value_changed(value: float) -> void:
 
 ## 设置音符流速更改后，重新计算实际音符流速
 func reset_speed() -> void:
-	Global.note_speed = 19.0 * Global.note_flow_speed / 40.0 + 10.5
+	# 速度映射公式
+	Global.note_speed = Global.note_flow_speed / 2.0 + 13.0
 	if Global.rendering_area.size() == 0:
 		return
 	for note: MeshInstance3D in Global.rendering_area:

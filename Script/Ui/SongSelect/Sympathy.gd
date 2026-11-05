@@ -77,6 +77,8 @@ extends Control
 ## 选项按钮 (未解锁时禁用)
 @export var setting_button: Button # = $MarginContainer/Option/PopSetting/Setting
 
+## 历史最高准度
+@export var max_acc: Label # = $PreviousScore/VBoxContainer/HBoxContainer/MaxAcc
 
 ## 当前歌曲是否未解锁
 var is_locked: bool = false
@@ -267,6 +269,18 @@ func _format_chapter(chapter_number: int) -> String:
 	return "Chapter%s. %s" % [ CHAPTER_ROMAN[chapter_number], CHAPTER_NAMES[chapter_number] ]
 
 
+## 刷新历史最高准度显示
+## INFO: 数据来自 Global.song_max_accuracy —— 结算页写入后, 每次切歌 / 重新进入本场景
+##       都会走一次 load_song_info(), 所以这里总是显示最新记录
+func _update_max_acc(song_title: String) -> void:
+	var best_accuracy: float = Global.get_song_max_accuracy(song_title)
+	if best_accuracy < 0.0:
+		max_acc.text = "无记录"
+		return
+	max_acc.text = "%.4f" % (best_accuracy * 100.0)
+	pass
+
+
 # ---------- 加载 ----------
 ## 加载曲包中的内容
 func load_song_info() -> void:
@@ -298,6 +312,9 @@ func load_song_info() -> void:
 	# 章节标签 —— 未解锁时和其余曲目信息一样藏起来
 	var chapter_number: int = int(general.get("Chapter", 0))
 	chapter.text = _format_chapter(chapter_number) if not is_locked else "Chapter?. ???"
+
+	# 历史最高准度 —— 没有记录时显示"无记录"
+	_update_max_acc(str(general.get("Title", "")))
 
 	# 加载歌曲音频
 	var song_audio_stream: AudioStream = Global._read_audio_from_lpz(song_package_path)

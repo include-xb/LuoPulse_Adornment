@@ -56,7 +56,7 @@ grow_vertical = 2
 
 [node name="Label" type="Label" parent="CanvasLayer/QuitPanel/VBoxContainer" unique_id=1395788665]
 layout_mode = 2
-theme_override_font_sizes/font_size = 60
+theme_override_font_sizes/font_size = 65
 text = "退出游戏"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/QuitPanel/VBoxContainer" unique_id=1581503288]
@@ -65,11 +65,13 @@ layout_mode = 2
 [node name="OkQuit" type="Button" parent="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer" unique_id=699364697]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 50
 text = "确认"
 
 [node name="CancelQuit" type="Button" parent="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer" unique_id=115059605]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 50
 text = "取消"
 
 [connection signal="pressed" from="CanvasLayer/QuitPanel/VBoxContainer/HBoxContainer/OkQuit" to="." method="_on_ok_quit_pressed"]

@@ -1,6 +1,5 @@
 extends MeshInstance3D
 
-# TODO 用状态机重写
 
 ## 对 Gameplay 节点的引用 (由 NoteLoader 注入)
 var root_node: Control
@@ -69,8 +68,6 @@ const MULTI_TAP_BRIGHTEN: float = 0.4
 const HOLD_RELEASE_TOLERANCE: float = 40.0
 
 ## 长键收尾后延迟多久清理 (毫秒)
-## INFO: 原先借用的是"判定窗口的结束时间", 但那个窗口现在会被 heart 特效收紧 ——
-##       清理时机不该跟着判定参数一起漂移, 所以独立成常量
 const HOLD_TAIL_LINGER: float = 240.0
 
 
@@ -93,6 +90,7 @@ func _process(delta: float) -> void:
 	# 获取 master_time 时间
 	mt = root_node.master_time
 	
+	# TODO 用状态机重写
 	if is_holding:
 		pass
 	
@@ -149,9 +147,9 @@ func _process(delta: float) -> void:
 			pass
 
 		if not in_judging_area and _was_in_judging_area:
-			# INFO: 判定窗口会被 heart 特效整体收窄 —— 还没越过判定线的头部"被动"离开
-			#       判定区不算漏键, 只把它从判定区摘掉 (与 NoteBase 同一套处理);
-			#       越过判定线之后离开, 才是头部错过判定窗口
+			# 判定窗口会被 heart 特效整体收窄 —— 还没越过判定线的头部"被动"离开
+			# 判定区不算漏键, 只把它从判定区摘掉 (与 NoteBase 同一套处理);
+			# 越过判定线之后离开, 才是头部错过判定窗口
 			if time_offset > 0.0:
 				_lose()
 			else:
@@ -369,21 +367,23 @@ func judge_head(master_time: float) -> void:
 ## 由 InputProcesser 节点调用
 ## 松开, 对音符进行判定
 func on_released(master_time: float) -> void:
-	if not is_hold_completed:
-		if master_time >= float(time) + float(duration) - HOLD_RELEASE_TOLERANCE:
-			# 已按满 (含尾部容差): 正常结算, 不判中断
-			_complete_hold()
-			pass
-		else:
-			# 未按满: 半透明后继续下落
-			_set_alpha(REST_ALPHA)
-			is_hold_interrupted = true
-			_release_time = master_time
-			var tail_z: float = Global.note_speed * (master_time - float(time) - float(duration)) / 1000.0
-			_interrupted_visible_length = maxf(0.0, -tail_z)
-			_complete_hold()
-			pass
+	if is_hold_completed:
+		return
+	
+	if master_time >= float(time) + float(duration) - HOLD_RELEASE_TOLERANCE:
+		# 已按满 (含尾部容差): 正常结算, 不判中断
+		_complete_hold()
 		pass
+	else:
+		# 未按满: 半透明后继续下落
+		_set_alpha(REST_ALPHA)
+		is_hold_interrupted = true
+		_release_time = master_time
+		var tail_z: float = Global.note_speed * (master_time - float(time) - float(duration)) / 1000.0
+		_interrupted_visible_length = maxf(0.0, -tail_z)
+		_complete_hold()
+		pass
+
 	is_holding = false
 	# 释放后不再追踪该 hold
 	pass

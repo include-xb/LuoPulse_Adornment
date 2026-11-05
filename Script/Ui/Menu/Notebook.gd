@@ -298,7 +298,7 @@ func _build_fragment_list() -> void:
 func _make_sidebar_button() -> Button:
 	var btn: Button = Button.new()
 	btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	btn.add_theme_font_size_override("font_size", 35)
+	btn.add_theme_font_size_override("font_size", 40)
 	btn.custom_minimum_size = Vector2(0, SIDEBAR_ROW_HEIGHT)
 	# mouse_filter 用 PASS 而不是默认的 STOP: 条目铺满整列, STOP 会把触摸拖拽
 	# 整个吃掉, 侧栏条目一多就滚不动了 (正文那个 RichTextLabel 也是同样的处理)。

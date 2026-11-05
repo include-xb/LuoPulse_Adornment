@@ -75,6 +75,7 @@ theme_override_constants/margin_left = 50
 
 [node name="Back" type="Button" parent="HBoxContainer/MarginContainer" unique_id=145690368]
 layout_mode = 2
+theme_override_font_sizes/font_size = 50
 text = "< 返回"
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1044826898]
@@ -116,7 +117,7 @@ offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_trans")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_trans")
 theme_override_styles/hover = SubResource("StyleBoxFlat_trans")

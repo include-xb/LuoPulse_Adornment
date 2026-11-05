@@ -93,6 +93,8 @@ func _show_results() -> void:
 	var crystal_earned: int = result.get("crystal_earned", 0)
 	_count_up(crystal_label, float(crystal_earned), _format_crystal)
 	Global.crystal += crystal_earned
+	# 记录最大准度
+	_record_max_accuracy(result)
 	Global.save_user_data()
 
 	# ---- 入场动画时序: 音效 + 数值增长 → 评级淡入 → 继续按钮淡入 ----
@@ -189,6 +191,16 @@ func _format_int(value: float) -> String:
 ## 水晶, 例: ◇ +14
 func _format_crystal(value: float) -> String:
 	return "◇ +" + str(int(round(value)))
+
+
+## 记录本曲的历史最高准度 (只增不减)
+## INFO: 标题由 Gameplay 写入 Global.current_song_title; 拿不到标题时不记录
+func _record_max_accuracy(result: Dictionary) -> void:
+	var song_title: String = Global.current_song_title
+	if song_title.is_empty():
+		return
+	Global.record_song_max_accuracy(song_title, float(result.get("accuracy", 0.0)))
+	pass
 
 
 ## 填入歌曲标题

@@ -20,7 +20,7 @@ func set_up(settings_group_key: String, settings_group: Dictionary) -> void:
 
 		var name_label: Label = Label.new()
 		name_label.text = setting_name
-		name_label.add_theme_font_size_override("font_size", 40)
+		name_label.add_theme_font_size_override("font_size", 45)
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(name_label)
