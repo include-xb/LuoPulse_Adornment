@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bwfl7qxn4dgo7"]
+
+[ext_resource type="Script" uid="uid://dfp5fcails5sf" path="res://Script/Ui/Widget/SidebarButton.gd" id="1_script"]
+
+[node name="SidebarButton" type="Button" unique_id=968803745]
+custom_maximum_size = Vector2(200, -1)
+mouse_filter = 1
+theme_override_font_sizes/font_size = 40
+text_overrun_behavior = 5
+script = ExtResource("1_script")

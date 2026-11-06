@@ -44,13 +44,13 @@ extends Control
 ## 用于暗色过度背景
 @export var color_rect: ColorRect # = $ColorRect
 
+## 侧栏条目场景
+@export var sidebar_button_scene: PackedScene # = res://Scene/Ui/Menu/SidebarButton.tscn
+
 ## 切换背景图时的黑场过渡时长 (单向, 秒)
 ## 一次完整过渡是 压黑 → 换图 → 淡回来, 所以实际耗时是它的两倍
 @export var cover_fade_duration: float = 0.25
 
-
-## 侧栏每一行的最小高度 (够到移动端触摸区的最低要求)
-const SIDEBAR_ROW_HEIGHT: float = 44.0
 
 ## 曲包所在目录名 (位于 OS.get_user_data_dir() 下)
 const PLAYLIST_DIR_NAME: String = "CustomizedPlaylist"
@@ -80,6 +80,9 @@ var current_tab: String = "cards"
 ## 选中的标签索引
 var selected_card_index: int = -1
 
+## 当前选中的侧栏条目
+var selected_side_bar_btn: SidebarButton = null
+
 ## 资料卡列表: 每项 { "path": String, "general": Dictionary, "card_no": int },
 ## 与侧栏条目一一对应。card_no 是 cards.json 里的资料卡序号 n, -1 表示没有索引
 var _songs: Array[Dictionary] = [ ]
@@ -100,20 +103,14 @@ var _cover_tween: Tween = null
 var _cover_source_index: int = -1
 
 ## 本次进入是否还没设置过背景图 —— 是的话第一次换图直接生效, 不播过渡
-## INFO: 进本场景时 SceneManager 已经做过一次整屏淡入, 曲绘再淡入一次就是重复的,
-##       所以首次换图藏在那次淡入底下直接完成即可
+## INFO: 进本场景时 SceneManager 已经做过一次整屏淡入, 曲绘再淡入一次就是重复的
 ## INFO: 本场景每次进入都是新实例 (SceneManager 离开时会把旧实例 queue_free),
-##       所以这个字段每次进入都会重置回 true, 不需要额外复位
 var _is_first_cover_set: bool = true
 
 
 # ---------- 节点重载函数 ----------
 ## 进入时把背景音乐淡回来 (选歌页为了试听会把背景音乐淡掉)
-## INFO: 用 _ready 而不是像 MainMenu 那样用 _enter_tree —— 本场景每次都是新实例
-##       (SceneManager 离开时会把旧实例 queue_free), _ready 每次进入都会执行, 不需要
-##       用 _enter_tree 去兜"场景被复用、_ready 不再跑"的情况。
-##       反过来 _enter_tree 会踩坑: 它早于自动加载的 _ready 传播, 那时 Global 的
-##       @onready bgm_player 还是 null, 单独把本场景当主场景运行会直接报错
+## INFO: 用 _ready 而不是像 MainMenu 那样用 _enter_tree -- 本场景每次都是新实例
 func _ready() -> void:
 	# 先记下 color_rect 本来的透明度, 必须在任何过渡发生之前读
 	_color_rect_base_alpha = color_rect.color.a
@@ -122,8 +119,7 @@ func _ready() -> void:
 	pass
 
 
-## 读上个场景通过 SceneManager 传进来的曲目下标 (键 "song_index";
-## 旧键 "card_index" 保留兼容)。它只是曲目列表下标, 不是 cards.json 里的资料卡序号。
+## 读上个场景通过 SceneManager 传进来的曲目下标 (键 "song_index"; 旧键 "card_index" 保留兼容)
 ## 单独运行本场景调试时父节点不是 SceneManager, 没有 get_args, 用 has_method 挡一下
 func _read_requested_song_index() -> int:
 	var parent_node: Node = get_parent()
@@ -164,11 +160,13 @@ func _on_fragments_tab_pressed() -> void:
 
 
 ## 切换标签页: 清空侧栏后重建列表
-## 两个标签按钮和侧栏条目都用主题 (Genrial) 里的默认 Button 样式, 不覆盖字色字号;
-## 选中态只靠下划线的显隐表示
+## 两个标签按钮沿用主题 (Genrial) 的 Button 样式; 侧栏条目使用 SidebarButton.tscn
+## 侧栏当前打开的条目用 > 标题 < 表示 (见 SidebarButton.set_selected)
 ## @param song_index: 资料卡要优先展示的曲目下标, -1 表示不指定
 func switch_tab(tab: String, song_index: int = -1) -> void:
 	current_tab = tab
+	# 旧条目马上会被清掉, 不要留下悬空引用
+	selected_side_bar_btn = null
 	var is_cards: bool = tab == "cards"
 
 	cards_underline.visible = is_cards
@@ -177,9 +175,7 @@ func switch_tab(tab: String, song_index: int = -1) -> void:
 	_show_normal_background()
 	
 	# 清左侧
-	# INFO: 必须先 remove_child 再 queue_free —— queue_free 是延迟到帧末执行的,
-	#       若只调 queue_free, 紧接着重建列表时这些旧条目还挂在 sidebar 下,
-	#       子节点数会翻倍, 按行号取条目的地方就会错位
+	# ATTENTION: 先 remove_child 再 queue_free
 	for child: Node in sidebar.get_children():
 		sidebar.remove_child(child)
 		child.queue_free()
@@ -222,21 +218,17 @@ func _build_card_list(requested_song_index: int = -1) -> void:
 		return
 
 	for i: int in _songs.size():
-		var btn: Button = _make_sidebar_button()
-		if _is_song_locked(i):
-			btn.text = LOCKED_PLACEHOLDER
-			btn.disabled = true
-			pass
-		else:
-			btn.text = _song_title(_songs[i])
-			pass
+		var is_locked: bool = _is_song_locked(i)
+		var btn: SidebarButton = _make_sidebar_button(
+			str(i),
+			_song_title(_songs[i]),
+			is_locked
+		)
 		btn.pressed.connect(_on_card_selected.bind(i))
 		sidebar.add_child(btn)
 		pass
 
 	# 优先选中上个场景指定的那一首, 没指定 (或它没解锁) 就退回第一首已解锁的
-	# INFO: 指定的下标越界 (曲包被删过) 或那一首未解锁时都不能直接用 ——
-	#       否则会把未解锁曲目的资料漏出来
 	var target_index: int = requested_song_index
 	if target_index < 0 or target_index >= _songs.size() or _is_song_locked(target_index):
 		target_index = -1
@@ -264,14 +256,12 @@ func _build_fragment_list() -> void:
 
 	var ids: Array[String] = _sorted_fragment_ids(_fragments)
 	for fragment_id: String in ids:
-		var btn: Button = _make_sidebar_button()
-		if _is_fragment_locked(fragment_id):
-			btn.text = LOCKED_PLACEHOLDER
-			btn.disabled = true
-			pass
-		else:
-			btn.text = _fragment_title(fragment_id)
-			pass
+		var is_locked: bool = _is_fragment_locked(fragment_id)
+		var btn: SidebarButton = _make_sidebar_button(
+			fragment_id,
+			_fragment_title(fragment_id),
+			is_locked
+		)
 		btn.pressed.connect(_on_fragment_selected.bind(fragment_id))
 		sidebar.add_child(btn)
 		pass
@@ -293,22 +283,33 @@ func _build_fragment_list() -> void:
 	pass
 
 
-## 建一个侧栏条目
-## 不设 flat, 也不覆盖字色字号 —— 外观完全交给主题 (Genrial) 里的 Button 定义
-func _make_sidebar_button() -> Button:
-	var btn: Button = Button.new()
-	btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	btn.add_theme_font_size_override("font_size", 40)
-	btn.custom_minimum_size = Vector2(0, SIDEBAR_ROW_HEIGHT)
-	# mouse_filter 用 PASS 而不是默认的 STOP: 条目铺满整列, STOP 会把触摸拖拽
-	# 整个吃掉, 侧栏条目一多就滚不动了 (正文那个 RichTextLabel 也是同样的处理)。
-	# 用 PASS 而非 IGNORE: 条目自己还要收点击, IGNORE 会让它点不动
-	btn.mouse_filter = Control.MOUSE_FILTER_PASS
-	# 点击音效单独接一条, 不写进 _on_card_selected / _on_fragment_selected ——
-	# 那两个函数在"进入场景自动选中"和"从 Sympathy 的笔记按钮进来"时也会被调用,
-	# 写在那里会让玩家什么都没点也响一声
+## 实例化一个侧栏条目
+## 静态外观 (字号 / 高度 / 对齐 / 鼠标过滤) 在 SidebarButton.tscn 里配置
+func _make_sidebar_button(item_id: String, title: String, is_locked: bool) -> SidebarButton:
+	var btn: SidebarButton = sidebar_button_scene.instantiate() as SidebarButton
+	btn.setup(item_id, title, is_locked)
 	btn.pressed.connect(Global.play_ui_click_audio)
 	return btn
+
+
+## 更新侧栏选中态
+## INFO: 旧条目先恢复普通标题, 再在新条目上包 > <
+func _select_sidebar_button(item_id: String) -> void:
+	if is_instance_valid(selected_side_bar_btn):
+		selected_side_bar_btn.set_selected(false)
+		pass
+
+	selected_side_bar_btn = null
+	for child: Node in sidebar.get_children():
+		var btn: SidebarButton = child as SidebarButton
+		if btn == null:
+			continue
+		if btn.item_id != item_id:
+			continue
+		selected_side_bar_btn = btn
+		btn.set_selected(true)
+		break
+	pass
 
 
 ## 数据文件缺失时不留空白
@@ -321,8 +322,8 @@ func _show_empty_hint() -> void:
 func _on_card_selected(index: int) -> void:
 	if index < 0 or index >= _songs.size():
 		return
-
 	selected_card_index = index
+	_select_sidebar_button(str(index))
 	var song: Dictionary = _songs[index]
 
 	# 曲绘切到这一首 —— 同一首重复点就什么都不做, 免得白闪一下黑场
@@ -352,6 +353,8 @@ func _on_fragment_selected(fragment_id: String) -> void:
 		content_label.text = "[center]（故事碎片序号无效）[/center]"
 		return
 
+	_select_sidebar_button(fragment_id)
+
 	var fragment_text: String = _read_bbcode_file(_fragment_file_path(fragment_no))
 	if fragment_text.is_empty():
 		content_label.text = "[center]（故事碎片 #%d 缺失）[/center]" % fragment_no
@@ -371,13 +374,8 @@ func _show_normal_background() -> void:
 	pass
 
 
-## 黑场过渡: 把 color_rect 压到全黑 → 黑透了才取图并换上 → 淡回它原本的透明度
+## 黑场过渡
 ## @param texture_provider: 无参、返回 Texture2D 的可调用对象, 在黑场中间才被调用
-## INFO: 取图要放在黑场中间的回调里, 不能在过渡开始前先取好 ——
-##       从 .lpz 里解一张曲绘要几十上百毫秒, 放在变黑之前玩家会先卡一下才看到变黑;
-##       挪到黑幕底下就完全看不见了
-## INFO: 终值是 _color_rect_base_alpha 而不是 0 —— color_rect 是常驻的压暗层,
-##       场景里给了它一个非 0 的透明度, 过渡完必须回到那个值
 func _fade_to_cover(texture_provider: Callable) -> void:
 	# 本次进入的第一次换图直接生效: SceneManager 已经在做整屏淡入了, 不必再来一次
 	if _is_first_cover_set:
@@ -484,6 +482,7 @@ func _load_song_cards() -> Array[Dictionary]:
 	# 索引表整表读一次就够, 不要在循环里按曲名反复读同一个文件
 	var card_indices: Dictionary = _get_card_indices()
 	var missing_titles: Array[String] = [ ]
+	
 	for i: int in paths.size():
 		var chart: Dictionary = Global._read_chart_from_lpz(paths[i])
 		var general: Dictionary = chart.get("General", { })
@@ -493,18 +492,21 @@ func _load_song_cards() -> Array[Dictionary]:
 		if not title.is_empty() and card_no <= 0:
 			missing_titles.append(title)
 			pass
+			
 		cards.append({
 			"path": paths[i],
 			"general": general,
 			"card_no": card_no,
 		})
 		pass
+	
 	print("资料卡曲包读取完成, 共 %d 首" % cards.size())
 	if not missing_titles.is_empty():
 		print("以下曲名在%s里没有序号, 请核对键名: %s" % [
 			CARDS_JSON_PATH,
 			", ".join(missing_titles),
 		])
+		pass
 	return cards
 
 
@@ -514,15 +516,11 @@ func _get_card_indices() -> Dictionary:
 
 
 ## 曲包里的原始曲名 (chart.General 的 Title), 取不到就是空字符串
-## INFO: 与 _song_title() 的区别是这里不做文件名兜底 —— 文件名是服务器链接末段的
-##       数字 ID (1.lpz / 3.lpz), 只配用来显示, 拿来当 cards.json 的键毫无意义
 func _raw_title(general: Dictionary) -> String:
 	return str(general.get("Title", ""))
 
 
 ## 取曲名对应的资料卡序号 n
-## INFO: 键是曲名而不是"第几首" —— 下标来自未排序的目录枚举, 曲包一增删就整体错位,
-##       曲名是曲目的固有属性, 不受目录顺序影响
 ## 曲名为空、表里没有这个曲名、值不是有效序号时返回 -1
 func _card_no_for_title(card_indices: Dictionary, general: Dictionary) -> int:
 	var title: String = _raw_title(general)
@@ -547,11 +545,8 @@ func _song_title(song: Dictionary) -> String:
 
 
 ## 取全部曲包路径
-## 正常流程下 Launch 启动时已扫描并排好序, 直接用它的结果 —— 单独运行本场景调试时
-## (Global.sympath_song_path_list 还是空的) 才回退到现场扫描目录
-## INFO: 排序规则必须与 Launch 完全一致 (Global.sort_song_package_paths) ——
-##       Global.main_line_unlocked 是"已解锁几首"的计数, 靠下标去套,
-##       两个场景对"第 i 首"的认定一旦错开, 结果就是锁错歌。
+## 正常流程下 Launch 启动时已扫描并排好序, 直接用它的结果
+## Global.sympath_song_path_list 是空的才回退到现场扫描目录
 func _get_song_packages() -> Array[String]:
 	if not Global.sympath_song_path_list.is_empty():
 		return Global.sympath_song_path_list.duplicate()

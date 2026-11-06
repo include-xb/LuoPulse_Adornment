@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bjb6bgdktts7l" path="res://Script/Ui/Menu/Notebook.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dlgxtjyxywsup" path="res://Asset/Image/main.png" id="2_2k4sk"]
 [ext_resource type="Shader" uid="uid://6um35ew01m36" path="res://Shader/blur.gdshader" id="3_qbuod"]
+[ext_resource type="PackedScene" uid="uid://bwfl7qxn4dgo7" path="res://Scene/Ui/Widget/SidebarButton.tscn" id="4_sidebar"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2k4sk"]
 shader = ExtResource("3_qbuod")
@@ -21,9 +22,10 @@ fragments_tab = NodePath("VBoxContainer/HBoxContainer/FragmentsTab")
 cards_underline = NodePath("VBoxContainer/HBoxContainer/CardsTab/Underline")
 fragments_underline = NodePath("VBoxContainer/HBoxContainer/FragmentsTab/Underline")
 sidebar = NodePath("VBoxContainer/Layout/MarginContainer/SideBar/SidebarList")
-content_label = NodePath("VBoxContainer/Layout/Content/Main/VBoxContainer/ContentLabel")
+content_label = NodePath("VBoxContainer/Layout/Content/Main/VBoxContainer/HBoxContainer/ContentLabel")
 cover = NodePath("Cover")
 color_rect = NodePath("ColorRect")
+sidebar_button_scene = ExtResource("4_sidebar")
 
 [node name="Cover" type="TextureRect" parent="." unique_id=614334663]
 layout_mode = 0
@@ -137,15 +139,17 @@ size_flags_vertical = 3
 theme_override_constants/separation = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/Layout" unique_id=711603367]
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
-theme_override_constants/margin_left = 10
+theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 40
-theme_override_constants/margin_right = 10
+theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 60
 
 [node name="SideBar" type="ScrollContainer" parent="VBoxContainer/Layout/MarginContainer" unique_id=519533527]
 layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
 
 [node name="SidebarList" type="VBoxContainer" parent="VBoxContainer/Layout/MarginContainer/SideBar" unique_id=1443704997]
 layout_mode = 2
@@ -165,25 +169,34 @@ theme_override_constants/margin_bottom = 60
 [node name="Main" type="ScrollContainer" parent="VBoxContainer/Layout/Content" unique_id=1313258144]
 layout_mode = 2
 size_flags_horizontal = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Layout/Content/Main" unique_id=624813964]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ContentLabel" type="RichTextLabel" parent="VBoxContainer/Layout/Content/Main/VBoxContainer" unique_id=1084048440]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Layout/Content/Main/VBoxContainer" unique_id=1211305858]
+layout_mode = 2
+
+[node name="ContentLabel" type="RichTextLabel" parent="VBoxContainer/Layout/Content/Main/VBoxContainer/HBoxContainer" unique_id=1084048440]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
 theme_override_constants/line_separation = 5
-theme_override_font_sizes/normal_font_size = 37
+theme_override_font_sizes/normal_font_size = 40
 bbcode_enabled = true
 text = "jhuknygjbjk"
 fit_content = true
 scroll_active = false
 
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/Layout/Content/Main/VBoxContainer/HBoxContainer" unique_id=1396779835]
+layout_mode = 2
+theme_override_constants/margin_right = 20
+
 [connection signal="pressed" from="VBoxContainer/TopBar/MarginContainer/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/CardsTab" to="." method="_on_cards_tab_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/FragmentsTab" to="." method="_on_fragments_tab_pressed"]
-[connection signal="meta_clicked" from="VBoxContainer/Layout/Content/Main/VBoxContainer/ContentLabel" to="." method="_on_content_meta_clicked"]
+[connection signal="meta_clicked" from="VBoxContainer/Layout/Content/Main/VBoxContainer/HBoxContainer/ContentLabel" to="." method="_on_content_meta_clicked"]
