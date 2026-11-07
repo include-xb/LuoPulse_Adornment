@@ -52,7 +52,7 @@ extends Control
 @export var _track: Node3D # = $UI/TextureRect/SubViewport/Node3D/Track
 
 ## UI 节点
-@export var _ui: Control # = $UI
+# @export var _ui: Control # = $UI
 
 ## 连击数标签
 @export var _combo_label: Label # = $UI/Combo

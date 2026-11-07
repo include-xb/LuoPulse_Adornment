@@ -125,14 +125,14 @@ LuoPulse/
    }
    ```
 
-2. `bool`型的变量采用`is_...`命名. 
+4. `bool`型的变量采用`is_...`命名. 
    
    ```javascript
    var is_killing: bool = false
    var is_killed: bool = false
    ```
 
-3. 一切从场景引用的变量都在代码开头定义. 
+5. 一切从场景引用的变量都在代码开头定义. 
    
    ```javascript
    @onready var display_info: AnimaitonPlayer = $"aisplay_info"
@@ -164,13 +164,17 @@ LuoPulse/
    func _ready() -> void:
        pass
    ```
-
+   
     func my_function(i: int) -> void:
+   
         print(i)
         pass
-    ```
+   
+   ```
+   
+   ```
 
-6. 所有代码缩进使用`pass`包裹
+7. 所有代码缩进使用`pass`包裹
    
    ```javascript
    for i in range(count):
@@ -181,7 +185,7 @@ LuoPulse/
        pass
    ```
 
-7. 若函数中的参数过长, 则采用以下写法: 
+8. 若函数中的参数过长, 则采用以下写法: 
    
    ```javascript
    var tween = create_tween()
