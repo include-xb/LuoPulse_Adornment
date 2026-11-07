@@ -45,13 +45,13 @@ shader_parameter/texture_scale = 180.0
 shader = ExtResource("7_46tx6")
 shader_parameter/blur_amount = 3.50000016625
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_dtck8"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_qwem3"]
 viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qalqs"]
 bg_color = Color(0, 0, 0, 0.9411765)
 
-[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "heart_pulse", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_ui", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask", "judgment_container", "countdown_label") groups=["JudgeArea"]]
+[node name="Gameplay" type="Control" unique_id=1217592357 node_paths=PackedStringArray("audio_system", "note_loader", "effect_manager", "heart_line", "heart_vignette", "heart_pulse", "progress_bar", "background", "video_stream_player", "_subviewport", "_camera", "_track", "_combo_label", "_pause_button", "_pause_panel", "autoplay", "username", "speed_label", "speed_scroll_bar", "tick", "finish_button_mask", "judgment_container", "countdown_label") groups=["JudgeArea"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -71,7 +71,6 @@ video_stream_player = NodePath("UI/VideoStreamPlayer")
 _subviewport = NodePath("SubViewport")
 _camera = NodePath("SubViewport/Node3D/Camera3D")
 _track = NodePath("SubViewport/Node3D/Track")
-_ui = NodePath("UI")
 _combo_label = NodePath("UI/Combo")
 _pause_button = NodePath("UI/PauseButton")
 _pause_panel = NodePath("UI/PausePanel")
@@ -166,7 +165,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.3529412)
+color = Color(0, 0, 0, 0.78431374)
 
 [node name="ProgressBar" type="ProgressBar" parent="UI" unique_id=1275532284]
 layout_mode = 1
@@ -189,7 +188,7 @@ offset_top = -20.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("ViewportTexture_dtck8")
+texture = SubResource("ViewportTexture_qwem3")
 expand_mode = 3
 script = ExtResource("10_0lm72")
 
