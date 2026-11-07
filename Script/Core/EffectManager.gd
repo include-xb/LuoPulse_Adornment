@@ -30,6 +30,12 @@ class_name EffectManager
 ## INFO: 底子只表示"这个效果正开着"; 打击闪动是叠加在它上面的, 调得接近 1 就看不见闪了
 @export_range(0.0, 1.0, 0.01) var heart_vignette_base: float = 0.3
 
+## 无音符时心电图自动前进的速度 (占整屏/秒)
+@export_range(0.0, 0.2, 0.001) var heart_auto_advance_speed: float = 0.18
+
+## 停手多久后开始自动前进 (秒); 0 = 立即
+@export_range(0.0, 10.0, 0.1) var heart_auto_advance_delay: float = 0.5
+
 ## 动画时长的下限 (秒) —— 防止导出变量被设成 0 导致除零
 const MIN_CHANGE_TIME: float = 0.001
 
@@ -88,6 +94,12 @@ var _heart_end_ms: float = -1.0
 ## heart 当前的整体淡入淡出 (0 ~ 1) —— 命中触发心跳颤动时作为幅度
 var _heart_fade: float = 0.0
 
+## 距上一次命中/漏键的空闲时间 (毫秒) —— 达到延迟后开始自动推进
+var _heart_idle_ms: float = 0.0
+
+## 上一次 tick 的 master_time (毫秒); < 0 表示还没开始累计
+var _heart_last_tick_ms: float = -1.0
+
 ## 当前效果: 各轨道在触发瞬间的 x (上升段的起点)
 var _from_x: PackedFloat32Array = PackedFloat32Array()
 
@@ -133,6 +145,8 @@ func reset() -> void:
 	_heart_start_ms = -1.0
 	_heart_end_ms = -1.0
 	_heart_fade = 0.0
+	_heart_idle_ms = 0.0
+	_heart_last_tick_ms = -1.0
 	Global.apply_judge_window(false)
 	if _heart_line:
 		_heart_line.modulate.a = 0.0
@@ -167,6 +181,10 @@ func tick(master_time: float) -> void:
 
 	if _heart_end_ms >= 0.0:
 		_apply_heart(master_time)
+		# _apply_heart 到期时可能已经调用 _finish_heart(), 结束后不要再自动推进
+		if _heart_end_ms >= 0.0:
+			_update_heart_auto_advance(master_time)
+			pass
 		pass
 	pass
 
@@ -179,6 +197,9 @@ func on_note_hit(strength: float = 1.0) -> void:
 	if strength <= 0.0 or _heart_start_ms < 0.0:
 		# 判定为"丢失"的打击不算打中; 或者当前不在 heart 特效期间
 		return
+
+	# 有真实命中: 重新开始空闲计时, 自动步进只填充停手后的空档
+	_heart_idle_ms = 0.0
 
 	if _heart_vignette:
 		# _heart_vignette.flash_once(strength)
@@ -204,6 +225,9 @@ func on_note_miss() -> void:
 	if _heart_start_ms < 0.0:
 		# 当前不在 heart 特效期间
 		return
+
+	# 漏键也重新开始空闲计时, 让这次后退完整显示出来
+	_heart_idle_ms = 0.0
 
 	if _heart_line:
 		_heart_line.rewind()
@@ -351,6 +375,8 @@ func _start_heart(start: float, duration: float) -> void:
 	# 结束时刻与换位一致: 复原 ramp 的时长也算在持续时间内
 	_heart_end_ms = start + duration + _change_time_ms()
 	_heart_fade = 0.0
+	_heart_idle_ms = 0.0
+	_heart_last_tick_ms = -1.0
 	Global.apply_judge_window(true)
 	if _heart_line:
 		_heart_line.set_beat(true)
@@ -387,12 +413,41 @@ func _apply_heart(master_time: float) -> void:
 	pass
 
 
+## 无音符时平滑推进心电图: 每帧只前进一小段
+## INFO: 只在 tick() 被调用时累计 —— 暂停 / 继续倒计时期间 Gameplay 不会调 tick,
+##       所以自动前进会跟心电图一起冻结
+func _update_heart_auto_advance(master_time: float) -> void:
+	if _heart_line == null:
+		return
+	if heart_auto_advance_speed <= 0.0:
+		return
+
+	if _heart_last_tick_ms < 0.0 or master_time < _heart_last_tick_ms:
+		_heart_last_tick_ms = master_time
+		_heart_idle_ms = 0.0
+		return
+
+	# 时间步长夹一下: 卡顿 / 加载造成的大跳不应该让笔尖瞬移
+	var dt_ms: float = minf(master_time - _heart_last_tick_ms, 100.0)
+	_heart_last_tick_ms = master_time
+
+	var delay_ms: float = heart_auto_advance_delay * 1000.0
+	_heart_idle_ms = minf(_heart_idle_ms + dt_ms, delay_ms)
+	if _heart_idle_ms < delay_ms:
+		return
+
+	_heart_line.advance_auto(heart_auto_advance_speed * dt_ms / 1000.0)
+	pass
+
+
 ## 结束 heart: 恢复常规判定窗口 + 收起心电图
 ## INFO: 心电图置 false 后不会立刻消失 —— 它会画完当前这一趟再清空 (见 HeartLine)
 func _finish_heart() -> void:
 	_heart_start_ms = -1.0
 	_heart_end_ms = -1.0
 	_heart_fade = 0.0
+	_heart_idle_ms = 0.0
+	_heart_last_tick_ms = -1.0
 	Global.apply_judge_window(false)
 	if _heart_line:
 		_heart_line.modulate.a = 0.0
@@ -444,7 +499,7 @@ func _change_time_ms() -> float:
 	return maxf(effect_change_time, MIN_CHANGE_TIME) * 1000.0
 
 
-## 上升段: 0 → 1 的指数收敛 (起步快、尾部柔和)
+## 上升段: 0 -> 1 的指数收敛 (起步快、尾部柔和)
 func _rise_ease(up: float) -> float:
 	return 1.0 - exp(-POSITION_EASE_POWER * up)
 
@@ -491,12 +546,13 @@ func _parse_effects(raw_effects: Variant) -> Array:
 	if not raw_effects is Array:
 		push_error("Effects 段必须是数组: %s" % str(raw_effects))
 		return result
-
+	
 	var order: int = 0
 	for raw: Variant in raw_effects:
 		if not raw is Dictionary:
 			push_error("效果项必须是字典: %s" % str(raw))
 			continue
+		
 		# 不同谱面效果
 		var type: String = str((raw as Dictionary).get("type", ""))
 		match type:
@@ -546,8 +602,8 @@ func _parse_change(raw: Dictionary, order: int, type_name: String) -> Dictionary
 		push_error("%s 效果的 changed 长度必须是 %d, 实际是 %d" % [ type_name, count, changed.size() ])
 		return { }
 
-	# 只要求每一项落在 1~count 内; 允许重复 (多根轨道去同一槽位 → 重叠),
-	# 也允许某些轨道号不出现 (那根轨道留在原位, 与 LPEditor 预览一致)
+	# 只要求每一项落在 1~count 内; 允许重复 (多根轨道去同一槽位 -> 重叠),
+	# 也允许某些轨道号不出现 (那根轨道留在原位, 与 Editor 预览一致)
 	for value: int in changed:
 		if value < 1 or value > count:
 			push_error("%s 效果的 changed 每一项必须在 1~%d 内: %s" % [ type_name, count, str(raw_changed) ])

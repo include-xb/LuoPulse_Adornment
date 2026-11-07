@@ -632,7 +632,7 @@ var default_effects: Array = [
 			"type": "heart",
 			"time": 6000,
 			"changed": [ 1, 3, 2, 4 ],
-			"duration": 4000,
+			"duration": 24000,
 		}]
 
 

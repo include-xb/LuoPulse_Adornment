@@ -11,6 +11,7 @@
 ##   beat = true  (set_beat(true))  —— 上场: 清空并从最左边起笔
 ##   beat = false (set_beat(false)) —— 退场: 停笔 (整体淡出由 EffectManager 写 modulate.a)
 ##   advance()                      —— 玩家打中一个音符, 笔尖往前画一段
+##   advance_auto(amount)           —— 无音符时由 EffectManager 每帧调用, 平滑推进一小段
 ##   reset_now()                    —— 立即清空 (重开游戏时用)
 
 
@@ -206,8 +207,7 @@ func advance() -> void:
 	if not _is_running:
 		return
 
-	# 后一次从前一个"目标"接着走, 而不是从笔尖当前位置 —— 这样密集连打时
-	# 几次推进不会互相拖慢, 笔尖始终平滑地往前滑
+	# 后一次从前一个"目标"接着走, 而不是从笔尖当前位置
 	_glide_from = _progress
 	_glide_start_ms = Global.master_time
 
@@ -223,9 +223,25 @@ func advance() -> void:
 	pass
 
 
+## 无音符时自动推进: 只增加一小段进度, 不改变命中/漏键使用的 advance_step
+## INFO: 由 EffectManager 每帧传入很小的量, 所以是平滑前进;
+##       不重置 _glide_from / _glide_start_ms —— 命中/漏键的平滑过渡继续生效
+func advance_auto(amount: float) -> void:
+	if not _is_running or amount <= 0.0:
+		return
+
+	_progress += amount
+	if _progress >= 1.0:
+		_progress = fposmod(_progress, 1.0)
+		_glide_from = 0.0
+		_drawn = 0.0
+		_glide_start_ms = Global.master_time
+		pass
+	queue_redraw()
+	pass
+
+
 ## 玩家漏掉一个音符: 笔尖往回退半步 (由 EffectManager 调用)
-## INFO: 不能复用 advance() —— 那里靠"结果小于一个步长"判断画满一圈, 倒退也会满足
-##       那个条件, 会被误判成清空、笔尖瞬间归零
 func rewind() -> void:
 	if not _is_running:
 		return
